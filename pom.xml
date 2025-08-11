@@ -208,6 +208,6 @@
         </configuration>
       </plugin>
     </plugins>
-    <finalName>baby</finalName>
+    <finalName>SmartBin</finalName>
   </build>
 </project>

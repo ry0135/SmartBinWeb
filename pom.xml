@@ -188,6 +188,15 @@
       <version>1.14.0</version>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/com.google.cloud/google-cloud-storage -->
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-storage</artifactId>
+      <version>2.48.2</version>
+    </dependency>
+
+
+
   </dependencies>
 
 
@@ -205,6 +214,7 @@
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
+          <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
     </plugins>

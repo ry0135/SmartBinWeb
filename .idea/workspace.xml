@@ -9,7 +9,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="849682ca-ca30-4ed2-b49d-5dee5331a97f" name="Changes" comment="comiit" />
+    <list default="true" id="849682ca-ca30-4ed2-b49d-5dee5331a97f" name="Changes" comment="comiit">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/index.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/index.jsp" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,6 +22,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Class" />
+        <option value="Jsp File" />
       </list>
     </option>
   </component>
@@ -48,25 +52,32 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/TestSpring/springmvc-java-config-jpa-master/SmartBinWeb/src/main/webapp/WEB-INF&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/TestSpring/springmvc-java-config-jpa-master/SmartBinWeb/src/main/webapp/WEB-INF/views/manager&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;spring.boot.initializr&quot;,
     &quot;spring.configuration.checksum&quot;: &quot;587566023d1145a0fe9811126ca1e331&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\TestSpring\springmvc-java-config-jpa-master\SmartBinWeb\src\main\webapp\WEB-INF\views\manager" />
       <recent name="D:\TestSpring\springmvc-java-config-jpa-master\SmartBinWeb\src\main\webapp\WEB-INF" />
       <recent name="D:\TestSpring\springmvc-java-config-jpa-master\SmartBin\src\main" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.example.model" />
     </key>
   </component>
   <component name="RunManager">
     <configuration name="Tomcat VIP" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local" APPLICATION_SERVER_NAME="Tomcat VIP" ALTERNATIVE_JRE_ENABLED="false" nameIsGenerated="true">
+      <option name="OPEN_IN_BROWSER_URL" value="http://localhost:8080/SmartBinWeb_war/home" />
       <option name="UPDATING_POLICY" value="restart-server" />
       <deployment>
         <artifact name="SmartBinWeb:war">
@@ -170,6 +181,28 @@
       <workItem from="1754675005921" duration="2245000" />
       <workItem from="1754925330255" duration="1813000" />
       <workItem from="1754927903177" duration="168000" />
+      <workItem from="1754928168021" duration="1922000" />
+      <workItem from="1754985779617" duration="3726000" />
+      <workItem from="1755013857560" duration="410000" />
+      <workItem from="1755014370578" duration="1202000" />
+      <workItem from="1755016442713" duration="5831000" />
+      <workItem from="1755026370125" duration="923000" />
+      <workItem from="1755933453913" duration="2208000" />
+      <workItem from="1755944794991" duration="294000" />
+      <workItem from="1755945736234" duration="84000" />
+      <workItem from="1755946726774" duration="352000" />
+      <workItem from="1755947570220" duration="3990000" />
+      <workItem from="1755964707426" duration="2789000" />
+      <workItem from="1755974985789" duration="177000" />
+      <workItem from="1755975526748" duration="2737000" />
+      <workItem from="1756034056618" duration="291000" />
+      <workItem from="1756034430328" duration="426000" />
+      <workItem from="1756034888540" duration="195000" />
+      <workItem from="1756049671387" duration="2596000" />
+      <workItem from="1756054434141" duration="1829000" />
+      <workItem from="1756056292376" duration="5571000" />
+      <workItem from="1756065257439" duration="4250000" />
+      <workItem from="1756129029285" duration="599000" />
     </task>
     <task id="LOCAL-00001" summary="comiit">
       <created>1754319433468</created>
@@ -227,7 +260,28 @@
       <option name="project" value="LOCAL" />
       <updated>1754928027831</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="comiit">
+      <created>1754928338350</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1754928338350</updated>
+    </task>
+    <task id="LOCAL-00010" summary="comiit">
+      <created>1754929457409</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1754929457409</updated>
+    </task>
+    <task id="LOCAL-00011" summary="comiit">
+      <created>1756100696659</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1756100696659</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -247,5 +301,19 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="comiit" />
     <option name="LAST_COMMIT_MESSAGE" value="comiit" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="java.lang.RuntimeException" package="java.lang" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

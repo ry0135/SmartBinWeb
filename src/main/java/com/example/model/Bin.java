@@ -1,5 +1,6 @@
 package com.example.model;
 
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -9,6 +10,7 @@ public class Bin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Column(name = "BinID")
     private int binId;
 

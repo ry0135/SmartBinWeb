@@ -1,33 +1,46 @@
 package com.example.model;
 
-
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "Bins")
+@Table(name = "Bins") // Tên bảng trong CSDL
 public class Bin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "BinID")
     private int binID;
 
-    @Column(unique = true)
+    @Column(name = "BinCode", length = 50, unique = true, nullable = false)
     private String binCode;
 
+    @Column(name = "Street", length = 255)
     private String street;
+
+    @Column(name = "Ward", length = 255)
     private String ward;
+
+    @Column(name = "City", length = 255)
     private String city;
 
+    @Column(name = "Latitude")
     private double latitude;
+
+    @Column(name = "Longitude")
     private double longitude;
 
+    @Column(name = "Capacity")
     private double capacity;
+
+    @Column(name = "CurrentFill")
     private double currentFill;
 
-    private int status;
+    @Column(name = "Status")
+    private int status;  // 1 = hoạt động, 0 = lỗi, 2 = đầy,...
 
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "LastUpdated")
     private Date lastUpdated = new Date();
 
     // ====== GETTER & SETTER ======
@@ -107,6 +120,4 @@ public class Bin {
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
-
 }
-

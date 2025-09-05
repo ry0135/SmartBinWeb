@@ -10,32 +10,50 @@ public class Bin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int binID;
 
-    @Column(unique = true)
+    @Column(name = "BinID")
+    private int binId;
+
+    @Column(name = "BinCode", length = 50, nullable = false, unique = true)
     private String binCode;
 
+    @Column(name = "Street", length = 255)
     private String street;
+
+    @Column(name = "Ward", length = 255)
     private String ward;
+
+    @Column(name = "City", length = 255)
     private String city;
 
+    @Column(name = "Latitude")
     private double latitude;
+
+    @Column(name = "Longitude")
     private double longitude;
 
+    @Column(name = "Capacity")
     private double capacity;
-    private double currentFill;
 
-    private int status;
+    @Column(name = "CurrentFill", columnDefinition = "FLOAT DEFAULT 0")
+    private double currentFill = 0;
+
+    @Column(name = "Status", columnDefinition = "INT DEFAULT 1")
+    private int status = 1; // 1 = hoạt động, 0 = bảo trì, 2 = đầy
 
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "LastUpdated", columnDefinition = "DATETIME DEFAULT GETDATE()")
     private Date lastUpdated = new Date();
 
-    // ====== GETTER & SETTER ======
-    public int getBinID() {
-        return binID;
+
+
+
+    // Getters và Setters
+    public int getBinId() {
+        return binId;
     }
-    public void setBinID(int binID) {
-        this.binID = binID;
+    public void setBinId(int binId) {
+        this.binId = binId;
     }
 
     public String getBinCode() {
@@ -109,4 +127,3 @@ public class Bin {
     }
 
 }
-

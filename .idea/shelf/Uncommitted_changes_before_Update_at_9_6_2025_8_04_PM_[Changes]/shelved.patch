@@ -1,0 +1,410 @@
+Index: src/main/java/com/example/controller/BinController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.controller;\r\n\r\n\r\nimport com.example.model.Bin;\r\nimport com.example.service.BinService;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.web.bind.annotation.PostMapping;\r\nimport org.springframework.web.bind.annotation.RequestBody;\r\nimport org.springframework.web.bind.annotation.RequestMapping;\r\nimport org.springframework.web.bind.annotation.RestController;\r\n\r\n@RestController\r\n@RequestMapping(\"/api/sensor\")\r\npublic class BinController {\r\n\r\n    @Autowired\r\n    private BinService binService;\r\n\r\n    @PostMapping\r\n    public String saveData(@RequestBody Bin bin) {\r\n        Bin savedBin = binService.saveOrUpdateBin(bin);\r\n        return \"Saved bin: \" + savedBin.getBinCode()\r\n                + \" - \" + savedBin.getStreet() + \", \"\r\n                + savedBin.getWard() + \", \"\r\n                + savedBin.getCity();\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/example/controller/BinController.java b/src/main/java/com/example/controller/BinController.java
+--- a/src/main/java/com/example/controller/BinController.java	(revision b2c341daf4172e6f1ea53e27dbd043615f8121a4)
++++ b/src/main/java/com/example/controller/BinController.java	(date 1757095836235)
+@@ -4,10 +4,16 @@
+ import com.example.model.Bin;
+ import com.example.service.BinService;
+ import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.stereotype.Controller;
++import org.springframework.ui.Model;
++import org.springframework.web.bind.annotation.GetMapping;
+ import org.springframework.web.bind.annotation.PostMapping;
+ import org.springframework.web.bind.annotation.RequestBody;
+ import org.springframework.web.bind.annotation.RequestMapping;
+ import org.springframework.web.bind.annotation.RestController;
++import org.springframework.web.bind.annotation.RequestParam;
++
++import java.util.List;
+ 
+ @RestController
+ @RequestMapping("/api/sensor")
+@@ -16,6 +22,27 @@
+     @Autowired
+     private BinService binService;
+ 
++    @GetMapping("/realtime-status")
++    public String viewRealtimeStatus(Model model,
++                                     @RequestParam(required = false) Integer status,
++                                     @RequestParam(defaultValue = "0.8") double threshold) {
++
++        List<Bin> bins;
++        if (status != null) {
++            bins = binService.getBinsByStatus(status);
++        } else {
++            bins = binService.getAllBins();
++        }
++
++        List<Bin> criticalBins = binService.getCriticalBins(threshold);
++
++        model.addAttribute("bins", bins);
++        model.addAttribute("criticalBins", criticalBins);
++        model.addAttribute("threshold", threshold);
++
++        return "manager/bin-status";
++    }
++
+     @PostMapping
+     public String saveData(@RequestBody Bin bin) {
+         Bin savedBin = binService.saveOrUpdateBin(bin);
+@@ -24,4 +51,5 @@
+                 + savedBin.getWard() + ", "
+                 + savedBin.getCity();
+     }
++
+ }
+Index: src/main/java/com/example/service/impl/BinServiceImpl.java
+===================================================================
+diff --git a/src/main/java/com/example/service/impl/BinServiceImpl.java b/src/main/java/com/example/service/impl/BinServiceImpl.java
+deleted file mode 100644
+--- a/src/main/java/com/example/service/impl/BinServiceImpl.java	(revision b2c341daf4172e6f1ea53e27dbd043615f8121a4)
++++ /dev/null	(revision b2c341daf4172e6f1ea53e27dbd043615f8121a4)
+@@ -1,40 +0,0 @@
+-package com.example.service.impl;
+-
+-import com.example.model.Bin;
+-import com.example.repository.BinRepository;
+-import com.example.service.BinService;
+-import org.springframework.beans.factory.annotation.Autowired;
+-import org.springframework.stereotype.Service;
+-import java.util.List;
+-
+-@Service
+-public class BinServiceImpl implements BinService {
+-
+-    @Autowired
+-    private BinRepository binRepository;
+-
+-    @Override
+-    public List<Bin> getAllBins() {
+-        return binRepository.findAllOrderByLastUpdatedDesc();
+-    }
+-
+-    @Override
+-    public List<Bin> getBinsByStatus(int status) {
+-        return binRepository.findByStatus(status);
+-    }
+-
+-    @Override
+-    public Bin getBinById(int id) {
+-        return binRepository.findById(id).orElse(null);
+-    }
+-
+-    @Override
+-    public List<Bin> getCriticalBins(double threshold) {
+-        return binRepository.findByCurrentFillGreaterThanEqual(threshold);
+-    }
+-    @Override
+-    public Bin getBinByCode(String binCode) {
+-        return binRepository.findByBinCode(binCode)
+-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thùng rác"));
+-    }
+-}
+\ No newline at end of file
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ArtifactsWorkspaceSettings\">\r\n    <artifacts-to-build>\r\n      <artifact name=\"SmartBinWeb:war\" />\r\n    </artifacts-to-build>\r\n  </component>\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"849682ca-ca30-4ed2-b49d-5dee5331a97f\" name=\"Changes\" comment=\"comiit\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Class\" />\r\n        <option value=\"Jsp File\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"LogFilters\">\r\n    <option name=\"FILTER_ERRORS\" value=\"false\" />\r\n    <option name=\"FILTER_WARNINGS\" value=\"false\" />\r\n    <option name=\"FILTER_INFO\" value=\"true\" />\r\n    <option name=\"FILTER_DEBUG\" value=\"true\" />\r\n    <option name=\"CUSTOM_FILTER\" />\r\n  </component>\r\n  <component name=\"MarkdownSettingsMigration\">\r\n    <option name=\"stateVersion\" value=\"1\" />\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"30pL3yyOEXRKVcM3MrJMKBrKM2u\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\">\r\n    <ConfirmationsSetting value=\"1\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"RunOnceActivity.OpenProjectViewOnStart\": \"true\",\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"WebServerToolWindowFactoryState\": \"false\",\r\n    \"last_opened_file_path\": \"D:/TestSpring/springmvc-java-config-jpa-master/SmartBinWeb/src/main/java/com/example/service\",\r\n    \"node.js.detected.package.eslint\": \"true\",\r\n    \"node.js.detected.package.tslint\": \"true\",\r\n    \"node.js.selected.package.eslint\": \"(autodetect)\",\r\n    \"node.js.selected.package.tslint\": \"(autodetect)\",\r\n    \"nodejs_package_manager_path\": \"npm\",\r\n    \"project.structure.last.edited\": \"Libraries\",\r\n    \"project.structure.proportion\": \"0.15\",\r\n    \"project.structure.side.proportion\": \"0.2\",\r\n    \"settings.editor.selected.configurable\": \"spring.boot.initializr\",\r\n    \"spring.configuration.checksum\": \"587566023d1145a0fe9811126ca1e331\"\r\n  }\r\n}]]></component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"D:\\TestSpring\\springmvc-java-config-jpa-master\\SmartBinWeb\\src\\main\\java\\com\\example\\service\" />\r\n      <recent name=\"D:\\TestSpring\\springmvc-java-config-jpa-master\\SmartBinWeb\\src\\main\\webapp\\WEB-INF\\views\\manager\" />\r\n      <recent name=\"D:\\TestSpring\\springmvc-java-config-jpa-master\\SmartBinWeb\\src\\main\\webapp\\WEB-INF\" />\r\n      <recent name=\"D:\\TestSpring\\springmvc-java-config-jpa-master\\SmartBin\\src\\main\" />\r\n    </key>\r\n    <key name=\"CopyClassDialog.RECENTS_KEY\">\r\n      <recent name=\"com.example.model\" />\r\n      <recent name=\"com.example.controller.app\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"Tomcat VIP\" type=\"#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory\" factoryName=\"Local\" APPLICATION_SERVER_NAME=\"Tomcat VIP\" ALTERNATIVE_JRE_ENABLED=\"false\" nameIsGenerated=\"true\">\r\n      <option name=\"OPEN_IN_BROWSER_URL\" value=\"http://localhost:8080/SmartBinWeb_war/home\" />\r\n      <option name=\"UPDATING_POLICY\" value=\"restart-server\" />\r\n      <deployment>\r\n        <artifact name=\"SmartBinWeb:war\">\r\n          <settings>\r\n            <option name=\"CONTEXT_PATH\" value=\"/SmartBinWeb_war\" />\r\n          </settings>\r\n        </artifact>\r\n      </deployment>\r\n      <server-settings>\r\n        <option name=\"BASE_DIRECTORY_NAME\" value=\"26571206-e5e0-4008-a514-c1cd94c979f4\" />\r\n      </server-settings>\r\n      <predefined_log_file enabled=\"true\" id=\"Tomcat\" />\r\n      <predefined_log_file enabled=\"true\" id=\"Tomcat Catalina\" />\r\n      <predefined_log_file id=\"Tomcat Manager\" />\r\n      <predefined_log_file id=\"Tomcat Host Manager\" />\r\n      <predefined_log_file id=\"Tomcat Localhost Access\" />\r\n      <RunnerSettings RunnerId=\"Debug\">\r\n        <option name=\"DEBUG_PORT\" value=\"49386\" />\r\n      </RunnerSettings>\r\n      <ConfigurationWrapper VM_VAR=\"JAVA_OPTS\" RunnerId=\"Cover\">\r\n        <option name=\"USE_ENV_VARIABLES\" value=\"true\" />\r\n        <STARTUP>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </STARTUP>\r\n        <SHUTDOWN>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </SHUTDOWN>\r\n      </ConfigurationWrapper>\r\n      <ConfigurationWrapper VM_VAR=\"JAVA_OPTS\" RunnerId=\"Debug\">\r\n        <option name=\"USE_ENV_VARIABLES\" value=\"true\" />\r\n        <STARTUP>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </STARTUP>\r\n        <SHUTDOWN>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </SHUTDOWN>\r\n      </ConfigurationWrapper>\r\n      <ConfigurationWrapper VM_VAR=\"JAVA_OPTS\" RunnerId=\"Profile\">\r\n        <option name=\"USE_ENV_VARIABLES\" value=\"true\" />\r\n        <STARTUP>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </STARTUP>\r\n        <SHUTDOWN>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </SHUTDOWN>\r\n      </ConfigurationWrapper>\r\n      <ConfigurationWrapper VM_VAR=\"JAVA_OPTS\" RunnerId=\"Run\">\r\n        <option name=\"USE_ENV_VARIABLES\" value=\"true\" />\r\n        <STARTUP>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </STARTUP>\r\n        <SHUTDOWN>\r\n          <option name=\"USE_DEFAULT\" value=\"true\" />\r\n          <option name=\"SCRIPT\" value=\"\" />\r\n          <option name=\"VM_PARAMETERS\" value=\"\" />\r\n          <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n        </SHUTDOWN>\r\n      </ConfigurationWrapper>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n        <option name=\"BuildArtifacts\" enabled=\"true\">\r\n          <artifact name=\"SmartBinWeb:war\" />\r\n        </option>\r\n      </method>\r\n    </configuration>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"849682ca-ca30-4ed2-b49d-5dee5331a97f\" name=\"Changes\" comment=\"\" />\r\n      <created>1754319374370</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1754319374370</updated>\r\n      <workItem from=\"1754319376056\" duration=\"769000\" />\r\n      <workItem from=\"1754495850102\" duration=\"1164000\" />\r\n      <workItem from=\"1754497038001\" duration=\"17000\" />\r\n      <workItem from=\"1754497261567\" duration=\"1175000\" />\r\n      <workItem from=\"1754498867293\" duration=\"2358000\" />\r\n      <workItem from=\"1754675005921\" duration=\"2245000\" />\r\n      <workItem from=\"1754925330255\" duration=\"1813000\" />\r\n      <workItem from=\"1754927903177\" duration=\"168000\" />\r\n      <workItem from=\"1754928168021\" duration=\"1922000\" />\r\n      <workItem from=\"1754985779617\" duration=\"3726000\" />\r\n      <workItem from=\"1755013857560\" duration=\"410000\" />\r\n      <workItem from=\"1755014370578\" duration=\"1202000\" />\r\n      <workItem from=\"1755016442713\" duration=\"5831000\" />\r\n      <workItem from=\"1755026370125\" duration=\"923000\" />\r\n      <workItem from=\"1755933453913\" duration=\"2208000\" />\r\n      <workItem from=\"1755944794991\" duration=\"294000\" />\r\n      <workItem from=\"1755945736234\" duration=\"84000\" />\r\n      <workItem from=\"1755946726774\" duration=\"352000\" />\r\n      <workItem from=\"1755947570220\" duration=\"3990000\" />\r\n      <workItem from=\"1755964707426\" duration=\"2789000\" />\r\n      <workItem from=\"1755974985789\" duration=\"177000\" />\r\n      <workItem from=\"1755975526748\" duration=\"2737000\" />\r\n      <workItem from=\"1756034056618\" duration=\"291000\" />\r\n      <workItem from=\"1756034430328\" duration=\"426000\" />\r\n      <workItem from=\"1756034888540\" duration=\"195000\" />\r\n      <workItem from=\"1756049671387\" duration=\"2596000\" />\r\n      <workItem from=\"1756054434141\" duration=\"1829000\" />\r\n      <workItem from=\"1756056292376\" duration=\"5571000\" />\r\n      <workItem from=\"1756065257439\" duration=\"4250000\" />\r\n      <workItem from=\"1756129029285\" duration=\"599000\" />\r\n      <workItem from=\"1756180828024\" duration=\"1953000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"comiit\">\r\n      <created>1754319433468</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1754319433468</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"comiit\">\r\n      <created>1754496085432</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1754496085432</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"comiit\">\r\n      <created>1754675452414</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1754675452414</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"comiit\">\r\n      <created>1754675585718</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1754675585718</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00005\" summary=\"comiit\">\r\n      <created>1754676574276</created>\r\n      <option name=\"number\" value=\"00005\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1754676574276</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00006\" summary=\"comiit\">\r\n      <created>1754926548512</created>\r\n      <option name=\"number\" value=\"00006\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00006\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1754926548512</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00007\" summary=\"comiit\">\r\n      <created>1754927955631</created>\r\n      <option name=\"number\" value=\"00007\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00007\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1754927955631</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00008\" summary=\"comiit\">\r\n      <created>1754928027831</created>\r\n      <option name=\"number\" value=\"00008\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00008\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1754928027831</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00009\" summary=\"comiit\">\r\n      <created>1754928338350</created>\r\n      <option name=\"number\" value=\"00009\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00009\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1754928338350</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00010\" summary=\"comiit\">\r\n      <created>1754929457409</created>\r\n      <option name=\"number\" value=\"00010\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00010\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1754929457409</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00011\" summary=\"comiit\">\r\n      <created>1756100696659</created>\r\n      <option name=\"number\" value=\"00011\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00011\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1756100696659</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00012\" summary=\"comiit\">\r\n      <created>1756180864431</created>\r\n      <option name=\"number\" value=\"00012\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00012\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1756180864431</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00013\" summary=\"comiit\">\r\n      <created>1756182676354</created>\r\n      <option name=\"number\" value=\"00013\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00013\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1756182676354</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"14\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"comiit\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"comiit\" />\r\n  </component>\r\n  <component name=\"XDebuggerManager\">\r\n    <breakpoint-manager>\r\n      <breakpoints>\r\n        <breakpoint enabled=\"true\" type=\"java-exception\">\r\n          <properties class=\"java.lang.RuntimeException\" package=\"java.lang\" />\r\n          <option name=\"timeStamp\" value=\"1\" />\r\n        </breakpoint>\r\n      </breakpoints>\r\n    </breakpoint-manager>\r\n  </component>\r\n  <component name=\"XSLT-Support.FileAssociations.UIState\">\r\n    <expand />\r\n    <select />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision b2c341daf4172e6f1ea53e27dbd043615f8121a4)
++++ b/.idea/workspace.xml	(date 1757163869470)
+@@ -9,8 +9,12 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="849682ca-ca30-4ed2-b49d-5dee5331a97f" name="Changes" comment="comiit">
++    <list default="true" id="849682ca-ca30-4ed2-b49d-5dee5331a97f" name="Changes" comment="commit phần bin">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/controller/BinController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/controller/BinController.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/repository/BinRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/repository/BinRepository.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/service/BinService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/service/BinService.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/service/impl/BinServiceImpl.java" beforeDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -20,6 +24,7 @@
+   <component name="FileTemplateManagerImpl">
+     <option name="RECENT_TEMPLATES">
+       <list>
++        <option value="Interface" />
+         <option value="Class" />
+         <option value="Jsp File" />
+       </list>
+@@ -46,34 +51,28 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent"><![CDATA[{
+-  "keyToString": {
+-    "RunOnceActivity.OpenProjectViewOnStart": "true",
+-    "RunOnceActivity.ShowReadmeOnStart": "true",
+-    "WebServerToolWindowFactoryState": "false",
+-    "last_opened_file_path": "D:/TestSpring/springmvc-java-config-jpa-master/SmartBinWeb/src/main/java/com/example/service",
+-    "node.js.detected.package.eslint": "true",
+-    "node.js.detected.package.tslint": "true",
+-    "node.js.selected.package.eslint": "(autodetect)",
+-    "node.js.selected.package.tslint": "(autodetect)",
+-    "nodejs_package_manager_path": "npm",
+-    "project.structure.last.edited": "Libraries",
+-    "project.structure.proportion": "0.15",
+-    "project.structure.side.proportion": "0.2",
+-    "settings.editor.selected.configurable": "spring.boot.initializr",
+-    "spring.configuration.checksum": "587566023d1145a0fe9811126ca1e331"
++  <component name="PropertiesComponent">{
++  &quot;keyToString&quot;: {
++    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
++    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
++    &quot;last_opened_file_path&quot;: &quot;C:/Users/admin/IdeaProjects/Baby&quot;,
++    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
++    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
++    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
++    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
++    &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
++    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
++    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
++    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
++    &quot;spring.configuration.checksum&quot;: &quot;587566023d1145a0fe9811126ca1e331&quot;
+   }
+-}]]></component>
++}</component>
+   <component name="RecentsManager">
+     <key name="CopyFile.RECENT_KEYS">
+-      <recent name="D:\TestSpring\springmvc-java-config-jpa-master\SmartBinWeb\src\main\java\com\example\service" />
+-      <recent name="D:\TestSpring\springmvc-java-config-jpa-master\SmartBinWeb\src\main\webapp\WEB-INF\views\manager" />
++      <recent name="C:\Users\admin\IdeaProjects\SmartBinWeb\src\main\webapp" />
+       <recent name="D:\TestSpring\springmvc-java-config-jpa-master\SmartBinWeb\src\main\webapp\WEB-INF" />
+       <recent name="D:\TestSpring\springmvc-java-config-jpa-master\SmartBin\src\main" />
+-    </key>
+-    <key name="CopyClassDialog.RECENTS_KEY">
+-      <recent name="com.example.model" />
+-      <recent name="com.example.controller.app" />
+     </key>
+   </component>
+   <component name="RunManager">
+@@ -88,7 +87,7 @@
+         </artifact>
+       </deployment>
+       <server-settings>
+-        <option name="BASE_DIRECTORY_NAME" value="26571206-e5e0-4008-a514-c1cd94c979f4" />
++        <option name="BASE_DIRECTORY_NAME" value="6e1843df-c03e-409d-8de2-857ed7d4aa02" />
+       </server-settings>
+       <predefined_log_file enabled="true" id="Tomcat" />
+       <predefined_log_file enabled="true" id="Tomcat Catalina" />
+@@ -96,7 +95,7 @@
+       <predefined_log_file id="Tomcat Host Manager" />
+       <predefined_log_file id="Tomcat Localhost Access" />
+       <RunnerSettings RunnerId="Debug">
+-        <option name="DEBUG_PORT" value="49386" />
++        <option name="DEBUG_PORT" value="49979" />
+       </RunnerSettings>
+       <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Cover">
+         <option name="USE_ENV_VARIABLES" value="true" />
+@@ -182,29 +181,29 @@
+       <workItem from="1754675005921" duration="2245000" />
+       <workItem from="1754925330255" duration="1813000" />
+       <workItem from="1754927903177" duration="168000" />
+-      <workItem from="1754928168021" duration="1922000" />
+-      <workItem from="1754985779617" duration="3726000" />
+-      <workItem from="1755013857560" duration="410000" />
+-      <workItem from="1755014370578" duration="1202000" />
+-      <workItem from="1755016442713" duration="5831000" />
+-      <workItem from="1755026370125" duration="923000" />
+-      <workItem from="1755933453913" duration="2208000" />
+-      <workItem from="1755944794991" duration="294000" />
+-      <workItem from="1755945736234" duration="84000" />
+-      <workItem from="1755946726774" duration="352000" />
+-      <workItem from="1755947570220" duration="3990000" />
+-      <workItem from="1755964707426" duration="2789000" />
+-      <workItem from="1755974985789" duration="177000" />
+-      <workItem from="1755975526748" duration="2737000" />
+-      <workItem from="1756034056618" duration="291000" />
+-      <workItem from="1756034430328" duration="426000" />
+-      <workItem from="1756034888540" duration="195000" />
+-      <workItem from="1756049671387" duration="2596000" />
+-      <workItem from="1756054434141" duration="1829000" />
+-      <workItem from="1756056292376" duration="5571000" />
+-      <workItem from="1756065257439" duration="4250000" />
+-      <workItem from="1756129029285" duration="599000" />
+-      <workItem from="1756180828024" duration="1953000" />
++      <workItem from="1754940975430" duration="321000" />
++      <workItem from="1754981135233" duration="5774000" />
++      <workItem from="1755018497525" duration="716000" />
++      <workItem from="1755080742429" duration="14041000" />
++      <workItem from="1755196964406" duration="575000" />
++      <workItem from="1755357960812" duration="6661000" />
++      <workItem from="1755595731369" duration="1896000" />
++      <workItem from="1755620421419" duration="637000" />
++      <workItem from="1755722044709" duration="2250000" />
++      <workItem from="1755877911257" duration="1350000" />
++      <workItem from="1755880039956" duration="12000" />
++      <workItem from="1755880660296" duration="1852000" />
++      <workItem from="1756111627274" duration="783000" />
++      <workItem from="1756306835370" duration="1095000" />
++      <workItem from="1756377519449" duration="544000" />
++      <workItem from="1756919277625" duration="1556000" />
++      <workItem from="1756921832031" duration="304000" />
++      <workItem from="1756951023988" duration="968000" />
++      <workItem from="1756979103193" duration="548000" />
++      <workItem from="1757088503936" duration="312000" />
++      <workItem from="1757088861157" duration="3981000" />
++      <workItem from="1757092939268" duration="4086000" />
++      <workItem from="1757163116150" duration="666000" />
+     </task>
+     <task id="LOCAL-00001" summary="comiit">
+       <created>1754319433468</created>
+@@ -262,42 +261,14 @@
+       <option name="project" value="LOCAL" />
+       <updated>1754928027831</updated>
+     </task>
+-    <task id="LOCAL-00009" summary="comiit">
+-      <created>1754928338350</created>
++    <task id="LOCAL-00009" summary="commit phần bin">
++      <created>1757093409229</created>
+       <option name="number" value="00009" />
+       <option name="presentableId" value="LOCAL-00009" />
+       <option name="project" value="LOCAL" />
+-      <updated>1754928338350</updated>
+-    </task>
+-    <task id="LOCAL-00010" summary="comiit">
+-      <created>1754929457409</created>
+-      <option name="number" value="00010" />
+-      <option name="presentableId" value="LOCAL-00010" />
+-      <option name="project" value="LOCAL" />
+-      <updated>1754929457409</updated>
+-    </task>
+-    <task id="LOCAL-00011" summary="comiit">
+-      <created>1756100696659</created>
+-      <option name="number" value="00011" />
+-      <option name="presentableId" value="LOCAL-00011" />
+-      <option name="project" value="LOCAL" />
+-      <updated>1756100696659</updated>
++      <updated>1757093409229</updated>
+     </task>
+-    <task id="LOCAL-00012" summary="comiit">
+-      <created>1756180864431</created>
+-      <option name="number" value="00012" />
+-      <option name="presentableId" value="LOCAL-00012" />
+-      <option name="project" value="LOCAL" />
+-      <updated>1756180864431</updated>
+-    </task>
+-    <task id="LOCAL-00013" summary="comiit">
+-      <created>1756182676354</created>
+-      <option name="number" value="00013" />
+-      <option name="presentableId" value="LOCAL-00013" />
+-      <option name="project" value="LOCAL" />
+-      <updated>1756182676354</updated>
+-    </task>
+-    <option name="localTasksCounter" value="14" />
++    <option name="localTasksCounter" value="10" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -316,20 +287,7 @@
+   </component>
+   <component name="VcsManagerConfiguration">
+     <MESSAGE value="comiit" />
+-    <option name="LAST_COMMIT_MESSAGE" value="comiit" />
+-  </component>
+-  <component name="XDebuggerManager">
+-    <breakpoint-manager>
+-      <breakpoints>
+-        <breakpoint enabled="true" type="java-exception">
+-          <properties class="java.lang.RuntimeException" package="java.lang" />
+-          <option name="timeStamp" value="1" />
+-        </breakpoint>
+-      </breakpoints>
+-    </breakpoint-manager>
+-  </component>
+-  <component name="XSLT-Support.FileAssociations.UIState">
+-    <expand />
+-    <select />
++    <MESSAGE value="commit phần bin" />
++    <option name="LAST_COMMIT_MESSAGE" value="commit phần bin" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: src/main/java/com/example/repository/BinRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.repository;\r\n\r\n\r\nimport com.example.model.Account;\r\n\r\nimport com.example.model.Bin;\r\nimport org.springframework.data.jpa.repository.JpaRepository;\r\n\r\npublic interface BinRepository extends JpaRepository<Bin, Integer> {\r\n\r\n    Bin findByBinCode(String binCode);\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/example/repository/BinRepository.java b/src/main/java/com/example/repository/BinRepository.java
+--- a/src/main/java/com/example/repository/BinRepository.java	(revision b2c341daf4172e6f1ea53e27dbd043615f8121a4)
++++ b/src/main/java/com/example/repository/BinRepository.java	(date 1757095848589)
+@@ -5,8 +5,25 @@
+ 
+ import com.example.model.Bin;
+ import org.springframework.data.jpa.repository.JpaRepository;
++import org.springframework.data.jpa.repository.Query;
++import org.springframework.data.repository.query.Param;
++import org.springframework.stereotype.Repository;
++
++import java.util.List;
++import java.util.Optional;
++
+ 
+ public interface BinRepository extends JpaRepository<Bin, Integer> {
+ 
+     Bin findByBinCode(String binCode);
++    // Custom query để lấy danh sách bin theo status
++    List<Bin> findByStatus(int status);
++
++    // Custom query để lấy danh sách bin sắp xếp theo thời gian cập nhật
++    @Query("SELECT b FROM Bin b ORDER BY b.lastUpdated DESC")
++    List<Bin> findAllOrderByLastUpdatedDesc();
++    // Thêm vào cuối interface
++    @Query("SELECT b FROM Bin b WHERE b.currentFill >= :threshold ORDER BY b.currentFill DESC")
++    List<Bin> findByCurrentFillGreaterThanEqual(@Param("threshold") double threshold);
++
+ }
+Index: src/main/java/com/example/service/BinService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.service;\r\n\r\n\r\nimport com.example.model.Bin;\r\nimport com.example.repository.BinRepository;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.stereotype.Service;\r\n\r\n\r\n\r\nimport java.util.Date;\r\n\r\nimport java.util.List;\r\n\r\n@Service\r\npublic class BinService {\r\n\r\n    @Autowired\r\n    private  BinRepository binRepository;\r\n\r\n    public BinService(BinRepository binRepository) {\r\n        this.binRepository = binRepository;\r\n    }\r\n\r\n    public List<Bin> getAllBins() {\r\n        return binRepository.findAll();\r\n    }\r\n\r\n\r\n\r\n    @Autowired\r\n    private BinRepository binRepository;\r\n\r\n    public Bin saveOrUpdateBin(Bin bin) {\r\n        // Nếu muốn update theo binCode\r\n        Bin existing = binRepository.findByBinCode(bin.getBinCode());\r\n\r\n        if (existing == null) {\r\n            // chưa có thì tạo mới\r\n            bin.setCapacity(bin.getCapacity() == 0 ? 50.0 : bin.getCapacity());\r\n            return binRepository.save(bin);\r\n        } else {\r\n            // có rồi thì cập nhật\r\n            existing.setLatitude(bin.getLatitude());\r\n            existing.setLongitude(bin.getLongitude());\r\n            existing.setCurrentFill(bin.getCurrentFill());\r\n            existing.setStatus(bin.getStatus());\r\n            existing.setStreet(bin.getStreet());\r\n            existing.setWard(bin.getWard());\r\n            existing.setCity(bin.getCity());\r\n            existing.setLastUpdated(new Date());\r\n\r\n            return binRepository.save(existing);\r\n        }\r\n    }\r\n\r\n    // \uD83D\uDC49 Hàm mới để lấy toàn bộ danh sách thùng rác\r\n    public List<Bin> getAllBins() {\r\n        return binRepository.findAll();\r\n    }\r\n\r\n    public Bin getBinById(int id) {\r\n        return binRepository.findById(id).orElse(null);\r\n    }\r\n\r\n\r\n    public Bin saveBin(Bin bin) {\r\n        return binRepository.save(bin);\r\n    }\r\n\r\n    public void deleteBin(int id) {\r\n        binRepository.deleteById(id);\r\n    }\r\n}\r\n\r\n\r\n}\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/example/service/BinService.java b/src/main/java/com/example/service/BinService.java
+--- a/src/main/java/com/example/service/BinService.java	(revision b2c341daf4172e6f1ea53e27dbd043615f8121a4)
++++ b/src/main/java/com/example/service/BinService.java	(date 1757096231217)
+@@ -22,14 +22,11 @@
+         this.binRepository = binRepository;
+     }
+ 
+-    public List<Bin> getAllBins() {
+-        return binRepository.findAll();
+-    }
++
+ 
+ 
+ 
+-    @Autowired
+-    private BinRepository binRepository;
++
+ 
+     public Bin saveOrUpdateBin(Bin bin) {
+         // Nếu muốn update theo binCode
+@@ -71,8 +68,10 @@
+     public void deleteBin(int id) {
+         binRepository.deleteById(id);
+     }
+-}
+ 
+ 
+ }
+ 
++
++
++

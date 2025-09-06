@@ -1,20 +1,22 @@
 package com.example.model;
 
-
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "Bins")
+@Table(name = "Bins") // Tên bảng trong CSDL
 public class Bin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     @Column(name = "BinID")
-    private int binId;
+    private int binID;
 
-    @Column(name = "BinCode", length = 50, nullable = false, unique = true)
+    @Column(name = "BinCode", length = 50, unique = true, nullable = false)
+
+
+
     private String binCode;
 
     @Column(name = "Street", length = 255)
@@ -35,14 +37,16 @@ public class Bin {
     @Column(name = "Capacity")
     private double capacity;
 
-    @Column(name = "CurrentFill", columnDefinition = "FLOAT DEFAULT 0")
-    private double currentFill = 0;
 
-    @Column(name = "Status", columnDefinition = "INT DEFAULT 1")
-    private int status = 1; // 1 = hoạt động, 0 = bảo trì, 2 = đầy
+    @Column(name = "CurrentFill")
+    private double currentFill;
+
+    @Column(name = "Status")
+    private int status;  // 1 = hoạt động, 0 = lỗi, 2 = đầy,...
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "LastUpdated", columnDefinition = "DATETIME DEFAULT GETDATE()")
+    @Column(name = "LastUpdated")
+
     private Date lastUpdated = new Date();
 
 
@@ -50,10 +54,10 @@ public class Bin {
 
     // Getters và Setters
     public int getBinId() {
-        return binId;
+        return binID;
     }
-    public void setBinId(int binId) {
-        this.binId = binId;
+    public void setBinId(int binID) {
+        this.binID = binID;
     }
 
     public String getBinCode() {
@@ -125,5 +129,4 @@ public class Bin {
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
-
 }

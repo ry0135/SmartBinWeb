@@ -22,14 +22,6 @@ public class BinService {
         this.binRepository = binRepository;
     }
 
-    public List<Bin> getAllBins() {
-        return binRepository.findAll();
-    }
-
-
-
-    @Autowired
-    private BinRepository binRepository;
 
     public Bin saveOrUpdateBin(Bin bin) {
         // Nếu muốn update theo binCode
@@ -73,6 +65,4 @@ public class BinService {
     }
 }
 
-
-}
 

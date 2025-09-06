@@ -19,5 +19,10 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
     boolean existsByEmailAndIsVerifiedTrue(String email);
     boolean existsByEmailAndIsVerifiedFalse(String email);
+    @Query("SELECT a FROM Account a WHERE a.email = :email AND a.password = :password")
+    Optional<Account> findByEmailAndPassword(@Param("email") String email,
+                                             @Param("password") String password);
+
+
 
 }

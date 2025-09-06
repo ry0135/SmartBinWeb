@@ -1,12 +1,13 @@
 package com.example.service;
 
-
 import com.example.model.Account;
 import com.example.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 public class AccountService {
@@ -15,14 +16,37 @@ public class AccountService {
 
     @Autowired
     private EmailService emailService;
+
     @Autowired
     private RandomService randomService;
 
-
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    // PHƯƠNG THỨC MỚI CHO LOGIN
+//    @Transactional(readOnly = true)
+//    public Optional<Account> authenticate(String email, String password) {
+//        Account account = accountRepository.findByEmailAccount(email);
+//
+//        if (account != null && passwordEncoder.matches(password, account.getPassword())) {
+//            return Optional.of(account);
+//        }
+//        return Optional.empty();
+//    }
+    @Transactional(readOnly = true)
+    public Optional<Account> authenticate(String email, String password) {
+        Account account = accountRepository.findByEmailAccount(email);
+
+        // So sánh trực tiếp với mật khẩu trong database (không mã hóa)
+        if (account != null && account.getPassword().equals(password)) {
+            return Optional.of(account);
+        }
+
+        return Optional.empty();
+    }
+
+    // CÁC PHƯƠNG THỨC HIỆN CÓ GIỮ NGUYÊN...
     @Transactional
     public void save(Account account) {
-
         String code = randomService.generateRandomCode();
         String encodedPassword = passwordEncoder.encode(account.getPassword());
         account.setPassword(encodedPassword);
@@ -31,13 +55,14 @@ public class AccountService {
         accountRepository.save(account);
         emailService.sendCodeToEmail(account.getEmail(), code);
     }
+
     @Transactional(readOnly = true)
-    public boolean isEmailExistsAndIsVerifiedTrue (String email) {
+    public boolean isEmailExistsAndIsVerifiedTrue(String email) {
         return accountRepository.existsByEmailAndIsVerifiedTrue(email);
     }
 
     @Transactional(readOnly = true)
-    public boolean isEmailExistsAndIsVerifiedFalse (String email) {
+    public boolean isEmailExistsAndIsVerifiedFalse(String email) {
         return accountRepository.existsByEmailAndIsVerifiedFalse(email);
     }
 
@@ -45,7 +70,6 @@ public class AccountService {
     public boolean verifyCodeAndUpdateStatus(String email, String code) {
         Account account = accountRepository.findByEmailAndCode(email, code);
         if (account != null) {
-            // Cập nhật trạng thái tài khoản
             account.setStatus(1);
             accountRepository.save(account);
             return true;
@@ -55,13 +79,10 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public Account verify(String email, String password) {
-        // Tìm tài khoản theo tên người dùng
         Account account = accountRepository.findByEmailAccount(email);
-        // Nếu tài khoản được tìm thấy, kiểm tra mật khẩu
         if (account != null && passwordEncoder.matches(password, account.getPassword())) {
-            return account; // Trả về tài khoản nếu xác thực thành công
+            return account;
         }
-
-        return null; // Trả về null nếu không tìm thấy tài khoản hoặc mật khẩu không chính xác
+        return null;
     }
 }

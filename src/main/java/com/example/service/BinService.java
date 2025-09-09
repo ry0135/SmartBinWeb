@@ -15,7 +15,9 @@ import java.util.List;
 public class BinService {
 
     @Autowired
+
     private BinRepository binRepository;
+
 
     public Bin saveOrUpdateBin(Bin bin) {
         // Nếu muốn update theo binCode
@@ -65,4 +67,13 @@ public class BinService {
     }
 
 
+    public Bin saveBin(Bin bin) {
+        return binRepository.save(bin);
+    }
+
+    public void deleteBin(int id) {
+        binRepository.deleteById(id);
+    }
 }
+
+

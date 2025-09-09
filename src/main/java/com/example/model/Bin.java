@@ -53,11 +53,11 @@ public class Bin {
 
 
     // Getters và Setters
-    public int getBinId() {
-        return binId;
+    public int getBinID() {
+        return binID;
     }
-    public void setBinId(int binId) {
-        this.binId = binId;
+    public void setBinID(int binID) {
+        this.binID = binID;
     }
 
     public String getBinCode() {

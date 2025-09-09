@@ -11,7 +11,7 @@ public class Bin {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     @Column(name = "BinID")
-    private int binId;
+    private int binID;
 
     @Column(name = "BinCode", length = 50, unique = true, nullable = false)
 
@@ -53,11 +53,11 @@ public class Bin {
 
 
     // Getters và Setters
-    public int getBinId() {
-        return binId;
+    public int getBinID() {
+        return binID;
     }
-    public void setBinId(int binID) {
-        this.binId = binId;
+    public void setBinID(int binID) {
+        this.binID = binID;
     }
 
     public String getBinCode() {

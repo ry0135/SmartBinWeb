@@ -20,4 +20,6 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     boolean existsByEmailAndIsVerifiedTrue(String email);
     boolean existsByEmailAndIsVerifiedFalse(String email);
 
+
+
 }

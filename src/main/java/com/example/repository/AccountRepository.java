@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Integer> {
@@ -19,7 +20,14 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
     boolean existsByEmailAndIsVerifiedTrue(String email);
     boolean existsByEmailAndIsVerifiedFalse(String email);
+    @Query("SELECT a FROM Account a WHERE a.email = :email AND a.password = :password")
+    Optional<Account> findByEmailAndPassword(@Param("email") String email,
+                                             @Param("password") String password);
+    // Thêm phương thức mới
 
 
+        @Query("SELECT a FROM Account a LEFT JOIN FETCH a.ward WHERE a.role = 2 AND a.wardID = :wardID")
+        List<Account> findWorkersByWard(@Param("wardID") int wardID);
+    }
 
-}
+

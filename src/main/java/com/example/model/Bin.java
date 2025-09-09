@@ -1,6 +1,5 @@
 package com.example.model;
 
-
 import javax.persistence.*;
 import java.util.Date;
 
@@ -10,21 +9,17 @@ public class Bin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     @Column(name = "BinID")
-    private int binId;
+    private int binID;
 
-    @Column(name = "BinCode", length = 50, nullable = false, unique = true)
+    @Column(name = "BinCode", length = 50, unique = true, nullable = false)
     private String binCode;
 
     @Column(name = "Street", length = 255)
     private String street;
 
-    @Column(name = "Ward", length = 255)
-    private String ward;
-
-    @Column(name = "City", length = 255)
-    private String city;
+    @Column(name = "WardID") // Sửa từ "Ward" thành "WardID"
+    private int wardID; // Sửa từ ward thành wardID
 
     @Column(name = "Latitude")
     private double latitude;
@@ -35,25 +30,27 @@ public class Bin {
     @Column(name = "Capacity")
     private double capacity;
 
-    @Column(name = "CurrentFill", columnDefinition = "FLOAT DEFAULT 0")
-    private double currentFill = 0;
+    @Column(name = "CurrentFill")
+    private double currentFill;
 
-    @Column(name = "Status", columnDefinition = "INT DEFAULT 1")
-    private int status = 1; // 1 = hoạt động, 0 = bảo trì, 2 = đầy
+    @Column(name = "Status")
+    private int status;  // 1 = hoạt động, 0 = bảo trì, 2 = đầy
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "LastUpdated", columnDefinition = "DATETIME DEFAULT GETDATE()")
+    @Column(name = "LastUpdated")
     private Date lastUpdated = new Date();
 
-
-
+    // Thêm relationship với Ward
+    @ManyToOne(fetch = FetchType.EAGER) // Thay LAZY bằng EAGER
+    @JoinColumn(name = "WardID", insertable = false, updatable = false)
+    private Ward ward;
 
     // Getters và Setters
-    public int getBinId() {
-        return binId;
+    public int getBinID() {
+        return binID;
     }
-    public void setBinId(int binId) {
-        this.binId = binId;
+    public void setBinID(int binID) {
+        this.binID = binID;
     }
 
     public String getBinCode() {
@@ -70,18 +67,11 @@ public class Bin {
         this.street = street;
     }
 
-    public String getWard() {
-        return ward;
+    public int getWardID() {
+        return wardID;
     }
-    public void setWard(String ward) {
-        this.ward = ward;
-    }
-
-    public String getCity() {
-        return city;
-    }
-    public void setCity(String city) {
-        this.city = city;
+    public void setWardID(int wardID) {
+        this.wardID = wardID;
     }
 
     public double getLatitude() {
@@ -126,4 +116,20 @@ public class Bin {
         this.lastUpdated = lastUpdated;
     }
 
+    public Ward getWard() {
+        return ward;
+    }
+    public void setWard(Ward ward) {
+        this.ward = ward;
+    }
+
+    // Thêm phương thức getWardName() để tương thích với code cũ
+    public String getWardName() {
+        return ward != null ? ward.getWardName() : "";
+    }
+
+    // Thêm phương thức getCity() để tương thích với code cũ
+    public String getCity() {
+        return ward != null && ward.getProvince() != null ? ward.getProvince().getProvinceName() : "";
+    }
 }

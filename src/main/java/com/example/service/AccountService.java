@@ -52,4 +52,16 @@ public class AccountService {
         }
         return false;
     }
+
+    @Transactional(readOnly = true)
+    public Account verify(String email, String password) {
+        // Tìm tài khoản theo tên người dùng
+        Account account = accountRepository.findByEmailAccount(email);
+        // Nếu tài khoản được tìm thấy, kiểm tra mật khẩu
+        if (account != null && passwordEncoder.matches(password, account.getPassword())) {
+            return account; // Trả về tài khoản nếu xác thực thành công
+        }
+
+        return null; // Trả về null nếu không tìm thấy tài khoản hoặc mật khẩu không chính xác
+    }
 }

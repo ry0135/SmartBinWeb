@@ -9,10 +9,14 @@ public class Bin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Column(name = "BinID")
     private int binID;
 
     @Column(name = "BinCode", length = 50, unique = true, nullable = false)
+
+
+
     private String binCode;
 
     @Column(name = "Street", length = 255)
@@ -33,6 +37,7 @@ public class Bin {
     @Column(name = "Capacity")
     private double capacity;
 
+
     @Column(name = "CurrentFill")
     private double currentFill;
 
@@ -41,14 +46,18 @@ public class Bin {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "LastUpdated")
+
     private Date lastUpdated = new Date();
 
-    // ====== GETTER & SETTER ======
-    public int getBinID() {
-        return binID;
+
+
+
+    // Getters và Setters
+    public int getBinId() {
+        return binId;
     }
-    public void setBinID(int binID) {
-        this.binID = binID;
+    public void setBinId(int binId) {
+        this.binId = binId;
     }
 
     public String getBinCode() {

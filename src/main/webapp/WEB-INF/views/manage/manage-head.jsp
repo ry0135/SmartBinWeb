@@ -13,15 +13,4 @@
   </ul>
 </div>
 
-<!-- Main content -->
-<div class="main">
-  <!-- Header -->
-  <div class="header">
-    <h1>Tổng quan</h1>
-    <div class="user-info">
-      <span>🔔</span>
-      <span>Manage User</span>
-      <img src="https://i.pravatar.cc/150?img=3" alt="User">
-    </div>
-  </div>
 

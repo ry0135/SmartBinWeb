@@ -9,24 +9,80 @@
     <link href="https://unpkg.com/@vietmap/vietmap-gl-js@6.0.0/dist/vietmap-gl.css" rel="stylesheet" />
     <script src="https://unpkg.com/@vietmap/vietmap-gl-js@6.0.0/dist/vietmap-gl.js"></script>
     <style>
-        body {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: 'Segoe UI', sans-serif;
+        }
+
+        html, body {
+            height: 100%;
             background: #f9fafb;
         }
 
-        /* Sidebar */
+        /* Container chính */
+        .container {
+            display: flex;
+            min-height: 100vh;
+            height: 100%;
+        }
+
+        /* Sidebar - Chiều cao 100% */
         .sidebar {
             width: 240px;
             background: #fff;
             border-right: 1px solid #e5e7eb;
-            padding: 20px 0;
             display: flex;
             flex-direction: column;
             height: 100vh;
             position: fixed;
-            top: 0;
             left: 0;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            font-size: 18px;
+            margin: 20px 0;
+            padding: 0 10px;
+        }
+
+        .menu {
+            list-style: none;
+            padding: 0;
+            flex-grow: 1;
+        }
+
+        .menu li {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            color: #374151;
+            transition: all 0.2s;
+        }
+
+        .menu li.active {
+            background: #f3f4f6;
+            font-weight: bold;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .menu li:hover {
+            background: #f9fafb;
+        }
+
+        /* Main content */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-left: 240px; /* Để tránh bị sidebar che */
+            width: calc(100% - 240px);
+            min-height: 100vh;
         }
 
         /* Header */
@@ -37,203 +93,68 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #e5e7eb;
-            position: fixed;
-            top: 0;
-            left: 240px;    /* chừa khoảng sidebar */
-            right: 0;
-            height: 64px;
-            z-index: 1000;
         }
 
-        /* Main content */
-        .main {
-            margin-left: 240px;   /* chừa sidebar */
-            padding: 20px;
-            margin-top: 80px;     /* chừa header */
-        }
-
-        /* Content layout */
-        .content {
-            display: flex;
-            gap: 20px;
-        }
-
-        /* Map */
-        .map-container {
-            flex: 2;
-        }
-        #map {
-            width: 100%;
-            height: 350px;   /* cho nhỏ lại */
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        /* Detail card */
-        .detail-card {
-            flex: 1;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .sidebar h2 {
-            text-align: center;
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-        .menu {
-            list-style: none;
-            padding: 0;
-        }
-        .menu li {
-            padding: 12px 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            color: #374151;
-        }
-        .menu li.active {
-            background: #f3f4f6;
-            font-weight: bold;
-            border-left: 4px solid #3b82f6;
-        }
-        .menu li:hover {
-            background: #f9fafb;
-        }
-        /* Main */
-        .main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .header {
-            background: #fff;
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e5e7eb;
-        }
         .header h1 {
             margin: 0;
             font-size: 20px;
         }
+
         .user-info {
             display: flex;
             align-items: center;
             gap: 12px;
         }
+
         .user-info img {
             width: 32px;
             height: 32px;
             border-radius: 50%;
         }
-        /* Stats */
-        .stats {
+
+        /* ========== PHẦN CHÍNH SỬA ========== */
+
+        /* Layout chính */
+        .content {
             display: flex;
             gap: 20px;
             padding: 20px;
-        }
-        .stat-card {
             flex: 1;
-            background: #fff;
-            padding: 16px;
-            border-radius: 8px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
-        .stat-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: #fff;
-        }
-        .bg-blue { background: #3b82f6; }
-        .bg-orange { background: #f97316; }
-        .bg-green { background: #22c55e; }
+
+        /* Bản đồ bên trái */
         .map-container {
             flex: 1;
-            padding: 0 20px 20px 20px;
+            min-width: 0; /* Để tránh tràn layout */
         }
+
         #map {
             width: 100%;
             height: 500px;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
-        }
-        .filter-section {
-            padding: 10px 20px;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        .filter-section label {
-            font-weight: bold;
-        }
-        .table-section {
-            padding: 0 20px 20px 20px;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        th {
-            background-color: #f9fafb;
-            font-weight: bold;
-        }
-        tr:hover {
-            background-color: #f3f4f6;
-        }
-        /* Filter section */
-        .filter-section {
-            padding: 12px 20px;
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            background: #fff;
-            border-radius: 8px;
-            margin: 15px 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .filter-section label {
-            font-weight: 600;
-            font-size: 14px;
-            color: #374151;
-            margin-right: 6px;
-        }
-        .filter-section select {
-            padding: 6px 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            background: #fff;
-            font-size: 14px;
-            color: #374151;
-            outline: none;
-            transition: border 0.2s;
-        }
-        .filter-section select:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .detail-card h2 { margin-top: 0; }
+        /* Thông tin bên phải */
+        .detail-card {
+            flex: 0 0 400px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .detail-card h2 {
+            font-size: 20px;
+            color: #1f2937;
+            margin-bottom: 8px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f3f4f6;
+        }
 
         .detail-table {
             width: 100%;
@@ -241,122 +162,273 @@
         }
 
         .detail-table th, .detail-table td {
-            padding: 10px;
-            border-bottom: 1px solid #e5e7eb;
+            padding: 12px 8px;
+            border-bottom: 1px solid #f3f4f6;
             text-align: left;
         }
-        .btn-back {
-            display: inline-block;
-            margin-top: 15px;
-            background: #3b82f6;
-            color: #fff;
-            padding: 8px 16px;
-            border-radius: 6px;
-            text-decoration: none;
-        }
-        .btn-back:hover { background: #2563eb; }
-        thead th {
-            background: #f3f4f6;
+
+        .detail-table th {
             font-weight: 600;
-            font-size: 14px;
             color: #374151;
-            text-align: left;
-            padding: 12px 16px;
-            border-bottom: 2px solid #e5e7eb;
+            width: 120px;
         }
-        tbody td {
-            font-size: 14px;
+
+        .detail-table td {
             color: #4b5563;
-            padding: 12px 16px;
-            border-bottom: 1px solid #e5e7eb;
+            font-weight: 500;
         }
-        tbody tr:last-child td {
+
+        .detail-table tr:last-child th,
+        .detail-table tr:last-child td {
             border-bottom: none;
         }
-        tbody tr:hover {
-            background: #f9fafb;
-            transition: background 0.2s;
+
+        /* Nút hành động */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid #f3f4f6;
         }
 
-        /* Trạng thái màu trong bảng */
-        .status-online {
-            color: #22c55e;
-            font-weight: 600;
-        }
-        .status-offline {
-            color: #ef4444;
-            font-weight: 600;
-        }
-        .status-warning {
-            color: #f97316;
-            font-weight: 600;
-        }
-        .btn-detail {
-            padding: 6px 12px;
-            background: #3b82f6;
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            background: #6b7280;
             color: #fff;
-            border-radius: 6px;
+            padding: 10px 16px;
+            border-radius: 8px;
             text-decoration: none;
-            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
         }
-        .btn-detail:hover {
-            background: #2563eb;
+
+        .btn-back:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
         }
+
         .btn-assign {
-            display: inline-block;
-            margin-top: 15px;
-            background: #22c55e; /* Màu xanh lá cây */
+            display: inline-flex;
+            align-items: center;
+            background: #22c55e;
             color: #fff;
-            padding: 8px 16px;
-            border-radius: 6px;
+            padding: 10px 16px;
+            border-radius: 8px;
             text-decoration: none;
-        }
-        .btn-assign:hover {
-            background: #15803d; /* Màu đậm hơn khi di chuột */
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
+        .btn-assign:hover {
+            background: #16a34a;
+            transform: translateY(-1px);
+        }
+
+        /* Chỉ báo trạng thái */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-online {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .status-offline {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .fill-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fill-bar {
+            width: 60px;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .fill-progress {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .fill-low { background: #22c55e; }
+        .fill-medium { background: #f59e0b; }
+        .fill-high { background: #ef4444; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .content {
+                flex-direction: column;
+            }
+
+            .detail-card {
+                flex: 0 0 auto;
+            }
+
+            #map {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+        /* Thêm vào phần CSS */
+        .warning-message {
+            background: #fffbeb;
+            color: #92400e;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #fcd34d;
+            margin-top: 16px;
+        }
+
+        .warning-message strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .warning-message p {
+            margin: 8px 0 0 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
-<%@ include file="manage-head.jsp" %>
-<!-- Map + Detail (chia 2 cột) -->
-<div class="content">
-
-    <!-- Bản đồ bên trái -->
-    <div class="map-container">
-        <div id="map"></div>
+<div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Trash Bin App</h2>
+        <ul class="menu">
+            <li class="active">📊 Dashboard</li>
+            <li>🗑️ Danh sách thùng rác</li>
+            <li>⚠️ Báo cáo</li>
+            <li>👤 Người dùng</li>
+            <li>⚙️ Cài đặt</li>
+        </ul>
     </div>
 
-    <!-- Thông tin bên phải -->
-    <div class="detail-card">
-        <h2>Thông tin thùng rác</h2>
-        <table class="detail-table">
-            <tr><th>Mã</th><td>${bin.binCode}</td></tr>
-            <tr><th>Địa chỉ</th><td>${bin.street}, ${bin.ward}, ${bin.city}</td></tr>
-            <tr><th>Vĩ độ</th><td>${bin.latitude}</td></tr>
-            <tr><th>Kinh độ</th><td>${bin.longitude}</td></tr>
-            <tr><th>Dung tích</th><td>${bin.capacity}</td></tr>
-            <tr><th>Hiện tại</th><td>${bin.currentFill}%</td></tr>
-            <tr><th>Trạng thái</th>
-                <td>
-                    <c:choose>
-                        <c:when test="${bin.status == 1}">Online</c:when>
-                        <c:otherwise>Offline</c:otherwise>
-                    </c:choose>
-                </td>
-            </tr>
-            <tr><th>Lần cập nhật cuối</th><td>${bin.lastUpdated}</td></tr>
-        </table>
-        <a href="${pageContext.request.contextPath}/manage" class="btn-back">← Quay lại</a>
-        <a href="#" id="assignTaskBtn" class="btn-back">Giao nhiệm vụ</a>
+
+    <!-- Main content -->
+    <div class="main">
+        <!-- Header -->
+        <div class="header">
+            <h1>Chi tiết thùng rác</h1>
+            <div class="user-info">
+                <span>🔔</span>
+                <span>Admin User</span>
+                <img src="https://i.pravatar.cc/150?img=3" alt="User">
+            </div>
+        </div>
+
+        <!-- Map + Detail (chia 2 cột) -->
+        <div class="content">
+            <!-- Bản đồ bên trái -->
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+
+            <!-- Thông tin bên phải -->
+            <div class="detail-card">
+                <h2>Thông tin thùng rác</h2>
+                <table class="detail-table">
+                    <tr><th>Mã</th><td>${bin.binCode}</td></tr>
+                    <tr><th>Địa chỉ</th><td>${bin.street}, ${bin.ward.wardName}, ${bin.city}</td></tr>
+                    <tr><th>Dung tích</th><td>${bin.capacity}L</td></tr>
+                    <tr>
+                        <th>Hiện tại</th>
+                        <td>
+                            <div class="fill-indicator">
+                                <div class="fill-bar">
+                                    <div class="fill-progress
+                                        <c:choose>
+                                            <c:when test="${bin.currentFill >= 80}">fill-high</c:when>
+                                            <c:when test="${bin.currentFill >= 40}">fill-medium</c:when>
+                                            <c:otherwise>fill-low</c:otherwise>
+                                        </c:choose>"
+                                         style="width: ${bin.currentFill}%">
+                                    </div>
+                                </div>
+                                <span>${bin.currentFill}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Trạng thái</th>
+                        <td>
+                            <span class="status-indicator
+                                <c:choose>
+                                    <c:when test="${bin.status == 1}">status-online</c:when>
+                                    <c:otherwise>status-offline</c:otherwise>
+                                </c:choose>">
+                                <c:choose>
+                                    <c:when test="${bin.status == 1}">Online 🟢</c:when>
+                                    <c:otherwise>Offline 🔴</c:otherwise>
+                                </c:choose>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr><th>Cập nhật cuối</th><td>${bin.lastUpdated}</td></tr>
+                </table>
+
+                <div class="action-buttons">
+                    <a href="${pageContext.request.contextPath}/manage" class="btn-back">← Quay lại</a>
+                    <c:if test="${not hasOpenTask}">
+                        <button type="button" class="btn-assign"
+                                onclick="location.href='${pageContext.request.contextPath}/tasks/assign/${bin.binID}?ward=' + encodeURIComponent('${bin.wardID}')">
+                            📋 Giao nhiệm vụ
+                        </button>
+                    </c:if>
+                </div>
+
+                <!-- Hiển thị thông báo nếu có task đang mở -->
+                <c:if test="${hasOpenTask}">
+                    <div class="warning-message">
+                        <strong>⚠️ Đang có nhiệm vụ mở</strong>
+                        <p>
+                            Thùng rác này đã có nhiệm vụ đang được xử lý.
+                            Vui lòng hoàn thành nhiệm vụ hiện tại trước khi giao mới.
+                        </p>
+                    </div>
+                </c:if>
+            </div>
+        </div>
     </div>
 </div>
-
 
 <script>
     var binData = {
         code: "${bin.binCode}",
-        address: "${bin.street}, ${bin.ward}, ${bin.city}",
+        address: "${bin.street}, ${bin.ward.wardName}, ${bin.city}",
         fullness: ${bin.currentFill},
         status: ${bin.status},
         updated: "${bin.lastUpdated}",
@@ -367,22 +439,28 @@
     function getBinIcon(level) {
         if (level >= 80) {
             return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="red" viewBox="0 0 24 24">
-                    <path d="M3 6h18v2H3zm2 3h14l-1.5 12h-11z"/>
-                </svg>
-            `);
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="red" viewBox="0 0 24 24">
+                <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
+                <!-- Mức đầy cao -->
+                <rect x="5" y="8" width="14" height="12" fill="rgba(0,0,0,0.3)"/>
+            </svg>
+        `);
         } else if (level >= 40) {
             return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="orange" viewBox="0 0 24 24">
-                    <path d="M3 6h18v2H3zm2 3h14l-1 8h-12z"/>
-                </svg>
-            `);
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="orange" viewBox="0 0 24 24">
+                <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
+                <!-- Mức đầy trung bình -->
+                <rect x="5" y="12" width="14" height="8" fill="rgba(0,0,0,0.3)"/>
+            </svg>
+        `);
         } else {
             return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="green" viewBox="0 0 24 24">
-                    <path d="M3 6h18v2H3z"/>
-                </svg>
-            `);
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="green" viewBox="0 0 24 24">
+                <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
+                <!-- Mức đầy thấp -->
+                <rect x="5" y="16" width="14" height="4" fill="rgba(0,0,0,0.3)"/>
+            </svg>
+        `);
         }
     }
 
@@ -393,24 +471,26 @@
         zoom: 15
     });
 
+    // Thêm điều khiển navigation
+    map.addControl(new vietmapgl.NavigationControl());
+
     var el = document.createElement("img");
     el.src = getBinIcon(binData.fullness);
-    el.style.width = "32px";
-    el.style.height = "32px";
+    el.style.width = "40px";
+    el.style.height = "40px";
 
     var popup = new vietmapgl.Popup({ offset: 25 }).setHTML(
-        "<b>Mã:</b> " + binData.code +
+        "<div style='padding: 8px;'><b>Mã:</b> " + binData.code +
         "<br><b>Địa chỉ:</b> " + binData.address +
         "<br><b>Đầy:</b> " + binData.fullness + "%" +
-        "<br><b>Trạng thái:</b> " + (binData.status == 1 ? "Online" : "Offline") +
-        "<br><b>Cập nhật:</b> " + binData.updated
+        "<br><b>Trạng thái:</b> " + (binData.status == 1 ? "Online 🟢" : "Offline 🔴") +
+        "<br><b>Cập nhật:</b> " + binData.updated + "</div>"
     );
 
-    new vietmapgl.Marker({ element: el })   // ✅ phải để trong object
+    new vietmapgl.Marker({ element: el })
         .setLngLat([binData.lng, binData.lat])
         .setPopup(popup)
         .addTo(map);
-
 </script>
 
 </body>

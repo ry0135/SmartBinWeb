@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Date;
-
 import javax.persistence.*;
+
 @Entity
-@Table(name = "Accounts ") // Tên bảng trong CSDL
+@Table(name = "Accounts")
 public class Account {
 
     @Id
@@ -33,6 +33,9 @@ public class Account {
     @Column(name = "Code")
     private String code;
 
+    @Column(name = "WardID")
+    private int wardID;
+
     @JsonIgnore
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CreatedAt", updatable = false)
@@ -41,8 +44,18 @@ public class Account {
     @Column(name = "IsVerified")
     private Boolean isVerified;
 
+    // Thêm relationship với Ward
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "WardID", insertable = false, updatable = false)
+    private Ward ward;
+
+    // Thêm field taskCount (tạm thời)
+    @Transient
+    private int taskCount;
+
     public Account() {
     }
+
     public Account(String email, String code) {
         this.email = email;
         this.code = code;
@@ -93,9 +106,15 @@ public class Account {
     public String getCode() {
         return code;
     }
-
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public int getWardID() {
+        return wardID;
+    }
+    public void setWardID(int wardID) {
+        this.wardID = wardID;
     }
 
     public int getStatus() {
@@ -108,16 +127,30 @@ public class Account {
     public Date getCreatedAt() {
         return createdAt;
     }
+
     @PrePersist
     protected void onCreate() {
-        this.createdAt = new Date(); // Lấy ngày hiện tại
+        this.createdAt = new Date();
     }
 
     public Boolean getVerified() {
         return isVerified;
     }
-
     public void setVerified(Boolean verified) {
         isVerified = verified;
+    }
+
+    public Ward getWard() {
+        return ward;
+    }
+    public void setWard(Ward ward) {
+        this.ward = ward;
+    }
+
+    public int getTaskCount() {
+        return taskCount;
+    }
+    public void setTaskCount(int taskCount) {
+        this.taskCount = taskCount;
     }
 }

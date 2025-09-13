@@ -78,10 +78,12 @@ public class AccountService {
     }
 
     @Transactional(readOnly = true)
-    public Account verify(String email, String password) {
-        Account account = accountRepository.findByEmailAccount(email);
-        if (account != null && passwordEncoder.matches(password, account.getPassword())) {
-            return account;
+    public Account verify(String email, String rawPassword) {
+        Account acc = accountRepository.findByEmailAccount(email);
+        if (acc != null && rawPassword != null) {
+            if (passwordEncoder.matches(rawPassword, acc.getPassword())) {
+                return acc;
+            }
         }
         return null;
     }

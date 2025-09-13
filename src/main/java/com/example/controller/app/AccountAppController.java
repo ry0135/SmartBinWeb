@@ -1,5 +1,6 @@
 package com.example.controller.app;
 
+import com.example.dto.LoginRequest;
 import com.example.model.Account;
 import com.example.model.ApiMessage;
 import com.example.repository.AccountRepository;
@@ -23,15 +24,12 @@ public class AccountAppController {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Autowired
     private AccountService accountService;
-
     @Autowired
     private RandomService randomService;
-
     @Autowired
     private EmailService emailService;
     @Autowired
     private AccountRepository accountRepository;
-
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody Account account) {
@@ -59,7 +57,8 @@ public class AccountAppController {
         }
         account.setPassword(encodedPassword);
         account.setCode(code);
-        account.setVerified(false);
+        account.setIsVerified(false);
+        account.setWardID(account.getWardID());
         accountRepository.save(account);
         emailService.sendCodeToEmail(account.getEmail(), code);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -71,7 +70,7 @@ public class AccountAppController {
         boolean codeVerified = accountService.verifyCodeAndUpdateStatus(account.getEmail(), account.getCode());
 
         if (codeVerified) {
-            account.setVerified(true);
+            account.setIsVerified(true);
             return ResponseEntity.ok("Xác thực thành công!");
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Mã xác minh không hợp lệ");
@@ -79,7 +78,7 @@ public class AccountAppController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginFromApp(@RequestBody Account loginRequest) {
+    public ResponseEntity<?> loginFromApp(@RequestBody LoginRequest loginRequest) {
         try {
             String username = loginRequest.getEmail();
             String password = loginRequest.getPassword();
@@ -93,7 +92,7 @@ public class AccountAppController {
                         .body("Sai tài khoản hoặc mật khẩu");
             }
 
-            if (account.getRole() == 0) {
+            if (account.getStatus() == 0) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("Tài khoản bị khóa");
             }
@@ -106,5 +105,6 @@ public class AccountAppController {
                     .body("Lỗi server");
         }
     }
+
 
 }

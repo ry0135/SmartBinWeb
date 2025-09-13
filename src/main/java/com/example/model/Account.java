@@ -2,6 +2,7 @@ package com.example.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Date;
 import javax.persistence.*;
@@ -21,6 +22,7 @@ public class Account {
     @Column(name = "Email", length = 100, unique = true, nullable = false)
     private String email;
 
+    @JsonIgnore // Không để password lộ ra ngoài JSON
     @Column(name = "Password", length = 255, nullable = false)
     private String password;
 
@@ -44,15 +46,17 @@ public class Account {
     @Column(name = "IsVerified")
     private Boolean isVerified;
 
-    // Thêm relationship với Ward
+    // Relationship với Ward
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "WardID", insertable = false, updatable = false)
+    @JsonIgnore   // thêm cái này
     private Ward ward;
 
-    // Thêm field taskCount (tạm thời)
+    // Field tạm (không lưu DB)
     @Transient
     private int taskCount;
 
+    // ========== Constructors ==========
     public Account() {
     }
 
@@ -67,7 +71,7 @@ public class Account {
         this.isVerified = isVerified;
     }
 
-    // Getters và Setters
+    // ========== Getters & Setters ==========
     public int getAccountId() {
         return accountId;
     }
@@ -133,11 +137,11 @@ public class Account {
         this.createdAt = new Date();
     }
 
-    public Boolean getVerified() {
+    public Boolean getIsVerified() {
         return isVerified;
     }
-    public void setVerified(Boolean verified) {
-        isVerified = verified;
+    public void setIsVerified(Boolean isVerified) {
+        this.isVerified = isVerified;
     }
 
     public Ward getWard() {

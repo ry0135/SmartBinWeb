@@ -1,17 +1,26 @@
-    package com.example.repository;
+package com.example.repository;
 
-    import com.example.model.Tasks;
-    import org.springframework.data.jpa.repository.JpaRepository;
-    import org.springframework.data.jpa.repository.Query;
-    import org.springframework.data.repository.query.Param;
+import com.example.model.Tasks;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import java.util.List;
 
-    public interface TasksRepository extends JpaRepository<Tasks, Integer> {
+public interface TasksRepository extends JpaRepository<Tasks, Integer> {
 
-        // Đếm số task đang mở/doing của nhân viên
-        @Query("SELECT COUNT(t) FROM Tasks t WHERE t.assignedTo.accountId = :workerId AND t.status IN ('OPEN','DOING')")
-        int countOpenTasksByWorker(@Param("workerId") int workerId);
+    @Query("SELECT COUNT(t) FROM Tasks t WHERE t.assignedTo.accountId = :workerId AND t.status IN ('OPEN','DOING')")
+    int countOpenTasksByWorker(@Param("workerId") int workerId);
 
-        // Trong TasksRepository.java
-        @Query("SELECT COUNT(t) FROM Tasks t WHERE t.bin.binID = :binId AND t.status IN ('OPEN','DOING')")
-        int countOpenTasksByBin(@Param("binId") int binId);
-    }
+    @Query("SELECT COUNT(t) FROM Tasks t WHERE t.bin.binID = :binId AND t.status IN ('OPEN','DOING')")
+    int countOpenTasksByBin(@Param("binId") int binId);
+
+    // Thêm phương thức mới
+    @Query("SELECT t FROM Tasks t WHERE t.batchId = :batchId ORDER BY t.createdAt DESC")
+    List<Tasks> findByBatchId(@Param("batchId") String batchId);
+
+    @Query("SELECT t FROM Tasks t WHERE t.assignedTo.accountId = :workerId AND t.status IN ('OPEN','DOING')")
+    List<Tasks> findOpenTasksByWorker(@Param("workerId") int workerId);
+    @Query("SELECT COUNT(t) FROM Tasks t WHERE t.bin.binID = :binId AND t.status IN ('OPEN','DOING','COMPLETED')")
+    int countTasksByBinExclude(@Param("binId") int binId);
+
+}

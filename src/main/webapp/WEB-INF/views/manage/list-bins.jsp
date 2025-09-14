@@ -6,9 +6,10 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <title>Trash Bin App - Dashboard</title>
+    <title>Trash Bin App - Quản lý thùng rác</title>
     <link href="https://unpkg.com/@vietmap/vietmap-gl-js@6.0.0/dist/vietmap-gl.css" rel="stylesheet" />
     <script src="https://unpkg.com/@vietmap/vietmap-gl-js@6.0.0/dist/vietmap-gl.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -142,83 +143,11 @@
             overflow-y: auto;
         }
 
-        /* Stats */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-        .stat-card {
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-        .bg-blue { background: #3b82f6; }
-        .bg-orange { background: #f97316; }
-        .bg-green { background: #22c55e; }
-        .stat-details {
-            flex: 1;
-        }
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #1f2937;
-            margin-bottom: 4px;
-        }
-        .stat-label {
-            color: #6b7280;
-            font-size: 14px;
-        }
-
-        /* Map */
-        .map-container {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-        .map-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .map-header h3 {
-            font-size: 18px;
-            color: #1f2937;
-        }
-        #map {
-            width: 100%;
-            height: 400px;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        /* Filter section */
+        /* Filter Section */
         .filter-section {
             background: #fff;
             border-radius: 12px;
-            padding: 16px 20px;
+            padding: 20px;
             margin-bottom: 24px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             display: flex;
@@ -228,32 +157,31 @@
         }
         .filter-group {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 8px;
         }
         .filter-group label {
             font-weight: 600;
             font-size: 14px;
-            color: #374151;
-            white-space: nowrap;
+            color: #1f2937;
         }
         .filter-group select {
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
+            padding: 10px 12px;
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
             background: #fff;
             font-size: 14px;
-            color: #374151;
+            color: #1f2937;
             outline: none;
-            transition: border 0.2s;
-            min-width: 150px;
+            transition: all 0.2s;
+            min-width: 180px;
         }
         .filter-group select:focus {
             border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
 
-        /* Table section */
+        /* Table Section */
         .table-section {
             background: #fff;
             border-radius: 12px;
@@ -323,27 +251,42 @@
             color: #f97316;
             font-weight: 600;
         }
-        .btn-detail {
-            padding: 6px 12px;
-            background: #3b82f6;
-            color: #fff;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 13px;
-            display: inline-block;
-            transition: background 0.2s;
+
+        /* Nút hành động */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
         }
-        .btn-detail:hover {
+        .btn-edit, .btn-delete {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-edit:hover {
             background: #2563eb;
+        }
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-delete:hover {
+            background: #dc2626;
         }
 
         /* Responsive */
         @media (max-width: 1024px) {
             .sidebar {
                 width: 200px;
-            }
-            .stats {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             }
         }
         @media (max-width: 768px) {
@@ -375,27 +318,41 @@
             .filter-group select {
                 width: 100%;
             }
+            .action-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
 <!-- Sidebar -->
 <div class="sidebar">
-    <h2>Trash Bin App</h2>
+    <div class="sidebar-header">
+        <h2>Trash Bin App</h2>
+    </div>
     <ul class="menu">
-        <li class="active"onclick="location.href='${pageContext.request.contextPath}/manage'">📊 Dashboard</li>
+        <li onclick="location.href='${pageContext.request.contextPath}/manage'">📊 Dashboard</li>
         <li onclick="location.href='${pageContext.request.contextPath}/tasks/task-management'">📋 Giao nhiệm vụ</li>
-        <li onclick="location.href='${pageContext.request.contextPath}/bins'">🗑️ Danh sách thùng rác</li>
+        <li class="active">🗑️ Danh sách thùng rác</li>
         <li>⚠️ Báo cáo</li>
         <li>👤 Người dùng</li>
-        <li>⚙️Cài đặt</li>
+        <li>⚙️ Cài đặt</li>
     </ul>
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <img src="https://i.pravatar.cc/150?img=3" alt="User">
+            <div class="user-details">
+                <div class="name">Admin User</div>
+                <div class="role">Quản trị viên</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Main Content -->
 <div class="main-content">
     <div class="header">
-        <h1>Dashboard Quản lý Thùng Rác</h1>
+        <h1>Quản lý thùng rác</h1>
         <div class="header-actions">
             <button class="notification-btn">
                 🔔
@@ -405,43 +362,10 @@
     </div>
 
     <div class="content">
-        <!-- Stats -->
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-icon bg-blue">🗑️</div>
-                <div class="stat-details">
-                    <div class="stat-value">${totalBins}</div>
-                    <div class="stat-label">Tổng số thùng</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon bg-orange">⚠️</div>
-                <div class="stat-details">
-                    <div class="stat-value">${alertCount}</div>
-                    <div class="stat-label">Cảnh báo</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon bg-green">📄</div>
-                <div class="stat-details">
-                    <div class="stat-value">${newReports}</div>
-                    <div class="stat-label">Báo cáo mới</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Map -->
-        <div class="map-container">
-            <div class="map-header">
-                <h3>Bản đồ thùng rác</h3>
-            </div>
-            <div id="map"></div>
-        </div>
-
         <!-- Filter Section -->
         <div class="filter-section">
             <div class="filter-group">
-                <label>Khu vực:</label>
+                <label for="cityFilter">Khu vực:</label>
                 <select id="cityFilter">
                     <option value="">-- Tất cả --</option>
                     <c:forEach var="city" items="${cities}">
@@ -451,7 +375,7 @@
             </div>
 
             <div class="filter-group">
-                <label>Phường/Xã:</label>
+                <label for="wardFilter">Phường/Xã:</label>
                 <select id="wardFilter">
                     <option value="">-- Tất cả --</option>
                     <c:forEach var="ward" items="${wards}">
@@ -461,7 +385,7 @@
             </div>
 
             <div class="filter-group">
-                <label>Hoạt động:</label>
+                <label for="statusFilter">Hoạt động:</label>
                 <select id="statusFilter">
                     <option value="">-- Tất cả --</option>
                     <c:forEach var="s" items="${statuses}">
@@ -476,7 +400,7 @@
             </div>
 
             <div class="filter-group">
-                <label>Mức đầy:</label>
+                <label for="fillFilter">Mức đầy:</label>
                 <select id="fillFilter">
                     <option value="">-- Tất cả --</option>
                     <c:forEach var="f" items="${currentFills}">
@@ -496,7 +420,9 @@
         <div class="table-section">
             <div class="table-header">
                 <h3>Danh sách thùng rác</h3>
-                <button class="export-btn">📊 Xuất báo cáo</button>
+                <button class="export-btn">
+                    <i class="fas fa-file-export"></i> Xuất báo cáo
+                </button>
             </div>
             <table id="binTable">
                 <thead>
@@ -504,9 +430,9 @@
                     <th>Mã</th>
                     <th>Địa chỉ</th>
                     <th>Đầy (%)</th>
-                    <th>Mức Chứa</th>
-                    <th>Hoạt Động</th>
-                    <th>Chi tiết</th>
+                    <th>Mức chứa</th>
+                    <th>Hoạt động</th>
+                    <th>Hành động</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -520,18 +446,36 @@
                             <c:if test="${not empty bin.ward}">${bin.ward.wardName}</c:if>
                             <c:if test="${not empty bin.ward and not empty bin.ward.province}">, ${bin.ward.province.provinceName}</c:if>
                         </td>
-                        <td>${bin.currentFill}</td>
-                        <td>${bin.capacity}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 60px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                    <div style="height: 100%; width: ${bin.currentFill}%;
+                                            background: ${bin.currentFill >= 80 ? '#ef4444' : (bin.currentFill >= 40 ? '#f97316' : '#22c55e')};">
+                                    </div>
+                                </div>
+                                <span>${bin.currentFill}%</span>
+                            </div>
+                        </td>
+                        <td>${bin.capacity}L</td>
                         <td>
                             <c:choose>
-                                <c:when test="${bin.status == 1}">Online</c:when>
-                                <c:when test="${bin.status == 2}">Offline</c:when>
+                                <c:when test="${bin.status == 1}">
+                                    <span class="status-online"><i class="fas fa-circle"></i> Online</span>
+                                </c:when>
+                                <c:when test="${bin.status == 2}">
+                                    <span class="status-offline"><i class="fas fa-circle"></i> Offline</span>
+                                </c:when>
                             </c:choose>
                         </td>
                         <td>
-                            <a href="${pageContext.request.contextPath}/manage/bin/${bin.binID}" class="btn-detail">
-                                <i class="fas fa-eye"></i> Chi tiết
-                            </a>
+                            <div class="action-buttons">
+                                <button class="btn-edit" onclick="editBin(${bin.binID})">
+                                    <i class="fas fa-edit"></i> Sửa
+                                </button>
+                                <button class="btn-delete" onclick="deleteBin(${bin.binID})">
+                                    <i class="fas fa-trash"></i> Xóa
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 </c:forEach>
@@ -542,103 +486,43 @@
 </div>
 
 <script>
-    // Hàm chọn icon theo mức đầy
-    function getBinIcon(level) {
-        if (level >= 80) {
-            return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="red" viewBox="0 0 24 24">
-                <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
-                <!-- Mức đầy cao -->
-                <rect x="5" y="8" width="14" height="12" fill="rgba(0,0,0,0.3)"/>
-            </svg>
-        `);
-        } else if (level >= 40) {
-            return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="orange" viewBox="0 0 24 24">
-                <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
-                <!-- Mức đầy trung bình -->
-                <rect x="5" y="12" width="14" height="8" fill="rgba(0,0,0,0.3)"/>
-            </svg>
-        `);
-        } else {
-            return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="green" viewBox="0 0 24 24">
-                <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
-                <!-- Mức đầy thấp -->
-                <rect x="5" y="16" width="14" height="4" fill="rgba(0,0,0,0.3)"/>
-            </svg>
-        `);
+    // Hàm xử lý sửa thùng rác
+    function editBin(binId) {
+        if (confirm('Bạn có chắc muốn chỉnh sửa thùng rác này?')) {
+            window.location.href = '${pageContext.request.contextPath}/manage/bin/edit/' + binId;
         }
     }
 
-    // Khởi tạo bản đồ VietMap
-    var map = new vietmapgl.Map({
-        container: "map",
-        style: "https://maps.vietmap.vn/maps/styles/tm/style.json?apikey=ecdbd35460b2d399e18592e6264186757aaaddd8755b774c",
-        center: [108.2068, 16.0471], // Đà Nẵng
-        zoom: 12
-    });
+    // Hàm xử lý xóa thùng rác
+    function deleteBin(binId) {
+        if (confirm('Bạn có chắc muốn xóa thùng rác này? Hành động này không thể hoàn tác.')) {
+            // Gửi yêu cầu xóa đến server
+            fetch('${pageContext.request.contextPath}/manage/bin/delete/' + binId, {
+                method: 'DELETE',
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Xóa thùng rác thành công!');
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra khi xóa thùng rác.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi xóa thùng rác.');
+                });
+        }
+    }
 
-    // Thêm điều khiển zoom & xoay
-    map.addControl(new vietmapgl.NavigationControl());
-
-    // Danh sách bins từ backend
-    // Danh sách bins từ backend - SỬA LẠI PHẦN NÀY
-    var bins = [
-        <c:forEach var="bin" items="${bins}" varStatus="loop">
-        {
-            code: '${bin.binCode}',
-            lat: ${bin.latitude},
-            lng: ${bin.longitude},
-            fullness: ${bin.currentFill != null ? bin.currentFill : 0},
-            address: '${bin.street}, ${bin.ward.wardName}, ${bin.ward.province.provinceName}',
-            updated: '${bin.lastUpdated}',
-            city: '${bin.ward.province.provinceName}', // SỬA THÀNH TÊN TỈNH/THÀNH PHỐ
-            ward: '${bin.ward.wardName}', // SỬA THÀNH TÊN PHƯỜNG/XÃ
-            status: '${bin.status}'
-        }<c:if test="${!loop.last}">,</c:if>
-        </c:forEach>
-    ];
-
-    // Mảng lưu trữ các marker
-    var markers = [];
-
-    // Thêm marker cho từng bin
-    map.on('load', function() {
-        bins.forEach(function(bin) {
-            // Tạo element <img> với icon màu
-            var el = document.createElement("img");
-            el.src = getBinIcon(bin.fullness);
-            el.style.width = "32px";
-            el.style.height = "32px";
-
-            var popup = new vietmapgl.Popup({ offset: 25 }).setHTML(
-                "<b>Mã:</b> " + bin.code +
-                "<br><b>Địa chỉ:</b> " + bin.address +
-                "<br><b>Đầy:</b> " + bin.fullness + "%" +
-                "<br><b>Trạng thái:</b> " + (bin.status == 1 ? "Online" : "Offline") +
-                "<br><b>Cập nhật:</b> " + bin.updated
-            );
-
-            var marker = new vietmapgl.Marker({ element: el })
-                .setLngLat([bin.lng, bin.lat])
-                .setPopup(popup)
-                .addTo(map);
-
-            marker.bin = bin; // Lưu thông tin bin vào marker
-            markers.push(marker);
-        });
-    });
-
-    // Filter function
-    // Filter function
+    // Hàm lọc dữ liệu
     function applyFilter() {
         var city = document.getElementById("cityFilter").value;
         var ward = document.getElementById("wardFilter").value;
         var status = document.getElementById("statusFilter").value;
         var fill = document.getElementById("fillFilter").value;
 
-        // Lọc bảng - SỬA LẠI PHẦN NÀY
+        // Lọc bảng
         document.querySelectorAll("#binTable tbody tr").forEach(function(row) {
             var rowCity = row.getAttribute("data-city");
             var rowWard = row.getAttribute("data-ward");
@@ -659,29 +543,9 @@
 
             row.style.display = match ? "" : "none";
         });
-
-        // Lọc marker - CŨNG CẦN SỬA LẠI
-        markers.forEach(function(m) {
-            var matchFill = true;
-            if (fill) {
-                if (fill == 80) matchFill = m.bin.fullness >= 80;
-                else if (fill == 40) matchFill = m.bin.fullness >= 40 && m.bin.fullness < 80;
-                else if (fill == 0) matchFill = m.bin.fullness < 40;
-            }
-
-            var match = (!city || city === m.bin.city)
-                && (!ward || ward === m.bin.ward)
-                && (!status || status == m.bin.status)
-                && matchFill;
-
-            if (match) {
-                if (!m._map) m.addTo(map);
-            } else {
-                if (m._map) m.remove();
-            }
-        });
     }
 
+    // Thêm event listeners cho các bộ lọc
     document.getElementById("cityFilter").addEventListener("change", applyFilter);
     document.getElementById("wardFilter").addEventListener("change", applyFilter);
     document.getElementById("statusFilter").addEventListener("change", applyFilter);

@@ -329,8 +329,9 @@
     <div class="sidebar">
         <h2>Trash Bin App</h2>
         <ul class="menu">
-            <li class="active">📊 Dashboard</li>
-            <li>🗑️ Danh sách thùng rác</li>
+            <li class="active"onclick="location.href='${pageContext.request.contextPath}/manage'">📊 Dashboard</li>
+            <li onclick="location.href='${pageContext.request.contextPath}/tasks/task-management'">📋 Giao nhiệm vụ</li>
+            <li onclick="location.href='${pageContext.request.contextPath}/bins'">🗑️ Danh sách thùng rác</li>
             <li>⚠️ Báo cáo</li>
             <li>👤 Người dùng</li>
             <li>⚙️ Cài đặt</li>
@@ -404,7 +405,7 @@
                     <a href="${pageContext.request.contextPath}/manage" class="btn-back">← Quay lại</a>
                     <c:if test="${not hasOpenTask}">
                         <button type="button" class="btn-assign"
-                                onclick="location.href='${pageContext.request.contextPath}/tasks/assign/${bin.binID}?ward=' + encodeURIComponent('${bin.wardID}')">
+                                onclick="location.href='${pageContext.request.contextPath}/tasks/task-management'">
                             📋 Giao nhiệm vụ
                         </button>
                     </c:if>

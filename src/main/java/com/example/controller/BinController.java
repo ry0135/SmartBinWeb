@@ -4,7 +4,11 @@ import com.example.model.Bin;
 import com.example.repository.BinRepository;
 import com.example.service.BinService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/sensor")
@@ -20,4 +24,6 @@ public class BinController {
                 + " - " + savedBin.getStreet() + ", "
                 + savedBin.getWard();
     }
+
+
 }

@@ -1,7 +1,5 @@
 package com.example.model;
 
-
-
 import javax.persistence.*;
 import java.util.Date;
 
@@ -11,141 +9,75 @@ public class Tasks {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "TaskID")
     private int taskID;
 
-    // Liên kết thùng rác
     @ManyToOne
-    @JoinColumn(name = "BinID", nullable = false)
+    @JoinColumn(name = "BinID")
     private Bin bin;
 
-    // Liên kết nhân viên
     @ManyToOne
-    @JoinColumn(name = "AssignedTo", nullable = false)
+    @JoinColumn(name = "AssignedTo")
     private Account assignedTo;
 
-    @Column(length = 20, nullable = false)
-    private String taskType = "MAINTENANCE"; // COLLECTION / MAINTENANCE
+    @Column(name = "TaskType")
+    private String taskType; // COLLECT, CLEAN, REPAIR
 
-    private int priority = 1; // 1 = thấp, 5 = cao
+    @Column(name = "Priority")
+    private int priority; // 1: High, 2: Medium, 3: Low
 
-    @Column(length = 20, nullable = false)
-    private String status = "OPEN"; // OPEN, DOING, DONE, ESCALATED
+    @Column(name = "Status")
+    private String status; // OPEN, DOING, COMPLETED, CANCELLED
 
-    @Column(length = 500)
+    @Column(name = "Notes", length = 500)
     private String notes;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(updatable = false)
-    private Date createdAt = new Date();
+    @Column(name = "CreatedAt")
+    private Date createdAt;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date dueAt;
-
-    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "CompletedAt")
     private Date completedAt;
 
-    @Column(length = 255)
-    private String beforeImage;
+    // Thêm trường mới cho giao nhiều task
+    @Column(name = "BatchID")
+    private String batchId; // ID để nhóm các task được giao cùng lúc
 
-    @Column(length = 255)
-    private String afterImage;
-
-    // ===== Getters & Setters =====
-
-    public int getTaskID() {
-        return taskID;
+    // Constructors
+    public Tasks() {
+        this.createdAt = new Date();
+        this.status = "OPEN";
     }
 
-    public void setTaskID(int taskID) {
-        this.taskID = taskID;
-    }
+    // Getters and Setters
+    public int getTaskID() { return taskID; }
+    public void setTaskID(int taskID) { this.taskID = taskID; }
 
-    public Bin getBin() {
-        return bin;
-    }
+    public Bin getBin() { return bin; }
+    public void setBin(Bin bin) { this.bin = bin; }
 
-    public void setBin(Bin bin) {
-        this.bin = bin;
-    }
+    public Account getAssignedTo() { return assignedTo; }
+    public void setAssignedTo(Account assignedTo) { this.assignedTo = assignedTo; }
 
-    public Account getAssignedTo() {
-        return assignedTo;
-    }
+    public String getTaskType() { return taskType; }
+    public void setTaskType(String taskType) { this.taskType = taskType; }
 
-    public void setAssignedTo(Account assignedTo) {
-        this.assignedTo = assignedTo;
-    }
+    public int getPriority() { return priority; }
+    public void setPriority(int priority) { this.priority = priority; }
 
-    public String getTaskType() {
-        return taskType;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public void setTaskType(String taskType) {
-        this.taskType = taskType;
-    }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 
-    public int getPriority() {
-        return priority;
-    }
+    public Date getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
+    public Date getCompletedAt() { return completedAt; }
+    public void setCompletedAt(Date completedAt) { this.completedAt = completedAt; }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getDueAt() {
-        return dueAt;
-    }
-
-    public void setDueAt(Date dueAt) {
-        this.dueAt = dueAt;
-    }
-
-    public Date getCompletedAt() {
-        return completedAt;
-    }
-
-    public void setCompletedAt(Date completedAt) {
-        this.completedAt = completedAt;
-    }
-
-    public String getBeforeImage() {
-        return beforeImage;
-    }
-
-    public void setBeforeImage(String beforeImage) {
-        this.beforeImage = beforeImage;
-    }
-
-    public String getAfterImage() {
-        return afterImage;
-    }
-
-    public void setAfterImage(String afterImage) {
-        this.afterImage = afterImage;
-    }
+    public String getBatchId() { return batchId; }
+    public void setBatchId(String batchId) { this.batchId = batchId; }
 }
-

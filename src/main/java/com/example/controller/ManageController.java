@@ -67,6 +67,52 @@ public class ManageController {
 
         return "manage/manage-content";
     }
+    @GetMapping("/bins")
+    public String listbins(Model model) {
+        List<Bin> bins = binService.getAllBins();
+
+        model.addAttribute("bins", bins);
+        model.addAttribute("totalBins", bins.size());
+        model.addAttribute("alertCount", bins.stream()
+                .filter(b -> b.getCurrentFill() >= 80)
+                .count());
+        model.addAttribute("newReports", 0);
+
+        // Lọc các giá trị duy nhất - SỬA LẠI PHẦN NÀY
+        List<String> cities = bins.stream()
+                .map(bin -> bin.getWard() != null && bin.getWard().getProvince() != null ?
+                        bin.getWard().getProvince().getProvinceName() : "")
+                .distinct()
+                .filter(name -> !name.isEmpty())
+                .collect(Collectors.toList());
+
+        List<String> wards = bins.stream()
+                .map(bin -> bin.getWard() != null ? bin.getWard().getWardName() : "")
+                .distinct()
+                .filter(name -> !name.isEmpty())
+                .collect(Collectors.toList());
+
+        List<Integer> statuses = bins.stream()
+                .map(Bin::getStatus)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Integer> currentFills = bins.stream()
+                .map(bin -> {
+                    double fill = bin.getCurrentFill();
+                    if (fill >= 80) return 80;
+                    else if (fill >= 40) return 40;
+                    else return 0;
+                })
+                .distinct()
+                .collect(Collectors.toList());
+
+        model.addAttribute("cities", cities);
+        model.addAttribute("wards", wards);
+        model.addAttribute("statuses", statuses);
+        model.addAttribute("currentFills", currentFills);
+        return "manage/list-bins";
+    }
 
 
     @GetMapping("/manage/bin/{id}")

@@ -51,8 +51,8 @@ public class LoginController {
             // Chuyển hướng theo role
             if (account.getRole() == 1) { // Admin
                 return "redirect:/admin/dashboard";
-            } else if (account.getRole() == 2) { // Manager
-                return "redirect:/home";
+            } else if (account.getRole() == 3) { // Manager
+                return "redirect:/manage";
             } else {
                 model.addAttribute("error", "Không có quyền truy cập");
                 return "login";

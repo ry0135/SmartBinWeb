@@ -22,13 +22,19 @@
                       transaction-manager-ref="transactionManager"/>
 
     <!-- DataSource -->
+<!--    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">-->
+<!--        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />-->
+<!--        <property name="url" value="jdbc:sqlserver://34.16.112.143:1433;databaseName=SmartBin;encrypt=false;characterEncoding=UTF-8;" />-->
+<!--        <property name="username" value="sqlserver" />-->
+<!--        <property name="password" value="030303" />-->
+<!--    </bean>-->
+
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-        <property name="url" value="jdbc:sqlserver://34.16.112.143:1433;databaseName=SmartBin;encrypt=false;characterEncoding=UTF-8;" />
-        <property name="username" value="sqlserver" />
+        <property name="url" value="jdbc:sqlserver://localhost:1433;databaseName=SmartBinManagement;encrypt=false;characterEncoding=UTF-8;" />
+        <property name="username" value="sa" />
         <property name="password" value="030303" />
     </bean>
-
     <!-- EntityManager -->
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="dataSource" ref="dataSource" />

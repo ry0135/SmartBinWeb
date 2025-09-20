@@ -2,7 +2,7 @@ package com.example.controller;
 
 import com.example.model.Account;
 import com.example.model.Bin;
-import com.example.model.Tasks;
+import com.example.model.Task;
 import com.example.service.BinService;
 import com.example.service.TasksService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ public class TasksController {
                              @RequestParam String taskType,
                              @RequestParam int priority,
                              @RequestParam(required = false) String notes) {
-        Tasks task = taskService.assignTask(binId, workerId, taskType, priority, notes);
+        Task task = taskService.assignTask(binId, workerId, taskType, priority, notes);
         return "redirect:/manage/bin/" + binId;
     }
 }

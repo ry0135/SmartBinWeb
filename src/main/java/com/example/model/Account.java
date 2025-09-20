@@ -46,6 +46,9 @@ public class Account {
     @Column(name = "IsVerified")
     private Boolean isVerified;
 
+    @Column(name = "fcm_token")
+    private String fcmToken;
+
     // Relationship với Ward
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "WardID", insertable = false, updatable = false)
@@ -156,5 +159,13 @@ public class Account {
     }
     public void setTaskCount(int taskCount) {
         this.taskCount = taskCount;
+    }
+
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
     }
 }

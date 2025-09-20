@@ -11,11 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController("accountControllerApp")
@@ -104,6 +103,22 @@ public class AccountAppController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Lỗi server");
         }
+    }
+
+
+    @PostMapping("/{id}/update-token")
+    public ResponseEntity<?> updateFcmToken(
+            @PathVariable int id,
+            @RequestBody Map<String, String> body) {
+
+        String token = body.get("token");
+        accountService.updateFcmToken(id, token);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Token updated");
+
+        return ResponseEntity.ok(response);
     }
 
 

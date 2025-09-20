@@ -87,4 +87,15 @@ public class AccountService {
         }
         return null;
     }
+
+    public void updateFcmToken(int workerId, String token) {
+        Account worker = accountRepository.findByAccountId(workerId);
+
+        worker.setFcmToken(token);
+        accountRepository.save(worker);
+    }
+
+    public String getFcmTokenByWorkerId(int workerId) {
+        return accountRepository.findFcmTokenByAccountId(workerId);
+    }
 }

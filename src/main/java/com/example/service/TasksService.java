@@ -1,8 +1,9 @@
 package com.example.service;
 
+import com.example.dto.TaskSummaryDTO;
 import com.example.model.Account;
 import com.example.model.Bin;
-import com.example.model.Tasks;
+import com.example.model.Task;
 import com.example.repository.AccountRepository;
 import com.example.repository.BinRepository;
 import com.example.repository.TasksRepository;
@@ -41,14 +42,14 @@ public class TasksService {
         return workers;
     }
 
-    public Tasks assignTask(int binId, int workerId, String taskType, int priority, String notes) {
+    public Task assignTask(int binId, int workerId, String taskType, int priority, String notes) {
         Bin bin = binRepository.findById(binId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bin với ID = " + binId));
 
         Account worker = accountRepository.findById(workerId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy worker với ID = " + workerId));
 
-        Tasks task = new Tasks();
+        Task task = new Task();
         task.setBin(bin);
         task.setAssignedTo(worker);
         task.setTaskType(taskType);
@@ -66,5 +67,19 @@ public class TasksService {
 
     public boolean hasOpenTask(int binId) {
         return taskRepository.countOpenTasksByBin(binId) > 0;
+    }
+
+    public boolean hasRestrictedTask(int binId) {
+        return taskRepository.countTasksByBinExclude(binId) > 0;
+    }
+
+    // Lấy danh sách batch tóm tắt theo worker
+    public List<TaskSummaryDTO> getTaskSummaryByAssignedTo(int workerId) {
+        return taskRepository.findTaskSummaryByAssignedTo(workerId);
+    }
+
+    // Lấy chi tiết task trong batch
+    public List<Task> getTasksInBatch(int workerId, String batchId) {
+        return taskRepository.findByAssignedTo_AccountIdAndBatchIdOrderByPriorityAsc(workerId, batchId);
     }
 }

@@ -1,5 +1,7 @@
 package com.example.dto;
 
+import com.example.model.Bin;
+
 import java.util.Date;
 
 public class BinDTO {
@@ -34,6 +36,20 @@ public class BinDTO {
         this.provinceName = provinceName;
         this.status = status;
         this.lastUpdated = lastUpdated;
+    }
+
+
+    public BinDTO(Bin bin) {
+        this.binId = bin.getBinID();
+        this.binCode = bin.getBinCode();
+        this.latitude = bin.getLatitude();
+        this.longitude = bin.getLongitude();
+        this.capacity = bin.getCapacity();
+        this.currentFill = bin.getCurrentFill();
+        this.wardName = bin.getWardName();
+        this.provinceName = (bin.getWard() != null && bin.getWard().getProvince() != null)
+                ? bin.getWard().getProvince().getProvinceName()
+                : null;
     }
 
     // Getters & Setters

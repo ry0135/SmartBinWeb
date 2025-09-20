@@ -1,14 +1,3 @@
-package com.example.controller.app;
-
-import com.example.dto.BinDTO;
-import com.example.model.Bin;
-import com.example.repository.BinRepository;
-import com.example.service.BinService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/bins")
@@ -64,3 +53,4 @@ public class BinAppController {
     }
 
 }
+

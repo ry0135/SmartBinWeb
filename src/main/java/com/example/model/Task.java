@@ -9,7 +9,6 @@ import java.util.Date;
 @Table(name = "Tasks")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Task {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "TaskID")

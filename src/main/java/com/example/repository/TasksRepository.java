@@ -1,14 +1,13 @@
-    package com.example.repository;
+package com.example.repository;
 
-    import com.example.dto.TaskSummaryDTO;
-    import com.example.model.Task;
-    import org.springframework.data.jpa.repository.JpaRepository;
-    import org.springframework.data.jpa.repository.Query;
-    import org.springframework.data.repository.query.Param;
+import com.example.dto.TaskSummaryDTO;
+import com.example.model.Task;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import java.util.List;
 
-    import java.util.List;
-
-    public interface TasksRepository extends JpaRepository<Task, Integer> {
+public interface TasksRepository extends JpaRepository<Task, Integer> {
 
         // Đếm số task đang mở/doing của nhân viên
         @Query("SELECT COUNT(t) FROM Task t WHERE t.assignedTo.accountId = :workerId AND t.status IN ('OPEN','DOING')")
@@ -32,7 +31,8 @@
                 "GROUP BY t.batchId, t.assignedTo.accountId")
         List<TaskSummaryDTO> findTaskSummaryByAssignedTo(@Param("assignedTo") int assignedTo);
 
-
         // 2. Lấy chi tiết task trong batch
         List<Task> findByAssignedTo_AccountIdAndBatchIdOrderByPriorityAsc(int assignedTo, String batchId);
     }
+
+

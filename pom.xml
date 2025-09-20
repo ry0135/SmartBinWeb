@@ -201,19 +201,13 @@
       <version>1.18.34</version>
       <scope>provided</scope>
     </dependency>
-    <!-- BỔ SUNG: Security web + config (khớp 5.5.2) -->
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-web</artifactId>
-      <version>5.5.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-config</artifactId>
-      <version>5.5.2</version>
-    </dependency>
 
 
+    <dependency>
+      <groupId>com.google.firebase</groupId>
+      <artifactId>firebase-admin</artifactId>
+      <version>9.2.0</version>
+    </dependency>
 
 
   </dependencies>

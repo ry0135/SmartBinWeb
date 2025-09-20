@@ -100,7 +100,7 @@ public class AccountService {
     public String getFcmTokenByWorkerId(int workerId) {
         return accountRepository.findFcmTokenByAccountId(workerId);
     }
-    // ========= FORGOT / RESET PASSWORD (ADD-ON) =========
+
 
     /** B1: Yêu cầu đặt lại mật khẩu — tạo mã, lưu vào Account.code và gửi email (không lộ tồn tại email) */
     @Transactional
@@ -161,5 +161,6 @@ public class AccountService {
         }
         return Optional.empty();
     }
+
 
 }

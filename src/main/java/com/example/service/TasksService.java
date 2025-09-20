@@ -2,7 +2,7 @@ package com.example.service;
 
 import com.example.model.Account;
 import com.example.model.Bin;
-import com.example.model.Tasks;
+import com.example.model.Task;
 import com.example.repository.AccountRepository;
 import com.example.repository.BinRepository;
 import com.example.repository.TasksRepository;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -28,8 +27,8 @@ public class TasksService {
 
     // Giao nhiều task cùng lúc
     @Transactional
-    public List<Tasks> assignMultipleTasks(List<Integer> binIds, int workerId,
-                                           String taskType, int priority, String notes) {
+    public List<Task> assignMultipleTasks(List<Integer> binIds, int workerId,
+                                          String taskType, int priority, String notes) {
 
         Account worker = accountRepository.findById(workerId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy worker với ID = " + workerId));
@@ -37,7 +36,7 @@ public class TasksService {
         // Tạo batch ID duy nhất
         String batchId = "BATCH_" + System.currentTimeMillis() + "_" + new Random().nextInt(1000);
 
-        List<Tasks> assignedTasks = new ArrayList<>();
+        List<Task> assignedTasks = new ArrayList<>();
 
         for (Integer binId : binIds) {
             Bin bin = binRepository.findById(binId)
@@ -48,7 +47,7 @@ public class TasksService {
                 continue; // Bỏ qua bin này
             }
 
-            Tasks task = new Tasks();
+            Task task = new Task();
             task.setBin(bin);
             task.setAssignedTo(worker);
             task.setTaskType(taskType);
@@ -64,14 +63,14 @@ public class TasksService {
     }
 
     // Giao task đơn lẻ (giữ lại cho tương thích)
-    public Tasks assignTask(int binId, int workerId, String taskType, int priority, String notes) {
+    public Task assignTask(int binId, int workerId, String taskType, int priority, String notes) {
         List<Integer> binIds = Collections.singletonList(binId);
-        List<Tasks> tasks = assignMultipleTasks(binIds, workerId, taskType, priority, notes);
+        List<Task> tasks = assignMultipleTasks(binIds, workerId, taskType, priority, notes);
         return tasks.isEmpty() ? null : tasks.get(0);
     }
 
     // Lấy danh sách task theo batch
-    public List<Tasks> getTasksByBatch(String batchId) {
+    public List<Task> getTasksByBatch(String batchId) {
         return taskRepository.findByBatchId(batchId);
     }
 

@@ -5,7 +5,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "Tasks")
-public class Tasks {
+public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,7 +45,7 @@ public class Tasks {
     private String batchId; // ID để nhóm các task được giao cùng lúc
 
     // Constructors
-    public Tasks() {
+    public Task() {
         this.createdAt = new Date();
         this.status = "OPEN";
     }

@@ -59,6 +59,9 @@ public class Account {
     @Transient
     private int taskCount;
 
+    @Column(name = "fcm_token")
+    private String fcmToken;
+
     // ========== Constructors ==========
     public Account() {
     }

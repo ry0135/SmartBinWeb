@@ -21,10 +21,10 @@ public class BinDTO {
 
     public BinDTO() {}
 
+    // Constructor đầy đủ tham số
     public BinDTO(int binId, String binCode, double latitude, double longitude,
-                  double capacity, double currentFill,
-                  String street, String wardName, String provinceName,
-                  int status, Date lastUpdated) {
+                  double capacity, double currentFill, String street,
+                  String wardName, String provinceName, int status, Date lastUpdated) {
         this.binId = binId;
         this.binCode = binCode;
         this.latitude = latitude;
@@ -37,8 +37,6 @@ public class BinDTO {
         this.status = status;
         this.lastUpdated = lastUpdated;
     }
-
-
     public BinDTO(Bin bin) {
         this.binId = bin.getBinID();
         this.binCode = bin.getBinCode();
@@ -85,6 +83,4 @@ public class BinDTO {
 
     public Date getLastUpdated() { return lastUpdated; }
     public void setLastUpdated(Date lastUpdated) { this.lastUpdated = lastUpdated; }
-
-
 }

@@ -12,6 +12,7 @@
   <%@include file="../include/sidebar.jsp"%>
 
   <!-- Main Content -->
+  <!-- Main Content -->
   <div class="flex-grow-1" style="margin-left: 250px;">
     <!-- Header -->
     <div class="bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
@@ -86,46 +87,42 @@
                 </select>
               </div>
 
-              <div class="mb-3">
-                <label for="fillFilter" class="form-label fw-semibold">
-                  <i class="fas fa-chart-bar me-1 text-warning"></i>Mức đầy:
-                </label>
-                <select class="form-select" id="fillFilter">
-                  <option value="">-- Tất cả --</option>
-                  <c:forEach var="f" items="${currentFills}">
-                    <option value="${f}">
-                      <c:choose>
-                        <c:when test="${f == 80}">Cảnh báo (>=80%)</c:when>
-                        <c:when test="${f == 40}">Trung bình (40–79%)</c:when>
-                        <c:when test="${f == 0}">Bình thường (&lt;40%)</c:when>
-                      </c:choose>
-                    </option>
-                  </c:forEach>
-                </select>
-              </div>
-
               <!-- Thống kê nhanh -->
               <div class="mt-4 pt-3 border-top">
                 <h6 class="text-muted mb-3">Thống kê nhanh</h6>
                 <div class="row text-center">
+                  <div class="col-6 mb-2">
+                    <div class="bg-success bg-opacity-10 rounded p-2">
+                      <i class="fas fa-wifi text-success"></i>
+                      <div class="small fw-bold text-success">Online</div>
+                      <div class="small" id="onlineCount">0</div>
+                    </div>
+                  </div>
+                  <div class="col-6 mb-2">
+                    <div class="bg-secondary bg-opacity-10 rounded p-2">
+                      <i class="fas fa-wifi-slash text-secondary"></i>
+                      <div class="small fw-bold text-secondary">Offline</div>
+                      <div class="small" id="offlineCount">0</div>
+                    </div>
+                  </div>
                   <div class="col-4">
                     <div class="bg-danger bg-opacity-10 rounded p-2">
                       <i class="fas fa-exclamation-triangle text-danger"></i>
-                      <div class="small fw-bold text-danger">Cảnh báo</div>
+                      <div class="small fw-bold text-danger">>=80%</div>
                       <div class="small" id="highFillCount">0</div>
                     </div>
                   </div>
                   <div class="col-4">
                     <div class="bg-warning bg-opacity-10 rounded p-2">
                       <i class="fas fa-clock text-warning"></i>
-                      <div class="small fw-bold text-warning">Trung bình</div>
+                      <div class="small fw-bold text-warning">40-79%</div>
                       <div class="small" id="mediumFillCount">0</div>
                     </div>
                   </div>
                   <div class="col-4">
                     <div class="bg-success bg-opacity-10 rounded p-2">
                       <i class="fas fa-check text-success"></i>
-                      <div class="small fw-bold text-success">Bình thường</div>
+                      <div class="small fw-bold text-success"><40%</div>
                       <div class="small" id="lowFillCount">0</div>
                     </div>
                   </div>
@@ -158,17 +155,21 @@
               <!-- Map Legend -->
               <div class="position-absolute bottom-0 start-0 m-2 bg-white rounded shadow-sm p-2" style="z-index: 1000;">
                 <div class="d-flex align-items-center small">
-                  <div class="me-3 d-flex align-items-center">
-                    <div class="bg-danger rounded-circle me-1" style="width: 10px; height: 10px;"></div>
+                  <div class="me-2 d-flex align-items-center">
+                    <div class="bg-danger rounded-circle me-1" style="width: 8px; height: 8px;"></div>
                     <span>>=80%</span>
                   </div>
-                  <div class="me-3 d-flex align-items-center">
-                    <div class="bg-warning rounded-circle me-1" style="width: 10px; height: 10px;"></div>
+                  <div class="me-2 d-flex align-items-center">
+                    <div class="bg-warning rounded-circle me-1" style="width: 8px; height: 8px;"></div>
                     <span>40-79%</span>
                   </div>
-                  <div class="d-flex align-items-center">
-                    <div class="bg-success rounded-circle me-1" style="width: 10px; height: 10px;"></div>
+                  <div class="me-2 d-flex align-items-center">
+                    <div class="bg-success rounded-circle me-1" style="width: 8px; height: 8px;"></div>
                     <span><40%</span>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <div class="bg-secondary rounded-circle me-1" style="width: 8px; height: 8px;"></div>
+                    <span>Offline</span>
                   </div>
                 </div>
               </div>
@@ -179,16 +180,6 @@
 
       <!-- Table Section -->
       <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">
-            <i class="fas fa-list me-2"></i>Danh sách thùng rác
-          </h5>
-          <div class="text-muted small">
-            Tổng: <span id="totalBins">${fn:length(bins)}</span> thùng |
-            Hiển thị: <span id="visibleBins">${fn:length(bins)}</span> thùng
-          </div>
-        </div>
-
         <!-- Selection Actions Bar -->
         <div class="card-body border-bottom d-none" id="selectionActions">
           <div class="row align-items-center">
@@ -492,7 +483,15 @@
       </c:forEach>
     ];
 
-    function getBinIcon(level) {
+    function getBinIcon(level,status) {
+      if (status == 2) {
+        return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="gray" viewBox="0 0 24 24">
+                    <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
+                    <rect x="5" y="16" width="14" height="4" fill="rgba(0,0,0,0.3)"/>
+                </svg>
+            `);
+      }
       if (level >= 80) {
         return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="red" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm2 2h14v14H5z"/><rect x="5" y="8" width="14" height="12" fill="rgba(0,0,0,0.3)"/></svg>'
@@ -515,7 +514,7 @@
 
         bins.forEach(bin => {
           const el = document.createElement("img");
-          el.src = getBinIcon(bin.fullness);
+          el.src = getBinIcon(bin.fullness,bin.status);
           el.style.width = "32px";
           el.style.height = "32px";
           el.style.cursor = "pointer";
@@ -572,26 +571,20 @@
     function applyFilter() {
       currentFilter.city = document.getElementById("cityFilter").value;
       currentFilter.ward = document.getElementById("wardFilter").value;
-      currentFilter.fill = document.getElementById("fillFilter").value;
+      // Xóa 2 dòng này
+      // currentFilter.status = document.getElementById("statusFilter").value;
+      // currentFilter.fill = document.getElementById("fillFilter").value;
 
+      // Filter table rows - CHỈ ÁP DỤNG FILTER CITY VÀ WARD
       allRows.forEach(function (row) {
         const rowCity = row.getAttribute("data-city");
         const rowWard = row.getAttribute("data-ward");
-        const rowFill = parseInt(row.getAttribute("data-fill")) || 0;
-
-        let matchFill = true;
-        if (currentFilter.fill) {
-          const fillValue = parseInt(currentFilter.fill);
-          if (fillValue === 80) matchFill = rowFill >= 80;
-          else if (fillValue === 40) matchFill = rowFill >= 40 && rowFill < 80;
-          else if (fillValue === 0) matchFill = rowFill < 40;
-        }
+        // Không cần lấy status và fill nữa
 
         const match =
                 (!currentFilter.city || currentFilter.city === rowCity) &&
-                (!currentFilter.ward || currentFilter.ward === rowWard) &&
-
-                matchFill;
+                (!currentFilter.ward || currentFilter.ward === rowWard);
+        // Xóa 2 điều kiện về status và fill
 
         row.style.display = match ? "" : "none";
 
@@ -605,21 +598,18 @@
         }
       });
 
+      // Filter markers - CHỈ ÁP DỤNG FILTER CITY VÀ WARD
       markers.forEach((marker) => {
         const bin = marker.bin;
-        let matchFill = true;
-        if (currentFilter.fill) {
-          const fillValue = parseInt(currentFilter.fill);
-          if (fillValue === 80) matchFill = bin.fullness >= 80;
-          else if (fillValue === 40) matchFill = bin.fullness >= 40 && bin.fullness < 80;
-          else if (fillValue === 0) matchFill = bin.fullness < 40;
-        }
+
         const match =
                 (!currentFilter.city || currentFilter.city === bin.city) &&
-                (!currentFilter.ward || currentFilter.ward === bin.ward) &&
-                matchFill;
+                (!currentFilter.ward || currentFilter.ward === bin.ward);
+        // Xóa 2 điều kiện về status và fill
+
         try {
-          marker.getElement().style.display = match ? "block" : "none";
+          const markerElement = marker.getElement();
+          markerElement.style.display = match ? "block" : "none";
         } catch (err) {
           console.error("Marker display error:", err);
         }
@@ -628,8 +618,9 @@
       updateSelectionUI();
     }
 
-    // Filter event listeners
-    ["cityFilter", "wardFilter", "fillFilter"].forEach((id) => {
+
+    // Filter event listeners - CHỈ 2 FILTER
+    ["cityFilter", "wardFilter"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.addEventListener("change", applyFilter);
     });

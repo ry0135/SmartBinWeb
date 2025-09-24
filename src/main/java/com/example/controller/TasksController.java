@@ -27,8 +27,51 @@ public class TasksController {
     public String manage(Model model) {
         List<Bin> allBins = binService.getAllBins();
 
-        // Lọc bỏ bin đã có task OPEN / DOING / COMPLETED
+        // Lọc bỏ bin đã có task OPEN / DOING / COMPLETED và chỉ lấy bin có status == 1
         List<Bin> bins = allBins.stream()
+                .filter(bin -> bin.getStatus() == 1) // thêm điều kiện status == 1
+                .filter(bin -> !taskService.hasRestrictedTask(bin.getBinID()))
+                .collect(Collectors.toList());
+
+        model.addAttribute("bins", bins);
+
+        // Giữ nguyên phần distinct city/ward/status/fill
+        List<String> cities = bins.stream()
+                .map(bin -> bin.getWard() != null && bin.getWard().getProvince() != null ?
+                        bin.getWard().getProvince().getProvinceName() : "")
+                .distinct()
+                .filter(name -> !name.isEmpty())
+                .collect(Collectors.toList());
+
+        List<String> wards = bins.stream()
+                .map(bin -> bin.getWard() != null ? bin.getWard().getWardName() : "")
+                .distinct()
+                .filter(name -> !name.isEmpty())
+                .collect(Collectors.toList());
+
+        List<Integer> currentFills = bins.stream()
+                .map(bin -> {
+                    double fill = bin.getCurrentFill();
+                    if (fill >= 80) return 80;
+                    else if (fill >= 40) return 40;
+                    else return 0;
+                })
+                .distinct()
+                .collect(Collectors.toList());
+
+        model.addAttribute("cities", cities);
+        model.addAttribute("wards", wards);
+        model.addAttribute("currentFills", currentFills);
+
+        return "manage/task-management";
+    }
+    @GetMapping("/maintenance-management")
+    public String maintenance(Model model) {
+        List<Bin> allBins = binService.getAllBins();
+
+        // Lọc bỏ bin đã có task OPEN / DOING / COMPLETED và chỉ lấy bin có status == 2
+        List<Bin> bins = allBins.stream()
+                .filter(bin -> bin.getStatus() == 2) // thêm điều kiện status == 2
                 .filter(bin -> !taskService.hasRestrictedTask(bin.getBinID()))
                 .collect(Collectors.toList());
 
@@ -53,22 +96,10 @@ public class TasksController {
                 .distinct()
                 .collect(Collectors.toList());
 
-        List<Integer> currentFills = bins.stream()
-                .map(bin -> {
-                    double fill = bin.getCurrentFill();
-                    if (fill >= 80) return 80;
-                    else if (fill >= 40) return 40;
-                    else return 0;
-                })
-                .distinct()
-                .collect(Collectors.toList());
-
         model.addAttribute("cities", cities);
         model.addAttribute("wards", wards);
-        model.addAttribute("statuses", statuses);
-        model.addAttribute("currentFills", currentFills);
 
-        return "manage/task-management";
+        return "manage/maintenance-management";
     }
 
     // ================= TRANG GIAO NHIỀU TASK =================
@@ -107,6 +138,30 @@ public class TasksController {
     // ================= XỬ LÝ GIAO VIỆC (FORM SUBMIT) =================
     @PostMapping("/assign/batch/process")
     public String processBatchAssignment(
+            @RequestParam("binIds") List<Integer> binIds,
+            @RequestParam("workerId") int workerId,
+            @RequestParam("taskType") String taskType,
+            @RequestParam("priority") int priority,
+            @RequestParam(value = "notes", required = false) String notes,
+            Model model) {
+
+        try {
+            List<Task> assignedTasks = taskService.assignMultipleTasks(
+                    binIds, workerId, taskType, priority, notes
+            );
+
+            model.addAttribute("message", "Đã giao " + assignedTasks.size() + " nhiệm vụ thành công");
+            model.addAttribute("assignedTasks", assignedTasks);
+
+            return "manage/assignment-success";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Lỗi khi giao nhiệm vụ: " + e.getMessage());
+            return "manage/assignment-error";
+        }
+    }
+    @PostMapping("/assign/batch/process1")
+    public String processBatchAssignment1(
             @RequestParam("binIds") List<Integer> binIds,
             @RequestParam("workerId") int workerId,
             @RequestParam("taskType") String taskType,

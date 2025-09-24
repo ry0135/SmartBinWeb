@@ -43,19 +43,19 @@ public class BinService {
         }
     }
 
-    @Scheduled(fixedRate = 60000)
-    public void checkInactiveBins() {
-        List<Bin> allBins = binRepository.findAll();
-        long now = System.currentTimeMillis();
-        for (Bin bin : allBins) {
-            long last = bin.getLastUpdated().getTime();
-            long diffMinutes = TimeUnit.MILLISECONDS.toMinutes(now - last);
-            if (diffMinutes >= 2 && bin.getStatus() != 2) {
-                bin.setStatus(2);
-                binRepository.save(bin);
-                System.out.println("[CHECKER] Bin " + bin.getBinCode() + " mất kết nối!");
-            }
-        }
-    }
+//    @Scheduled(fixedRate = 60000)
+//    public void checkInactiveBins() {
+//        List<Bin> allBins = binRepository.findAll();
+//        long now = System.currentTimeMillis();
+//        for (Bin bin : allBins) {
+//            long last = bin.getLastUpdated().getTime();
+//            long diffMinutes = TimeUnit.MILLISECONDS.toMinutes(now - last);
+//            if (diffMinutes >= 2 && bin.getStatus() != 2) {
+//                bin.setStatus(2);
+//                binRepository.save(bin);
+//                System.out.println("[CHECKER] Bin " + bin.getBinCode() + " mất kết nối!");
+//            }
+//        }
+//    }
 
 }

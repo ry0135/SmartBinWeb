@@ -88,7 +88,19 @@ public class TasksService {
         workers.sort(Comparator.comparingInt(Account::getTaskCount));
         return workers;
     }
+    public List<Account> getAvailableWorkersMaintenance(int wardID) {
+        List<Account> workers = accountRepository.findWorkersByWardandrole4(wardID);
 
+        Map<Integer, Integer> workerTaskCount = new HashMap<>();
+        for (Account w : workers) {
+            int count = taskRepository.countOpenTasksByWorker(w.getAccountId());
+            workerTaskCount.put(w.getAccountId(), count);
+            w.setTaskCount(count);
+        }
+
+        workers.sort(Comparator.comparingInt(Account::getTaskCount));
+        return workers;
+    }
     public int countOpenTasksByWorker(int workerId) {
         return taskRepository.countOpenTasksByWorker(workerId);
     }

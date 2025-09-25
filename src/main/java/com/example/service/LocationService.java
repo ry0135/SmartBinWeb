@@ -7,6 +7,7 @@ import com.example.repository.WardRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LocationService {
@@ -26,5 +27,9 @@ public class LocationService {
     public List<Ward> getWardsByProvince(Long provinceId) {
         return wardRepository.findByProvince_ProvinceId(provinceId);
     }
+
+
 }
+
+
 

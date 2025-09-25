@@ -66,6 +66,8 @@ public class AccountService {
         return accountRepository.existsByEmailAndIsVerifiedFalse(email);
     }
 
+
+
     @Transactional
     public boolean verifyCodeAndUpdateStatus(String email, String code) {
         Account account = accountRepository.findByEmailAndCode(email, code);
@@ -87,7 +89,18 @@ public class AccountService {
         }
         return null;
     }
-    // ========= FORGOT / RESET PASSWORD (ADD-ON) =========
+
+    public void updateFcmToken(int workerId, String token) {
+        Account worker = accountRepository.findByAccountId(workerId);
+
+        worker.setFcmToken(token);
+        accountRepository.save(worker);
+    }
+
+    public String getFcmTokenByWorkerId(int workerId) {
+        return accountRepository.findFcmTokenByAccountId(workerId);
+    }
+
 
     /** B1: Yêu cầu đặt lại mật khẩu — tạo mã, lưu vào Account.code và gửi email (không lộ tồn tại email) */
     @Transactional
@@ -148,5 +161,6 @@ public class AccountService {
         }
         return Optional.empty();
     }
+
 
 }

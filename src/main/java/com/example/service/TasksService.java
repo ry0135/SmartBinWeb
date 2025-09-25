@@ -1,8 +1,10 @@
 package com.example.service;
 
+import com.example.dto.TaskSummaryDTO;
 import com.example.model.Account;
 import com.example.model.Bin;
 import com.example.model.Task;
+import com.example.model.Tasks;
 import com.example.repository.AccountRepository;
 import com.example.repository.BinRepository;
 import com.example.repository.TasksRepository;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -88,19 +91,7 @@ public class TasksService {
         workers.sort(Comparator.comparingInt(Account::getTaskCount));
         return workers;
     }
-    public List<Account> getAvailableWorkersMaintenance(int wardID) {
-        List<Account> workers = accountRepository.findWorkersByWardandrole4(wardID);
 
-        Map<Integer, Integer> workerTaskCount = new HashMap<>();
-        for (Account w : workers) {
-            int count = taskRepository.countOpenTasksByWorker(w.getAccountId());
-            workerTaskCount.put(w.getAccountId(), count);
-            w.setTaskCount(count);
-        }
-
-        workers.sort(Comparator.comparingInt(Account::getTaskCount));
-        return workers;
-    }
     public int countOpenTasksByWorker(int workerId) {
         return taskRepository.countOpenTasksByWorker(workerId);
     }
@@ -111,15 +102,15 @@ public class TasksService {
     public boolean hasRestrictedTask(int binId) {
         return taskRepository.countTasksByBinExclude(binId) > 0;
     }
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+
+    // Lấy danh sách batch tóm tắt theo worker
+    public List<TaskSummaryDTO> getTaskSummaryByAssignedTo(int workerId) {
+        return taskRepository.findTaskSummaryByAssignedTo(workerId);
     }
 
-    public List<Task> getTasksByStatus(String status) {
-        return taskRepository.findByStatus(status);
+    // Lấy chi tiết task trong batch
+    public List<Task> getTasksInBatch(int workerId, String batchId) {
+        return taskRepository.findByAssignedTo_AccountIdAndBatchIdOrderByPriorityAsc(workerId, batchId);
     }
 
-    public List<Task> getTasksByWorker(int workerId) {
-        return taskRepository.findByAssignedToAccountId(workerId);
-    }
 }

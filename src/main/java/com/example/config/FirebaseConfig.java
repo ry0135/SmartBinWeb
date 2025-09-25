@@ -17,7 +17,7 @@ public class FirebaseConfig {
         if (FirebaseApp.getApps().isEmpty()) {
             // load file từ resources
             InputStream serviceAccount = getClass().getClassLoader()
-                    .getResourceAsStream("babycare-906f3-firebase-adminsdk-fbsvc-f3d164000b.json");
+                    .getResourceAsStream("smartbin-80c9f-60ba8974817a.json");
 
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))

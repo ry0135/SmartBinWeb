@@ -167,9 +167,13 @@
                     <div class="bg-success rounded-circle me-1" style="width: 8px; height: 8px;"></div>
                     <span><40%</span>
                   </div>
-                  <div class="d-flex align-items-center">
+                  <div class="me-2 d-flex align-items-center">
                     <div class="bg-secondary rounded-circle me-1" style="width: 8px; height: 8px;"></div>
                     <span>Offline</span>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <div class="bg-dark rounded-circle me-1" style="width: 8px; height: 8px;"></div>
+                    <span>Đã chọn</span>
                   </div>
                 </div>
               </div>
@@ -345,12 +349,22 @@
       else row.classList.remove("row-selected");
     }
 
+    // Updated function to change marker color instead of just highlighting
     function highlightMarkerForBin(binId, highlight) {
       const m = findMarkerByBinId(binId);
       if (!m) return;
       const el = m.getElement();
-      if (highlight) el.classList.add("marker-selected");
-      else el.classList.remove("marker-selected");
+
+      if (highlight) {
+        // Change to black icon when selected
+        el.src = getBlackBinIcon();
+        el.classList.add("marker-selected");
+      } else {
+        // Restore original color based on fill level and status
+        const bin = m.bin;
+        el.src = getBinIcon(bin.fullness, bin.status);
+        el.classList.remove("marker-selected");
+      }
     }
 
     // Selection UI update
@@ -507,6 +521,13 @@
       }
     }
 
+    // New function to create black icon for selected bins
+    function getBlackBinIcon() {
+      return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+              '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="black" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm2 2h14v14H5z"/><rect x="5" y="8" width="14" height="12" fill="rgba(255,255,255,0.8)"/><circle cx="12" cy="14" r="2" fill="white"/></svg>'
+      );
+    }
+
     function addMarkers() {
       try {
         markers.forEach(m => m.remove());
@@ -545,12 +566,6 @@
                 highlightRowForCheckbox(cb);
                 highlightMarkerForBin(binId, cb.checked);
                 updateSelectionUI();
-
-                if (cb.checked) {
-                  el.classList.add("marker-selected");
-                } else {
-                  el.classList.remove("marker-selected");
-                }
               }
               popup.addTo(map);
             } catch (err) {
@@ -617,7 +632,6 @@
 
       updateSelectionUI();
     }
-
 
     // Filter event listeners - CHỈ 2 FILTER
     ["cityFilter", "wardFilter"].forEach((id) => {

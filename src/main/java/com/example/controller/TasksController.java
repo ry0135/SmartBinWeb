@@ -63,7 +63,7 @@ public class TasksController {
         model.addAttribute("wards", wards);
         model.addAttribute("currentFills", currentFills);
 
-        return "garbage-collection";
+        return "manage/garbage-collection";
     }
     @GetMapping("/maintenance-management")
     public String maintenance(Model model) {
@@ -99,7 +99,7 @@ public class TasksController {
         model.addAttribute("cities", cities);
         model.addAttribute("wards", wards);
 
-        return "maintenance";
+        return "manage/maintenance";
     }
 
     // ================= TRANG GIAO NHIỀU TASK =================

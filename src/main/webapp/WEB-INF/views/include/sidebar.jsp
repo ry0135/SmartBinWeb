@@ -1,6 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <div class="d-flex flex-column vh-100 bg-dark text-white position-fixed start-0 top-0" style="width: 250px; z-index: 1000;">
   <!-- Header -->
@@ -8,6 +7,7 @@
     <h4 class="mb-0 text-primary fw-bold">
       🗑️ SmartBin
     </h4>
+    <small class="text-muted">Quản lý thùng rác thông minh</small>
   </div>
 
   <!-- Navigation Menu -->
@@ -22,13 +22,41 @@
         </a>
       </li>
 
+      <!-- Menu Quản lý Task -->
       <li class="nav-item mb-2">
-        <a href="${pageContext.request.contextPath}/tasks/task-management"
-           class="nav-link text-white d-flex align-items-center py-3 px-3 rounded sidebar-link"
-           data-path="/tasks/task-management">
-          <span class="me-3 fs-5">📋</span>
-          <span class="fw-semibold">Giao nhiệm vụ</span>
-        </a>
+        <div class="dropdown">
+          <a href="#" class="nav-link text-white d-flex align-items-center py-3 px-3 rounded sidebar-link dropdown-toggle"
+             data-bs-toggle="dropdown" data-path="/tasks">
+            <span class="me-3 fs-5">📋</span>
+            <span class="fw-semibold">Quản lý Task</span>
+          </a>
+          <ul class="dropdown-menu bg-dark border-secondary">
+            <li>
+              <a href="${pageContext.request.contextPath}/tasks/task-management"
+                 class="dropdown-item text-white d-flex align-items-center sidebar-link"
+                 data-path="/tasks/task-management">
+                <span class="me-2">🎯</span>
+                <span>Giao nhiệm vụ</span>
+              </a>
+            </li>
+            <li>
+              <a href="${pageContext.request.contextPath}/tasks/maintenance-management"
+                 class="dropdown-item text-white d-flex align-items-center sidebar-link"
+                 data-path="/tasks/maintenance-management">
+                <span class="me-2">🔧</span>
+                <span>Bảo trì</span>
+              </a>
+            </li>
+            <li>
+              <a href="${pageContext.request.contextPath}/tasks/management"
+                 class="dropdown-item text-white d-flex align-items-center sidebar-link"
+                 data-path="/tasks/management">
+                <span class="me-2">📊</span>
+                <span>Quản lý nhiệm vụ</span>
+              </a>
+            </li>
+          </ul>
+        </div>
       </li>
 
       <li class="nav-item mb-2">
@@ -36,7 +64,7 @@
            class="nav-link text-white d-flex align-items-center py-3 px-3 rounded sidebar-link"
            data-path="/bins">
           <span class="me-3 fs-5">🗑️</span>
-          <span class="fw-semibold">Danh sách thùng rác</span>
+          <span class="fw-semibold">Thùng rác</span>
         </a>
       </li>
 
@@ -44,7 +72,7 @@
         <a href="${pageContext.request.contextPath}/reports"
            class="nav-link text-white d-flex align-items-center py-3 px-3 rounded sidebar-link"
            data-path="/reports">
-          <span class="me-3 fs-5">⚠️</span>
+          <span class="me-3 fs-5">📈</span>
           <span class="fw-semibold">Báo cáo</span>
         </a>
       </li>
@@ -53,7 +81,7 @@
         <a href="${pageContext.request.contextPath}/users"
            class="nav-link text-white d-flex align-items-center py-3 px-3 rounded sidebar-link"
            data-path="/users">
-          <span class="me-3 fs-5">👤</span>
+          <span class="me-3 fs-5">👥</span>
           <span class="fw-semibold">Người dùng</span>
         </a>
       </li>
@@ -77,12 +105,63 @@
         <span class="text-white fs-5">👤</span>
       </div>
       <div class="flex-grow-1">
-        <div class="fw-bold small text-white">${sessionScope.user != null ? sessionScope.user.username : 'Manager'}</div>
+        <div class="fw-bold small text-white">
+          <c:choose>
+            <c:when test="${not empty sessionScope.user}">
+              ${sessionScope.user.username}
+            </c:when>
+            <c:otherwise>
+              Manager
+            </c:otherwise>
+          </c:choose>
+        </div>
         <div class="text-muted small">Quản trị viên</div>
       </div>
+      <a href="${pageContext.request.contextPath}/logout"
+         class="btn btn-outline-light btn-sm"
+         title="Đăng xuất">
+        <i class="fas fa-sign-out-alt"></i>
+      </a>
     </div>
   </div>
 </div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+  .sidebar-link {
+    transition: all 0.3s ease;
+    border: none;
+  }
+
+  .sidebar-link:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    transform: translateX(5px);
+  }
+
+  .sidebar-link.active {
+    background-color: #0d6efd !important;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+  }
+
+  .dropdown-menu {
+    min-width: 200px;
+  }
+
+  .dropdown-item {
+    transition: all 0.2s ease;
+  }
+
+  .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    padding-left: 20px !important;
+  }
+
+  .nav-item .dropdown-toggle::after {
+    margin-left: auto;
+  }
+</style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -95,23 +174,37 @@
       currentPath = currentPath.substring(contextPath.length);
     }
 
+    // Đảm bảo có dấu / ở đầu
+    if (!currentPath.startsWith('/')) {
+      currentPath = '/' + currentPath;
+    }
+
+    console.log('Current Path:', currentPath);
+
     // Tìm và đánh dấu menu item active
     var sidebarLinks = document.querySelectorAll('.sidebar-link');
 
     sidebarLinks.forEach(function(link) {
       var linkPath = link.getAttribute('data-path');
 
-      // Kiểm tra exact match hoặc startsWith cho các sub-paths
-      if (currentPath === linkPath ||
-              (linkPath !== '/' && currentPath.startsWith(linkPath))) {
+      if (linkPath) {
+        // Kiểm tra exact match hoặc startsWith cho các sub-paths
+        var isActive = currentPath === linkPath ||
+                (linkPath !== '/' && currentPath.startsWith(linkPath)) ||
+                (currentPath.startsWith('/tasks') && linkPath === '/tasks');
 
-        // Xóa active class khỏi tất cả links
-        sidebarLinks.forEach(function(l) {
-          l.classList.remove('active', 'bg-primary');
-        });
+        if (isActive) {
+          link.classList.add('active', 'bg-primary');
 
-        // Thêm active class cho link hiện tại
-        link.classList.add('active', 'bg-primary');
+          // Mở dropdown nếu có
+          var dropdown = link.closest('.dropdown');
+          if (dropdown) {
+            var dropdownToggle = dropdown.querySelector('.dropdown-toggle');
+            if (dropdownToggle) {
+              dropdownToggle.classList.add('active', 'bg-primary');
+            }
+          }
+        }
       }
     });
 
@@ -128,6 +221,35 @@
           this.style.backgroundColor = '';
         }
       });
+    });
+
+    // Xử lý dropdown
+    var dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+    dropdownToggles.forEach(function(toggle) {
+      toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        var dropdown = this.closest('.dropdown');
+        var menu = dropdown.querySelector('.dropdown-menu');
+
+        // Đóng tất cả dropdown khác
+        document.querySelectorAll('.dropdown-menu').forEach(function(otherMenu) {
+          if (otherMenu !== menu) {
+            otherMenu.classList.remove('show');
+          }
+        });
+
+        // Toggle menu hiện tại
+        menu.classList.toggle('show');
+      });
+    });
+
+    // Đóng dropdown khi click ra ngoài
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown-menu').forEach(function(menu) {
+          menu.classList.remove('show');
+        });
+      }
     });
   });
 </script>

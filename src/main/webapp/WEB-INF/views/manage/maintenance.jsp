@@ -18,25 +18,18 @@
     <div class="bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
       <div>
         <h1 class="h4 mb-0 text-dark">
-          <c:choose>
-            <c:when test="${param.type == 'maintain'}">
-              Giao Nhiệm Vụ Bảo Trì
-            </c:when>
-            <c:otherwise>
-              Giao Nhiệm Vụ Thu Gom
-            </c:otherwise>
-          </c:choose>
+          Giao Nhiệm Vụ Bảo Trì
         </h1>
         <small class="text-muted">Quản lý và giao nhiệm vụ cho thùng rác</small>
       </div>
       <div class="d-flex align-items-center">
         <!-- Nút chuyển đổi loại nhiệm vụ -->
         <div class="btn-group me-3" role="group">
-          <a href="${pageContext.request.contextPath}/tasks/task-management?type=collect"
+          <a href="${pageContext.request.contextPath}/tasks/task-management"
              class="btn ${param.type != 'maintain' ? 'btn-primary' : 'btn-outline-primary'}">
             <i class="fas fa-trash-alt me-1"></i> Thu gom
           </a>
-          <a href="${pageContext.request.contextPath}/tasks/maintenance-management?type=maintain"
+          <a href="${pageContext.request.contextPath}/tasks/maintenance-management"
              class="btn ${param.type == 'maintain' ? 'btn-primary' : 'btn-outline-primary'}">
             <i class="fas fa-tools me-1"></i> Bảo trì
           </a>
@@ -203,14 +196,7 @@
             <div class="col-md-4 text-end">
               <button id="assignTaskBtn" class="btn btn-success">
                 <i class="fas fa-tasks me-1"></i>
-                <c:choose>
-                  <c:when test="${param.type == 'maintain'}">
-                    Giao nhiệm vụ bảo trì
-                  </c:when>
-                  <c:otherwise>
-                    Giao nhiệm vụ thu gom
-                  </c:otherwise>
-                </c:choose>
+                 Giao nhiệm vụ bảo trì
               </button>
             </div>
           </div>
@@ -435,11 +421,11 @@
 
       // Xác định loại nhiệm vụ từ URL parameter
       const urlParams = new URLSearchParams(window.location.search);
-      const taskType = urlParams.get('type') || 'collect';
+      const taskType = urlParams.get('type');
 
       const form = document.createElement("form");
       form.method = "GET";
-      form.action = "${pageContext.request.contextPath}/tasks/assign/batch";
+      form.action = "${pageContext.request.contextPath}/tasks/assign/batch1";
       form.style.display = "none";
 
       const binIdsInput = document.createElement("input");

@@ -67,7 +67,7 @@
                                     <div class="card-body text-center">
                                         <i class="fas fa-user-check fa-2x text-info mb-2"></i>
                                         <h4 class="text-info">
-                                            <c:set var="uniqueWorkers" value="${assignedTasks.stream().map(t -> t.assignedTo.accountID).distinct().count()}" />
+                                            <c:set var="uniqueWorkers" value="${assignedTasks.stream().map(t -> t.assignedTo.accountId).distinct().count()}" />
                                                 ${uniqueWorkers}
                                         </h4>
                                         <p class="mb-0 text-muted">Nhân viên được giao</p>
@@ -141,7 +141,7 @@
                                                     </div>
                                                     <div>
                                                         <div class="fw-medium">${task.assignedTo.fullName}</div>
-                                                        <small class="text-muted">ID: ${task.assignedTo.accountID}</small>
+                                                        <small class="text-muted">ID: ${task.assignedTo.accountId}</small>
                                                     </div>
                                                 </div>
                                             </td>

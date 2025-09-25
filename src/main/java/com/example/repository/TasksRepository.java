@@ -22,5 +22,12 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
     List<Task> findOpenTasksByWorker(@Param("workerId") int workerId);
     @Query("SELECT COUNT(t) FROM Task t WHERE t.bin.binID = :binId AND t.status IN ('OPEN','DOING','COMPLETED')")
     int countTasksByBinExclude(@Param("binId") int binId);
+    // Thêm vào TasksRepository.java
+    List<Task> findByStatus(String status);
+    List<Task> findByAssignedToAccountId(int workerId);
+    List<Task> findByTaskType(String taskType);
+    List<Task> findByPriority(int priority);
 
+    @Query("SELECT t FROM Task t ORDER BY t.createdAt DESC")
+    List<Task> findAllOrderByCreatedAtDesc();
 }

@@ -111,5 +111,15 @@ public class TasksService {
     public boolean hasRestrictedTask(int binId) {
         return taskRepository.countTasksByBinExclude(binId) > 0;
     }
+    public List<Task> getAllTasks() {
+        return taskRepository.findAll();
+    }
 
+    public List<Task> getTasksByStatus(String status) {
+        return taskRepository.findByStatus(status);
+    }
+
+    public List<Task> getTasksByWorker(int workerId) {
+        return taskRepository.findByAssignedToAccountId(workerId);
+    }
 }

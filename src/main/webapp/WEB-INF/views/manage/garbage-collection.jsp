@@ -17,14 +17,9 @@
     <div class="bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
       <div>
         <h1 class="h4 mb-0 text-dark">
-          <c:choose>
-            <c:when test="${param.type == 'maintain'}">
-              Giao Nhiệm Vụ Bảo Trì
-            </c:when>
-            <c:otherwise>
+
               Giao Nhiệm Vụ Thu Gom
-            </c:otherwise>
-          </c:choose>
+
         </h1>
         <small class="text-muted">Quản lý và giao nhiệm vụ cho thùng rác</small>
       </div>

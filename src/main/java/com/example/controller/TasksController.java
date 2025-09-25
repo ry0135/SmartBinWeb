@@ -134,7 +134,38 @@ public class TasksController {
             return "redirect:/manage?error=" + e.getMessage();
         }
     }
+    // ================= TRANG GIAO NHIỀU TASK =================
+    @GetMapping("/assign/batch1")
+    public String showBatchAssignPage1(
+            @RequestParam("binIds") String binIdsStr,
+            @RequestParam("ward") int wardId,
+            Model model) {
 
+        try {
+            // Chuyển đổi chuỗi binIds thành List<Integer>
+            List<Integer> binIds = Arrays.stream(binIdsStr.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(Integer::parseInt)
+                    .collect(Collectors.toList());
+
+            if (binIds.isEmpty()) {
+                return "redirect:/manage?error=Không có thùng rác nào được chọn";
+            }
+
+            List<Account> workers = taskService.getAvailableWorkersMaintenance(wardId);
+
+            model.addAttribute("workers", workers);
+            model.addAttribute("binIds", binIds);
+            model.addAttribute("wardId", wardId);
+            model.addAttribute("wardName", "Phường " + wardId); // Thay bằng service thực tế
+
+            return "manage/assign-task-maintenance";
+
+        } catch (Exception e) {
+            return "redirect:/manage?error=" + e.getMessage();
+        }
+    }
     // ================= XỬ LÝ GIAO VIỆC (FORM SUBMIT) =================
     @PostMapping("/assign/batch/process")
     public String processBatchAssignment(
@@ -183,5 +214,34 @@ public class TasksController {
             model.addAttribute("error", "Lỗi khi giao nhiệm vụ: " + e.getMessage());
             return "manage/assignment-error";
         }
+    }
+    @GetMapping("/management")
+    public String taskManagement(
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "type", required = false) String taskType,
+            @RequestParam(value = "priority", required = false) Integer priority,
+            Model model) {
+
+        List<Task> allTasks = taskService.getAllTasks();
+
+        // Sửa lại dòng này - thay toList() bằng collect(Collectors.toList())
+        List<Task> filteredTasks = allTasks.stream()
+                .filter(task -> status == null || status.isEmpty() || task.getStatus().equals(status))
+                .filter(task -> taskType == null || taskType.isEmpty() || task.getTaskType().equals(taskType))
+                .filter(task -> priority == null || task.getPriority() == priority)
+                .collect(Collectors.toList()); // Sửa ở đây
+
+        model.addAttribute("tasks", filteredTasks);
+        model.addAttribute("statusFilter", status);
+        model.addAttribute("typeFilter", taskType);
+        model.addAttribute("priorityFilter", priority);
+
+        // Thống kê
+        model.addAttribute("totalTasks", allTasks.size());
+        model.addAttribute("openTasks", allTasks.stream().filter(t -> t.getStatus().equals("OPEN")).count());
+        model.addAttribute("doingTasks", allTasks.stream().filter(t -> t.getStatus().equals("DOING")).count());
+        model.addAttribute("completedTasks", allTasks.stream().filter(t -> t.getStatus().equals("COMPLETED")).count());
+
+        return "manage/task-management";
     }
 }

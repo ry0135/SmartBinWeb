@@ -21,7 +21,7 @@
         <div class="col-lg-10">
           <!-- Page Header -->
           <div class="mb-4">
-            <h2 class="h3 mb-2 text-dark">Giao nhiệm vụ mới</h2>
+            <h2 class="h3 mb-2 text-dark">Giao nhiệm vụ thu gom</h2>
             <p class="text-muted mb-0">Danh sách nhân viên trong phường phù hợp</p>
           </div>
 
@@ -60,7 +60,6 @@
                     </label>
                     <select class="form-select" id="taskType" name="taskType" required>
                       <option value="COLLECTION">Thu gom rác</option>
-                      <option value="MAINTENANCE">Bảo trì</option>
                     </select>
                   </div>
 

@@ -65,7 +65,7 @@ public class ManageController {
         model.addAttribute("statuses", statuses);
         model.addAttribute("currentFills", currentFills);
 
-        return "manage/manage-content";
+        return "manage/dashboard";
     }
 
 

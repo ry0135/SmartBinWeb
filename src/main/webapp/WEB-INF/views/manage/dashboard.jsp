@@ -71,81 +71,125 @@
                 </div>
             </div>
 
-            <!-- Map Section -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Bản đồ thùng rác</h5>
+            <!-- Main Layout: Filter Left, Map Right -->
+            <div class="row g-4 mb-4">
+                <!-- Filter Panel - Left Side -->
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom-0">
+                            <h5 class="mb-0">
+                                <i class="fas fa-filter me-2"></i>Bộ lọc
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="cityFilter" class="form-label fw-semibold">
+                                    <i class="fas fa-city me-1 text-primary"></i>Khu vực:
+                                </label>
+                                <select class="form-select" id="cityFilter">
+                                    <option value="">-- Tất cả --</option>
+                                    <c:forEach var="city" items="${cities}">
+                                        <option value="${city}">${city}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="wardFilter" class="form-label fw-semibold">
+                                    <i class="fas fa-map-marker-alt me-1 text-success"></i>Phường/Xã:
+                                </label>
+                                <select class="form-select" id="wardFilter">
+                                    <option value="">-- Tất cả --</option>
+                                    <c:forEach var="ward" items="${wards}">
+                                        <option value="${ward}">${ward}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="fillFilter" class="form-label fw-semibold">
+                                    <i class="fas fa-chart-bar me-1 text-warning"></i>Mức đầy:
+                                </label>
+                                <select class="form-select" id="fillFilter">
+                                    <option value="">-- Tất cả --</option>
+                                    <c:forEach var="f" items="${currentFills}">
+                                        <option value="${f}">
+                                            <c:choose>
+                                                <c:when test="${f == 80}">Cảnh báo (>=80%)</c:when>
+                                                <c:when test="${f == 40}">Trung bình (40–79%)</c:when>
+                                                <c:when test="${f == 0}">Bình thường (&lt;40%)</c:when>
+                                            </c:choose>
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+
+
+
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Hoạt động:</label>
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">-- Tất cả --</option>
+                                    <c:forEach var="s" items="${statuses}">
+                                        <option value="${s}">
+                                            <c:choose>
+                                                <c:when test="${s == 1}">Online</c:when>
+                                                <c:when test="${s == 2}">Offline</c:when>
+                                            </c:choose>
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+
+                            <!-- Results Summary -->
+                            <div class="alert alert-info">
+                                <small>
+                                    <strong id="resultCount">0</strong> thùng rác được tìm thấy
+                                </small>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success btn-sm" onclick="exportReport()">
+                                    📊 Xuất báo cáo
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm" onclick="focusOnResults()">
+                                    📍 Xem trên bản đồ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div id="map" style="height: 400px;" class="rounded"></div>
-                </div>
-            </div>
 
-            <!-- Filter Section -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">Khu vực:</label>
-                            <select class="form-select" id="cityFilter">
-                                <option value="">-- Tất cả --</option>
-                                <c:forEach var="city" items="${cities}">
-                                    <option value="${city}">${city}</option>
-                                </c:forEach>
-                            </select>
+                <!-- Map Section - Right Side -->
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">🗺️ Bản đồ thùng rác</h5>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-secondary" onclick="map.zoomIn()">
+                                    ➕
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="map.zoomOut()">
+                                    ➖
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetMapView()">
+                                    🏠
+                                </button>
+                            </div>
                         </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">Phường/Xã:</label>
-                            <select class="form-select" id="wardFilter">
-                                <option value="">-- Tất cả --</option>
-                                <c:forEach var="ward" items="${wards}">
-                                    <option value="${ward}">${ward}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">Hoạt động:</label>
-                            <select class="form-select" id="statusFilter">
-                                <option value="">-- Tất cả --</option>
-                                <c:forEach var="s" items="${statuses}">
-                                    <option value="${s}">
-                                        <c:choose>
-                                            <c:when test="${s == 1}">Online</c:when>
-                                            <c:when test="${s == 2}">Offline</c:when>
-                                        </c:choose>
-                                    </option>
-                                </c:forEach>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">Mức đầy:</label>
-                            <select class="form-select" id="fillFilter">
-                                <option value="">-- Tất cả --</option>
-                                <c:forEach var="f" items="${currentFills}">
-                                    <option value="${f}">
-                                        <c:choose>
-                                            <c:when test="${f == 80}">Cảnh báo (>=80%)</c:when>
-                                            <c:when test="${f == 40}">Trung bình (40–79%)</c:when>
-                                            <c:when test="${f == 0}">Bình thường (&lt;40%)</c:when>
-                                        </c:choose>
-                                    </option>
-                                </c:forEach>
-                            </select>
+                        <div class="card-body p-0">
+                            <div id="map" style="height: 500px;" class="rounded-bottom"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Table Section -->
+            <!-- Table Section with Pagination -->
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Danh sách thùng rác</h5>
-                    <button class="btn btn-success btn-sm">
-                        📊 Xuất báo cáo
-                    </button>
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📋 Danh sách thùng rác</h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -160,7 +204,7 @@
                                 <th class="fw-semibold">Chi tiết</th>
                             </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="binTableBody">
                             <c:forEach var="bin" items="${bins}">
                                 <tr data-city="${bin.ward.province.provinceName}"
                                     data-ward="${bin.ward.wardName}"
@@ -196,6 +240,19 @@
                             </c:forEach>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-between align-items-center p-3 border-top">
+                        <div class="text-muted">
+                            Hiển thị <span id="showingFrom">1</span> đến <span id="showingTo">25</span>
+                            trong tổng số <span id="totalItems">0</span> mục
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0" id="pagination">
+                                <!-- Pagination sẽ được tạo bởi JavaScript -->
+                            </ul>
+                        </nav>
                     </div>
                 </div>
             </div>

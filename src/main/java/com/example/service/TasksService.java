@@ -26,12 +26,18 @@ public class TasksService {
     private AccountRepository accountRepository;
 
     @Autowired
+    private AccountService accountService;
+
+
+    @Autowired
+    private FcmService fcmService;
+    @Autowired
     private BinRepository binRepository;
 
     // Giao nhiều task cùng lúc
     @Transactional
     public List<Task> assignMultipleTasks(List<Integer> binIds, int workerId,
-                                          String taskType, int priority, String notes) {
+                                          String taskType, int priority, String notes) throws Exception {
 
         Account worker = accountRepository.findById(workerId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy worker với ID = " + workerId));
@@ -62,11 +68,21 @@ public class TasksService {
             assignedTasks.add(taskRepository.save(task));
         }
 
+        if (!assignedTasks.isEmpty()) {
+            String token = accountService.getFcmTokenByWorkerId(workerId);
+            if (token != null && !token.isEmpty()) {
+                String title = "Nhiệm vụ mới được giao";
+                String body = notes;
+
+                fcmService.sendNotification(token, title, body,batchId);
+            }
+        }
+
         return assignedTasks;
     }
 
     // Giao task đơn lẻ (giữ lại cho tương thích)
-    public Task assignTask(int binId, int workerId, String taskType, int priority, String notes) {
+    public Task assignTask(int binId, int workerId, String taskType, int priority, String notes) throws Exception {
         List<Integer> binIds = Collections.singletonList(binId);
         List<Task> tasks = assignMultipleTasks(binIds, workerId, taskType, priority, notes);
         return tasks.isEmpty() ? null : tasks.get(0);

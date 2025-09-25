@@ -31,6 +31,8 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
     @Query("SELECT a.fcmToken FROM Account a WHERE a.accountId = :id")
     String findFcmTokenByAccountId(@Param("id") int id);
-    }
 
 
+    @Query("SELECT a FROM Account a LEFT JOIN FETCH a.ward WHERE a.role = 4 AND a.wardID = :wardID")
+    List<Account> findWorkersByWardandrole4(@Param("wardID") int wardID);
+}

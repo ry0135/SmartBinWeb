@@ -4,7 +4,6 @@ import com.example.dto.TaskSummaryDTO;
 import com.example.model.Account;
 import com.example.model.Bin;
 import com.example.model.Task;
-import com.example.model.Tasks;
 import com.example.repository.AccountRepository;
 import com.example.repository.BinRepository;
 import com.example.repository.TasksRepository;
@@ -91,6 +90,19 @@ public class TasksService {
         workers.sort(Comparator.comparingInt(Account::getTaskCount));
         return workers;
     }
+    public List<Account> getAvailableWorkersMaintenance(int wardID) {
+        List<Account> workers = accountRepository.findWorkersByWardandrole4(wardID);
+
+        Map<Integer, Integer> workerTaskCount = new HashMap<>();
+        for (Account w : workers) {
+            int count = taskRepository.countOpenTasksByWorker(w.getAccountId());
+            workerTaskCount.put(w.getAccountId(), count);
+            w.setTaskCount(count);
+        }
+
+        workers.sort(Comparator.comparingInt(Account::getTaskCount));
+        return workers;
+    }
 
     public int countOpenTasksByWorker(int workerId) {
         return taskRepository.countOpenTasksByWorker(workerId);
@@ -111,6 +123,9 @@ public class TasksService {
     // Lấy chi tiết task trong batch
     public List<Task> getTasksInBatch(int workerId, String batchId) {
         return taskRepository.findByAssignedTo_AccountIdAndBatchIdOrderByPriorityAsc(workerId, batchId);
+    }
+    public List<Task> getAllTasks() {
+        return taskRepository.findAll();
     }
 
 }

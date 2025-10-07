@@ -17,8 +17,8 @@ public class ApiBinsAliasController {
     @Autowired
     private BinService binService;
 
-    // Alias: Lấy tất cả thùng rác (phù hợp Android đang gọi /api/bins)
-    @GetMapping
+    // Alias: Lấy tất cả thùng rác (đổi endpoint để tránh trùng với BinAppController)
+    @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<Bin>>> getAllBins() {
         try {
             List<Bin> bins = binService.getAllBins();

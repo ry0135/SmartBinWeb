@@ -44,8 +44,8 @@ public class AccountAppController {
                 Account existing = existOpt.get();
                 existing.setCode(code);
                 existing.setPassword(account.getPassword());
-                existing.setFullName(account.getPassword());
-                existing.setPassword(account.getPassword());
+                existing.setFullName(account.getFullName());
+
                 // cập nhật code mới
                 accountRepository.save(existing);
                 emailService.sendCodeToEmail(existing.getEmail(), code);
@@ -121,5 +121,38 @@ public class AccountAppController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getAccountById(@PathVariable Integer id) {
+        Account account = accountRepository.findByAccountId(id);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Account not found with id: " + id);
+        }
+        return ResponseEntity.ok(account);
+    }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateAccount(@PathVariable Integer id, @RequestBody Account updatedAccount) {
+        Optional<Account> accountOpt = accountRepository.findById(id);
+
+
+        Account account = accountOpt.get();
+
+        // 🔹 Cập nhật thông tin (nếu client gửi lên)
+        if (updatedAccount.getFullName() != null)
+            account.setFullName(updatedAccount.getFullName());
+
+        if (updatedAccount.getPhone() != null)
+            account.setPhone(updatedAccount.getPhone());
+
+        if (updatedAccount.getAddressDetail() != null)
+            account.setAddressDetail(updatedAccount.getAddressDetail());
+
+        if (updatedAccount.getWardID() != null)
+            account.setWardID(updatedAccount.getWardID());
+
+        // ✅ Lưu lại
+        Account saved = accountRepository.save(account);
+        return ResponseEntity.ok(saved);
+    }
 }

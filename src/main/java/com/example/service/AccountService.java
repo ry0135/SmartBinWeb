@@ -56,6 +56,16 @@ public class AccountService {
         emailService.sendCodeToEmail(account.getEmail(), code);
     }
 
+    @Transactional
+    public void saveGoogle(Account account) {
+        String code = randomService.generateRandomCode();
+        String encodedPassword = passwordEncoder.encode(account.getPassword());
+        account.setPassword(encodedPassword);
+        account.setCode(code);
+
+        accountRepository.save(account);
+    }
+
     @Transactional(readOnly = true)
     public boolean isEmailExistsAndIsVerifiedTrue(String email) {
         return accountRepository.existsByEmailAndIsVerifiedTrue(email);

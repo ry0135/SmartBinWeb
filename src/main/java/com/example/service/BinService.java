@@ -4,10 +4,10 @@ import com.example.model.Bin;
 import com.example.repository.BinRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.scheduling.annotation.Scheduled;
-import java.util.concurrent.TimeUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 @Service
 public class BinService {
@@ -41,6 +41,37 @@ public class BinService {
             existing.setLastUpdated(new Date());
             return binRepository.save(existing);
         }
+    }
+
+    // Tìm thùng rác gần nhất theo bán kính (km) và giới hạn số lượng
+    public List<Bin> getNearbyBins(double latitude, double longitude, double radiusKm, int limit) {
+        List<Bin> all = binRepository.findAllWithWardAndProvince();
+        List<Bin> within = new ArrayList<>();
+
+        for (Bin bin : all) {
+            double distance = haversineKm(latitude, longitude, bin.getLatitude(), bin.getLongitude());
+            if (distance <= radiusKm) {
+                within.add(bin);
+            }
+        }
+
+        within.sort(Comparator.comparingDouble(b -> haversineKm(latitude, longitude, b.getLatitude(), b.getLongitude())));
+
+        if (limit > 0 && within.size() > limit) {
+            return new ArrayList<>(within.subList(0, limit));
+        }
+        return within;
+    }
+
+    private double haversineKm(double lat1, double lon1, double lat2, double lon2) {
+        final double R = 6371.0; // Earth radius (km)
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 
 //    @Scheduled(fixedRate = 60000)

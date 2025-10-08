@@ -127,5 +127,59 @@ public class TasksService {
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
     }
+// Thêm vào TasksService.java
 
+    public void deleteBatch(String batchId) {
+        List<Task> batchTasks = taskRepository.findByBatchId(batchId);
+        taskRepository.deleteAll(batchTasks);
+    }
+
+    public void updateBatchStatus(String batchId, String status) {
+        List<Task> batchTasks = taskRepository.findByBatchId(batchId);
+        for (Task task : batchTasks) {
+            task.setStatus(status);
+            if ("COMPLETED".equals(status)) {
+                task.setCompletedAt(new Date());
+            }
+            taskRepository.save(task);
+        }
+    }
+
+    public void deleteTask(int taskId) {
+        taskRepository.deleteById(taskId);
+    }
+
+    // Thêm phương thức để lấy thông tin batch summary
+    public Map<String, Object> getBatchSummary(String batchId) {
+        List<Task> batchTasks = taskRepository.findByBatchId(batchId);
+        if (batchTasks.isEmpty()) {
+            return null;
+        }
+
+        Task firstTask = batchTasks.get(0);
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("batchId", batchId);
+        summary.put("totalTasks", batchTasks.size());
+        summary.put("assignedTo", firstTask.getAssignedTo().getFullName());
+        summary.put("taskType", firstTask.getTaskType());
+        summary.put("createdAt", firstTask.getCreatedAt());
+
+        // Thống kê status
+        Map<String, Long> statusCount = batchTasks.stream()
+                .collect(Collectors.groupingBy(Task::getStatus, Collectors.counting()));
+        summary.put("statusCount", statusCount);
+
+        return summary;
+    }
+
+    // Thêm vào TasksService.java
+    public void updateTaskStatus(int taskId, String status) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy task với ID = " + taskId));
+        task.setStatus(status);
+        if ("COMPLETED".equals(status)) {
+            task.setCompletedAt(new Date());
+        }
+        taskRepository.save(task);
+    }
 }

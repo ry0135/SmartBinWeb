@@ -6,12 +6,15 @@ import com.example.model.Task;
 import com.example.service.BinService;
 import com.example.service.TasksService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -215,6 +218,8 @@ public class TasksController {
             return "manage/assignment-error";
         }
     }
+    // Thêm vào TasksController.java
+
     @GetMapping("/management")
     public String taskManagement(
             @RequestParam(value = "status", required = false) String status,
@@ -224,14 +229,24 @@ public class TasksController {
 
         List<Task> allTasks = taskService.getAllTasks();
 
-        // Sửa lại dòng này - thay toList() bằng collect(Collectors.toList())
         List<Task> filteredTasks = allTasks.stream()
                 .filter(task -> status == null || status.isEmpty() || task.getStatus().equals(status))
                 .filter(task -> taskType == null || taskType.isEmpty() || task.getTaskType().equals(taskType))
                 .filter(task -> priority == null || task.getPriority() == priority)
-                .collect(Collectors.toList()); // Sửa ở đây
+                .collect(Collectors.toList());
 
-        model.addAttribute("tasks", filteredTasks);
+        // Nhóm task theo batchId
+        Map<String, List<Task>> tasksByBatch = filteredTasks.stream()
+                .filter(task -> task.getBatchId() != null && !task.getBatchId().isEmpty())
+                .collect(Collectors.groupingBy(Task::getBatchId));
+
+        // Task không có batch (đơn lẻ)
+        List<Task> singleTasks = filteredTasks.stream()
+                .filter(task -> task.getBatchId() == null || task.getBatchId().isEmpty())
+                .collect(Collectors.toList());
+
+        model.addAttribute("tasksByBatch", tasksByBatch);
+        model.addAttribute("singleTasks", singleTasks);
         model.addAttribute("statusFilter", status);
         model.addAttribute("typeFilter", taskType);
         model.addAttribute("priorityFilter", priority);
@@ -243,5 +258,82 @@ public class TasksController {
         model.addAttribute("completedTasks", allTasks.stream().filter(t -> t.getStatus().equals("COMPLETED")).count());
 
         return "manage/task-management";
+    }
+
+    // Xem chi tiết batch
+    @GetMapping("/batch/{batchId}")
+    public String viewBatchDetail(@PathVariable String batchId, Model model) {
+        List<Task> batchTasks = taskService.getTasksByBatch(batchId);
+        model.addAttribute("batchTasks", batchTasks);
+        model.addAttribute("batchId", batchId);
+        return "manage/batch-detail";
+    }
+
+    // Xóa batch
+
+    // Xóa batch
+    @DeleteMapping("/batch/{batchId}")
+    @ResponseBody
+    public ResponseEntity<?> deleteBatch(@PathVariable String batchId) {
+        try {
+            taskService.deleteBatch(batchId);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Đã xóa batch thành công");
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Lỗi khi xóa batch: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    // Cập nhật status cho cả batch
+    @PutMapping("/batch/{batchId}/status")
+    @ResponseBody
+    public ResponseEntity<?> updateBatchStatus(@PathVariable String batchId, @RequestBody Map<String, String> request) {
+        try {
+            String status = request.get("status");
+            taskService.updateBatchStatus(batchId, status);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Đã cập nhật trạng thái batch thành công");
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Lỗi khi cập nhật batch: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    // Xóa task đơn
+    @DeleteMapping("/{taskId}")
+    @ResponseBody
+    public ResponseEntity<?> deleteTask(@PathVariable int taskId) {
+        try {
+            taskService.deleteTask(taskId);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Đã xóa task thành công");
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Lỗi khi xóa task: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    // Cập nhật status cho task đơn
+    @PutMapping("/{taskId}/status")
+    @ResponseBody
+    public ResponseEntity<?> updateTaskStatus(@PathVariable int taskId, @RequestBody Map<String, String> request) {
+        try {
+            String status = request.get("status");
+            taskService.updateTaskStatus(taskId, status);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Đã cập nhật trạng thái task thành công");
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Lỗi khi cập nhật task: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 }

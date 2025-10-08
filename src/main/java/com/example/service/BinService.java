@@ -42,6 +42,13 @@ public class BinService {
             return binRepository.save(existing);
         }
     }
+    public void deleteBin(int id) {
+        Bin bin = binRepository.findById(id).orElse(null);
+        if (bin != null) {
+            binRepository.delete(bin);
+        }
+    }
+
 
 //    @Scheduled(fixedRate = 60000)
 //    public void checkInactiveBins() {

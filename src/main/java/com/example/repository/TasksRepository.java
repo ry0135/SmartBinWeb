@@ -24,6 +24,8 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
         List<Task> findByBatchId(@Param("batchId") String batchId);
         @Query("SELECT t FROM Task t WHERE t.assignedTo.accountId = :workerId AND t.status IN ('OPEN','DOING')")
         List<Task> findOpenTasksByWorker(@Param("workerId") int workerId);
+
+
         // 1. Lấy danh sách batch (gom nhóm)
         @Query("SELECT new com.example.dto.TaskSummaryDTO(" +
                 "t.batchId, t.assignedTo.accountId, MAX(t.notes), MIN(t.priority)) " +
@@ -41,6 +43,25 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
         @Modifying
         @Query("DELETE FROM Task t WHERE t.batchId = :batchId")
         void deleteByBatchId(@Param("batchId") String batchId);
+
+
+
+
+        // Trong TasksRepository.java
+        @Query("SELECT t FROM Task t WHERE t.status = 'DOING' ORDER BY t.createdAt DESC")
+        List<Task> findDoingTasks();
+        @Query("SELECT t FROM Task t WHERE t.status = 'OPEN' ORDER BY t.createdAt DESC")
+        List<Task> findOpenTasks();
+        @Query("SELECT t FROM Task t WHERE t.status = 'COMPLETED' ORDER BY t.createdAt DESC")
+        List<Task> findCompletedTasks();
+
+        // Lấy doing tasks theo worker
+        @Query("SELECT t FROM Task t WHERE t.status = 'DOING' AND t.assignedTo.accountId = :workerId ORDER BY t.createdAt DESC")
+        List<Task> findDoingTasksByWorker(@Param("workerId") int workerId);
+
+        // Lấy doing tasks theo batch
+        @Query("SELECT t FROM Task t WHERE t.status = 'DOING' AND t.batchId = :batchId ORDER BY t.createdAt DESC")
+        List<Task> findDoingTasksByBatch(@Param("batchId") String batchId);
     }
 
 

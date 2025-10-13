@@ -127,6 +127,9 @@ public class TasksService {
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
     }
+    public List<Task> getAllTasksDoing() {
+        return taskRepository.findAll();
+    }
 // Thêm vào TasksService.java
 
     public void deleteBatch(String batchId) {
@@ -181,5 +184,64 @@ public class TasksService {
             task.setCompletedAt(new Date());
         }
         taskRepository.save(task);
+    }
+
+    // Trong TasksService.java
+    public List<Task> getDoingTasks() {
+        return taskRepository.findDoingTasks();
+    }
+    public List<Task> getOpenTasks() {
+        return taskRepository.findOpenTasks();
+    }
+    public List<Task> getCompletedTasks() {
+        return taskRepository.findCompletedTasks();
+    }
+    public List<Task> getDoingTasksByWorker(int workerId) {
+        return taskRepository.findDoingTasksByWorker(workerId);
+    }
+
+    public List<Task> getDoingTasksByBatch(String batchId) {
+        return taskRepository.findDoingTasksByBatch(batchId);
+    }
+
+    // Lấy danh sách batch đang có task DOING
+    public Map<String, List<Task>> getDoingTasksGroupedByBatch() {
+        List<Task> doingTasks = taskRepository.findDoingTasks();
+
+        // Nhóm task theo batchId
+        Map<String, List<Task>> tasksByBatch = doingTasks.stream()
+                .filter(task -> task.getBatchId() != null && !task.getBatchId().isEmpty())
+                .collect(Collectors.groupingBy(Task::getBatchId));
+
+        return tasksByBatch;
+    }
+
+    // Thống kê doing tasks
+    public Map<String, Object> getDoingTasksStats() {
+        List<Task> doingTasks = taskRepository.findDoingTasks();
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalDoingTasks", doingTasks.size());
+
+        // Thống kê theo loại task
+        Map<String, Long> typeStats = doingTasks.stream()
+                .collect(Collectors.groupingBy(Task::getTaskType, Collectors.counting()));
+        stats.put("tasksByType", typeStats);
+
+        // Thống kê theo độ ưu tiên
+        Map<Integer, Long> priorityStats = doingTasks.stream()
+                .collect(Collectors.groupingBy(Task::getPriority, Collectors.counting()));
+        stats.put("tasksByPriority", priorityStats);
+
+        // Thống kê theo worker
+        Map<String, Long> workerStats = doingTasks.stream()
+                .filter(task -> task.getAssignedTo() != null)
+                .collect(Collectors.groupingBy(
+                        task -> task.getAssignedTo().getFullName(),
+                        Collectors.counting()
+                ));
+        stats.put("tasksByWorker", workerStats);
+
+        return stats;
     }
 }

@@ -58,95 +58,7 @@
             </div>
 
             <!-- Stats Cards -->
-            <div class="row mb-4">
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <a href="${pageContext.request.contextPath}/tasks" class="text-decoration-none">
-                        <div class="card border-left-primary shadow h-100 py-2 stats-card-clickable"
-                             id="allTasksCard"
-                             title="Click để xem tất cả task">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                            Tổng số Task
-                                        </div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">${totalTasks}</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-tasks fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <a href="${pageContext.request.contextPath}/tasks?status=OPEN" class="text-decoration-none">
-                        <div class="card border-left-warning shadow h-100 py-2 stats-card-clickable"
-                             id="openTasksCard"
-                             title="Click để xem task đang mở">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                            Task đang mở
-                                        </div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">${openTasks}</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-folder-open fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <a href="${pageContext.request.contextPath}/tasks?status=DOING" class="text-decoration-none">
-                        <div class="card border-left-info shadow h-100 py-2 stats-card-clickable"
-                             id="doingTasksCard"
-                             title="Click để xem task đang thực hiện">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                            Đang thực hiện
-                                        </div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">${doingTasks}</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-spinner fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <a href="${pageContext.request.contextPath}/tasks?status=COMPLETED" class="text-decoration-none">
-                        <div class="card border-left-success shadow h-100 py-2 stats-card-clickable"
-                             id="completedTasksCard"
-                             title="Click để xem task đã hoàn thành">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                            Đã hoàn thành
-                                        </div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">${completedTasks}</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
+            <%@include file="../include/card.jsp"%>
 
             <!-- Search Section -->
             <div class="card mb-4">
@@ -287,11 +199,9 @@
                                                 <button class="btn btn-sm btn-outline-primary" onclick="viewBatchDetail('${batch.key}')">
                                                     <i class="fas fa-eye"></i> Xem chi tiết
                                                 </button>
-                                                <button class="btn btn-sm btn-outline-warning" onclick="updateBatchStatus('${batch.key}', 'COMPLETED')">
-                                                    <i class="fas fa-check"></i> Hoàn thành
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteBatch('${batch.key}')">
-                                                    <i class="fas fa-trash"></i> Xóa Batch
+                                                
+                                                <button class="btn btn-sm btn-outline-info" onclick="contactWorker(${batch.value[0].assignedTo.accountId})">
+                                                    <i class="fas fa-phone"></i> Liên hệ
                                                 </button>
                                             </div>
                                         </div>
@@ -384,39 +294,6 @@
         }, 100);
     }
 
-    function updateActiveStatsCard(status) {
-        // Xóa active class khỏi tất cả cards
-        document.querySelectorAll('.stats-card-clickable').forEach(card => {
-            card.classList.remove('active');
-        });
-
-        // Thêm active class cho card được chọn
-        let activeCardId = '';
-        switch(status) {
-            case '':
-                activeCardId = 'allTasksCard';
-                break;
-            case 'OPEN':
-                activeCardId = 'openTasksCard';
-                break;
-            case 'DOING':
-                activeCardId = 'doingTasksCard';
-                break;
-            case 'COMPLETED':
-                activeCardId = 'completedTasksCard';
-                break;
-        }
-
-        if (activeCardId) {
-            document.getElementById(activeCardId).classList.add('active');
-        }
-    }
-
-    function removeActiveStatsCard() {
-        document.querySelectorAll('.stats-card-clickable').forEach(card => {
-            card.classList.remove('active');
-        });
-    }
 
     // ==================== TÌM KIẾM VÀ LỌC ====================
     function searchTasks() {

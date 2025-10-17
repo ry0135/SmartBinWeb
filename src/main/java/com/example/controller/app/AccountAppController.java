@@ -4,6 +4,7 @@ import com.example.dto.LoginRequest;
 import com.example.model.Account;
 import com.example.model.ApiMessage;
 import com.example.repository.AccountRepository;
+import com.example.repository.WardRepository;
 import com.example.service.AccountService;
 import com.example.service.EmailService;
 import com.example.service.RandomService;
@@ -23,6 +24,8 @@ public class AccountAppController {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private WardRepository wardRepository;
     @Autowired
     private RandomService randomService;
     @Autowired
@@ -54,6 +57,7 @@ public class AccountAppController {
                         .body(new ApiMessage("EMAIL_NOT_VERIFIED", "Email đã đăng ký nhưng chưa xác minh. Mã xác minh mới đã được gửi."));
             }
         }
+
         account.setPassword(encodedPassword);
         account.setCode(code);
         account.setIsVerified(false);
@@ -105,7 +109,6 @@ public class AccountAppController {
         }
     }
 
-
     @PostMapping("/{id}/update-token")
     public ResponseEntity<?> updateFcmToken(
             @PathVariable int id,
@@ -131,14 +134,17 @@ public class AccountAppController {
         return ResponseEntity.ok(account);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<?> updateAccount(@PathVariable Integer id, @RequestBody Account updatedAccount) {
         Optional<Account> accountOpt = accountRepository.findById(id);
 
+        if (!accountOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
+        }
 
         Account account = accountOpt.get();
 
-        // 🔹 Cập nhật thông tin (nếu client gửi lên)
+        //  Cập nhật thông tin
         if (updatedAccount.getFullName() != null)
             account.setFullName(updatedAccount.getFullName());
 
@@ -148,10 +154,22 @@ public class AccountAppController {
         if (updatedAccount.getAddressDetail() != null)
             account.setAddressDetail(updatedAccount.getAddressDetail());
 
-        if (updatedAccount.getWardID() != null)
-            account.setWardID(updatedAccount.getWardID());
+        if (updatedAccount.getAvatarUrl() != null)
+            account.setAvatarUrl(updatedAccount.getAvatarUrl());
 
-        // ✅ Lưu lại
+        // 🔹 Kiểm tra WardID có tồn tại không trước khi set
+        if (updatedAccount.getWardID() != null) {
+            Integer wardId = updatedAccount.getWardID();
+            boolean wardExists = wardRepository.existsById(wardId);
+
+            if (!wardExists) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("WardID " + wardId + " does not exist in Wards table");
+            }
+
+            account.setWardID(wardId);
+        }
+
         Account saved = accountRepository.save(account);
         return ResponseEntity.ok(saved);
     }

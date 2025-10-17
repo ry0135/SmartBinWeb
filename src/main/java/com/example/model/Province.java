@@ -14,7 +14,7 @@ public class Province {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // IDENTITY cho SQL Server
     @Column(name = "ProvinceID")
-    private Long provinceId;
+    private Integer provinceId;
 
     @Column(name = "ProvinceName", nullable = false, length = 200)
     private String provinceName;
@@ -24,11 +24,11 @@ public class Province {
     private List<Ward> wards;
 
     // Getter & Setter
-    public Long getProvinceId() {
+    public Integer getProvinceId() {
         return provinceId;
     }
 
-    public void setProvinceId(Long provinceId) {
+    public void setProvinceId(Integer provinceId) {
         this.provinceId = provinceId;
     }
 

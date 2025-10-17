@@ -10,7 +10,10 @@ import com.example.repository.TasksRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -223,7 +226,7 @@ public class TasksService {
     // Lấy danh sách batch đang có task DOING
     public Map<String, List<Task>> getDoingTasksGroupedByBatch() {
         List<Task> doingTasks = taskRepository.findDoingTasks();
-
+      
         // Nhóm task theo batchId
         Map<String, List<Task>> tasksByBatch = doingTasks.stream()
                 .filter(task -> task.getBatchId() != null && !task.getBatchId().isEmpty())
@@ -231,6 +234,7 @@ public class TasksService {
 
         return tasksByBatch;
     }
+  
 
     // Thống kê doing tasks
     public Map<String, Object> getDoingTasksStats() {
@@ -259,5 +263,28 @@ public class TasksService {
         stats.put("tasksByWorker", workerStats);
 
         return stats;
+    }
+  
+  
+   @Autowired
+    private FirebaseStorageService firebaseStorageService;
+
+    public String completeTask(Integer taskId, Double lat, Double lng, MultipartFile image) throws IOException {
+        Optional<Task> optionalTask = taskRepository.findById(taskId);
+
+        Task task = optionalTask.get();
+
+        //  Upload ảnh lên Firebase
+        String imageUrl = firebaseStorageService.uploadFile(image, "/task/collect");
+
+        //  Cập nhật thông tin task
+        task.setAfterImage(imageUrl);
+        task.setCompletedAt(new Date());
+        task.setCompletedLat(lat);
+        task.setCompletedLng(lng);
+        task.setStatus("COMPLETED");
+        taskRepository.save(task);
+
+        return " Hoàn thành nhiệm vụ thành công!";
     }
 }

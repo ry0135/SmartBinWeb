@@ -24,7 +24,7 @@ public class LocationService {
         return provinceRepository.findAll();
     }
 
-    public List<Ward> getWardsByProvince(Long provinceId) {
+    public List<Ward> getWardsByProvince(Integer provinceId) {
         return wardRepository.findByProvince_ProvinceId(provinceId);
     }
 

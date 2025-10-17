@@ -10,7 +10,10 @@ import com.example.repository.TasksRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -142,6 +145,29 @@ public class TasksService {
     }
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
+    }
+
+
+    @Autowired
+    private FirebaseStorageService firebaseStorageService;
+
+    public String completeTask(Integer taskId, Double lat, Double lng, MultipartFile image) throws IOException {
+        Optional<Task> optionalTask = taskRepository.findById(taskId);
+
+        Task task = optionalTask.get();
+
+        //  Upload ảnh lên Firebase
+        String imageUrl = firebaseStorageService.uploadFile(image, "/task/collect");
+
+        //  Cập nhật thông tin task
+        task.setAfterImage(imageUrl);
+        task.setCompletedAt(new Date());
+        task.setCompletedLat(lat);
+        task.setCompletedLng(lng);
+        task.setStatus("COMPLETED");
+        taskRepository.save(task);
+
+        return " Hoàn thành nhiệm vụ thành công!";
     }
 
 }

@@ -52,6 +52,10 @@ public class Account {
 
     @Column(name = "fcm_token")
     private String fcmToken;
+    @Column(name = "AvatarUrl", length = 500)
+    private String avatarUrl;
+
+
 
     // Relationship với Ward
     @ManyToOne(fetch = FetchType.LAZY)
@@ -187,6 +191,14 @@ public class Account {
 
     public void setFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+    // Getter & Setter
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
     public void setCreatedAt(Date createdAt) {

@@ -211,7 +211,7 @@
                     </div>
                     <div class="col-md-4">
                       <div class="d-grid gap-2">
-                        <button class="btn btn-sm btn-outline-primary" onclick="viewBatchDetail('${batch.key}')">
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewBatchDetailOpen('${batch.key}')">
                           <i class="fas fa-eye"></i> Xem chi tiết
                         </button>
                         <button class="btn btn-sm btn-outline-danger" onclick="deleteBatch('${batch.key}')">
@@ -477,8 +477,8 @@
   }
 
   // ==================== CÁC HÀM TIỆN ÍCH ====================
-  function viewBatchDetail(batchId) {
-    window.location.href = '${pageContext.request.contextPath}/tasks/batch/' + batchId;
+  function viewBatchDetailOpen(batchId) {
+    window.location.href = '${pageContext.request.contextPath}/tasks/batchOpen/' + batchId;
   }
 
   function updateBatchStatus(batchId, status) {

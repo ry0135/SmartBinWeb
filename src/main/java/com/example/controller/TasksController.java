@@ -423,7 +423,20 @@ public class TasksController {
         model.addAttribute("batchId", batchId);
         return "manage/batch-detail";
     }
-
+    @GetMapping("/batchOpen/{batchId}")
+    public String viewBatchDetailOpen(@PathVariable String batchId, Model model) {
+        List<Task> batchTasks = taskService.getTasksByBatchOpen(batchId);
+        model.addAttribute("batchTasks", batchTasks);
+        model.addAttribute("batchId", batchId);
+        return "manage/task-open";
+    }
+    @GetMapping("/batchDoing/{batchId}")
+    public String viewBatchDetailDoing(@PathVariable String batchId, Model model) {
+        List<Task> batchTasks = taskService.getTasksByBatchDoing(batchId);
+        model.addAttribute("batchTasks", batchTasks);
+        model.addAttribute("batchId", batchId);
+        return "manage/task-doing";
+    }
     // Xóa batch
 
     // Xóa batch

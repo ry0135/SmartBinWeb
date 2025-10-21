@@ -94,6 +94,12 @@ public class TasksService {
     public List<Task> getTasksByBatch(String batchId) {
         return taskRepository.findByBatchId(batchId);
     }
+    public List<Task> getTasksByBatchOpen(String batchId) {
+        return taskRepository.findByBatchIdOpen(batchId);
+    }
+    public List<Task> getTasksByBatchDoing(String batchId) {
+        return taskRepository.findByBatchIdDoing(batchId);
+    }
 
     // Lấy danh sách nhân viên có thể giao task
     public List<Account> getAvailableWorkers(int wardID) {

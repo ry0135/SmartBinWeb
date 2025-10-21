@@ -7,6 +7,49 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<style>
+    .stats-card-clickable {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .stats-card-clickable:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+    }
+
+    .stats-card-clickable.active {
+        transform: scale(0.98);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+        border-width: 2px !important;
+    }
+
+    /* Hiệu ứng ripple */
+    .stats-card-clickable {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stats-card-clickable::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.3s ease, height 0.3s ease;
+    }
+
+    .stats-card-clickable:active::after {
+        width: 300px;
+        height: 300px;
+    }
+</style>
+
 <div class="row mb-4">
     <div class="col-xl-3 col-md-6 mb-4">
         <a href="${pageContext.request.contextPath}/tasks/management" class="text-decoration-none">
@@ -96,3 +139,37 @@
         </a>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lấy tất cả các card
+        const cards = document.querySelectorAll('.stats-card-clickable');
+
+        // Thêm sự kiện click cho mỗi card
+        cards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Xóa class active từ tất cả các card
+                cards.forEach(c => c.classList.remove('active'));
+
+                // Thêm class active cho card được click
+                this.classList.add('active');
+
+                // Tự động remove class active sau 500ms để có thể click lại
+                setTimeout(() => {
+                    this.classList.remove('active');
+                }, 500);
+            });
+        });
+
+        // Thêm sự kiện cho phím tắt (tùy chọn)
+        document.addEventListener('keydown', function(e) {
+            // 1-4 để chọn các card tương ứng
+            if (e.key >= '1' && e.key <= '4') {
+                const index = parseInt(e.key) - 1;
+                if (cards[index]) {
+                    cards[index].click();
+                }
+            }
+        });
+    });
+</script>

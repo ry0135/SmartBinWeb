@@ -245,11 +245,11 @@
                     data-status="${bin.status}"
                     data-fill="${bin.currentFill}"
                     data-bin-id="${bin.binID}"
-                    data-ward-id="${bin.ward.wardId}">
+                    data-ward-id="${bin.ward.wardID}">
                   <td class="text-center">
                     <div class="form-check">
                       <input class="form-check-input bin-checkbox" type="checkbox" value="${bin.binID}"
-                             data-ward-id="${bin.ward.wardId}"
+                             data-ward-id="${bin.ward.wardID}"
                              data-ward-name="${bin.ward.wardName}">
                     </div>
                   </td>

@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface BinRepository extends JpaRepository<Bin, Integer> {
 
+
     Bin findByBinCode(String binCode);
 
     // JOIN để lấy thông tin đầy đủ bao gồm Ward và Province
@@ -22,4 +23,5 @@ public interface BinRepository extends JpaRepository<Bin, Integer> {
     // JOIN để lấy bins theo wardID với thông tin đầy đủ
     @Query("SELECT b FROM Bin b JOIN FETCH b.ward w JOIN FETCH w.province WHERE b.wardID = :wardID")
     List<Bin> findByWardIDWithWardAndProvince(@Param("wardID") int wardID);
+    boolean existsByBinCode(String binCode);
 }

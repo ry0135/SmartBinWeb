@@ -100,6 +100,9 @@ public class TasksService {
     public List<Task> getTasksByBatchDoing(String batchId) {
         return taskRepository.findByBatchIdDoing(batchId);
     }
+    public List<Task> getTasksByBatchComplete(String batchId) {
+        return taskRepository.findByBatchIdCompeleted(batchId);
+    }
 
     // Lấy danh sách nhân viên có thể giao task
     public List<Account> getAvailableWorkers(int wardID) {
@@ -221,6 +224,9 @@ public class TasksService {
     public List<Task> getCompletedTasks() {
         return taskRepository.findCompletedTasks();
     }
+    public List<Task> getCancelTasks() {
+        return taskRepository.findCancelTasks();
+    }
     public List<Task> getDoingTasksByWorker(int workerId) {
         return taskRepository.findDoingTasksByWorker(workerId);
     }
@@ -292,5 +298,34 @@ public class TasksService {
         taskRepository.save(task);
 
         return " Hoàn thành nhiệm vụ thành công!";
+    }
+    // Cập nhật batch - đơn giản như insert
+    // Cập nhật batch - đơn giản
+    @Transactional
+    public void updateBatch(String batchId, int workerId, int priority, String notes) throws Exception {
+
+        List<Task> batchTasks = taskRepository.findByBatchId(batchId);
+        if (batchTasks.isEmpty()) {
+            throw new RuntimeException("Batch không tồn tại");
+        }
+
+        Account worker = accountRepository.findById(workerId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy worker với ID = " + workerId));
+
+        // Cập nhật tất cả task trong batch
+        for (Task task : batchTasks) {
+            task.setAssignedTo(worker);
+            task.setPriority(priority);
+            task.setNotes(notes);
+            taskRepository.save(task);
+        }
+
+        // Gửi thông báo cho worker
+        String token = accountService.getFcmTokenByWorkerId(workerId);
+        if (token != null && !token.isEmpty()) {
+            String title = "Batch được cập nhật";
+            String body = "Batch " + batchId + " đã được cập nhật thông tin";
+            fcmService.sendNotification(token, title, body, batchId);
+        }
     }
 }

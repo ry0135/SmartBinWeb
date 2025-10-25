@@ -40,6 +40,28 @@
     .stats-card:hover {
       transform: translateY(-3px);
     }
+
+    /* Pagination styles */
+    .pagination {
+      margin-top: 20px;
+    }
+
+    .page-link {
+      color: #ffc107;
+      border: 1px solid #dee2e6;
+    }
+
+    .page-link:hover {
+      color: #fff;
+      background-color: #ffc107;
+      border-color: #ffc107;
+    }
+
+    .page-item.active .page-link {
+      background-color: #ffc107;
+      border-color: #ffc107;
+      color: #000;
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -69,52 +91,34 @@
       <div class="card mb-4">
         <div class="card-header">
           <i class="fas fa-search me-1"></i>
-          Tìm kiếm Task đang thực hiện
+          Tìm kiếm & Lọc nhiệm vụ
         </div>
         <div class="card-body">
           <form id="searchForm" class="row g-3">
-            <div class="col-md-3">
+            <div class="col-md-6">
               <label for="searchKeyword" class="form-label">Từ khóa</label>
               <input type="text" class="form-control" id="searchKeyword"
-                     placeholder="Tìm theo batch ID, nhân viên, thùng rác...">
+                     placeholder="Tìm theo batch ID, nhân viên, thùng rác..."
+                     onkeyup="performSearch()">
             </div>
-            <div class="col-md-2">
-              <label for="searchType" class="form-label">Loại task</label>
-              <select class="form-select" id="searchType">
+            <div class="col-md-3">
+              <label for="searchType" class="form-label">Loại nhiệm vụ</label>
+              <select class="form-select" id="searchType" onchange="performSearch()">
                 <option value="">Tất cả</option>
-                <option value="COLLECT">Thu gom</option>
-                <option value="CLEAN">Vệ sinh</option>
-                <option value="REPAIR">Sửa chữa</option>
-              </select>
-            </div>
-            <div class="col-md-2">
-              <label for="searchPriority" class="form-label">Độ ưu tiên</label>
-              <select class="form-select" id="searchPriority">
-                <option value="">Tất cả</option>
-                <option value="1">Cao</option>
-                <option value="2">Trung bình</option>
-                <option value="3">Thấp</option>
-              </select>
-            </div>
-            <div class="col-md-2">
-              <label for="searchWorker" class="form-label">Nhân viên</label>
-              <select class="form-select" id="searchWorker">
-                <option value="">Tất cả</option>
-                <c:forEach var="worker" items="${uniqueWorkers}">
-                  <option value="${worker.accountId}">${worker.fullName}</option>
-                </c:forEach>
+                <option value="COLLECTION">Thu gom</option>
+                <option value="MAINTENANCE">Bảo trì</option>
               </select>
             </div>
             <div class="col-md-3">
-              <label class="form-label">&nbsp;</label>
-              <div class="d-grid gap-2 d-md-flex">
-                <button type="button" class="btn btn-warning me-2" onclick="searchDoingTasks()">
-                  <i class="fas fa-search"></i> Tìm kiếm
-                </button>
-                <button type="button" class="btn btn-outline-secondary" onclick="clearSearch()">
-                  <i class="fas fa-undo"></i> Xóa
-                </button>
-              </div>
+              <label for="searchPriority" class="form-label">Độ ưu tiên</label>
+              <select class="form-select" id="searchPriority" onchange="performSearch()">
+                <option value="">Tất cả</option>
+                <option value="5">Rất cao</option>
+                <option value="4">Cao</option>
+                <option value="3">Trung bình</option>
+                <option value="2">Thấp</option>
+                <option value="1">Rất thấp</option>
+              </select>
             </div>
           </form>
         </div>
@@ -128,14 +132,14 @@
             Batch đang thực hiện
           </div>
           <div class="text-muted small" id="searchResultInfo">
-            Hiển thị ${totalDoingTasks} task đang thực hiện
+            Hiển thị <span id="showingFrom">1</span> - <span id="showingTo">0</span> / <span id="totalResults">0</span> tasks
           </div>
         </div>
         <div class="card-body">
           <!-- Hiển thị Batch đang DOING -->
           <div id="batchTasksSection">
             <c:forEach var="batch" items="${doingTasksByBatch}">
-              <div class="card mb-3 batch-card">
+              <div class="card mb-3 batch-card" data-batch-card>
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-8">
@@ -166,36 +170,60 @@
                             </div>
                             <div class="mb-1">
                               <strong>Loại:</strong>
-                              <span class="badge ${batch.value[0].taskType == 'COLLECT' ? 'bg-primary' : batch.value[0].taskType == 'CLEAN' ? 'bg-info' : 'bg-warning'}">
-                                  ${batch.value[0].taskType}
+                              <span class="badge ${batch.value[0].taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${batch.value[0].taskType}">
+                                <c:choose>
+                                  <c:when test="${batch.value[0].taskType == 'COLLECTION'}">Thu gom</c:when>
+                                  <c:when test="${batch.value[0].taskType == 'MAINTENANCE'}">Bảo trì</c:when>
+                                  <c:otherwise>${batch.value[0].taskType}</c:otherwise>
+                                </c:choose>
                               </span>
                             </div>
                           </div>
                           <div class="col-sm-6">
                             <!-- Thống kê chi tiết -->
-                            <c:set var="highPriority" value="0"/>
-                            <c:set var="mediumPriority" value="0"/>
-                            <c:set var="lowPriority" value="0"/>
+                            <c:set var="priority5" value="0"/>
+                            <c:set var="priority4" value="0"/>
+                            <c:set var="priority3" value="0"/>
+                            <c:set var="priority2" value="0"/>
+                            <c:set var="priority1" value="0"/>
 
                             <c:forEach var="task" items="${batch.value}">
                               <c:choose>
-                                <c:when test="${task.priority == 1}">
-                                  <c:set var="highPriority" value="${highPriority + 1}"/>
+                                <c:when test="${task.priority == 5}">
+                                  <c:set var="priority5" value="${priority5 + 1}"/>
                                 </c:when>
-                                <c:when test="${task.priority == 2}">
-                                  <c:set var="mediumPriority" value="${mediumPriority + 1}"/>
+                                <c:when test="${task.priority == 4}">
+                                  <c:set var="priority4" value="${priority4 + 1}"/>
                                 </c:when>
                                 <c:when test="${task.priority == 3}">
-                                  <c:set var="lowPriority" value="${lowPriority + 1}"/>
+                                  <c:set var="priority3" value="${priority3 + 1}"/>
+                                </c:when>
+                                <c:when test="${task.priority == 2}">
+                                  <c:set var="priority2" value="${priority2 + 1}"/>
+                                </c:when>
+                                <c:when test="${task.priority == 1}">
+                                  <c:set var="priority1" value="${priority1 + 1}"/>
                                 </c:when>
                               </c:choose>
                             </c:forEach>
 
-                            <div class="mb-1">
+                            <div class="mb-1" data-priorities data-p5="${priority5}" data-p4="${priority4}" data-p3="${priority3}" data-p2="${priority2}" data-p1="${priority1}">
                               <strong>Độ ưu tiên:</strong><br>
-                              <span class="badge bg-danger me-1">Cao: ${highPriority}</span>
-                              <span class="badge bg-warning me-1">TB: ${mediumPriority}</span>
-                              <span class="badge bg-success">Thấp: ${lowPriority}</span>
+                              <c:if test="${priority5 > 0}">
+                                <span class="badge bg-danger me-1">Rất cao: ${priority5}</span>
+                              </c:if>
+                              <c:if test="${priority4 > 0}">
+                                <span class="badge bg-danger me-1" style="opacity: 0.8;">Cao: ${priority4}</span>
+                              </c:if>
+                              <c:if test="${priority3 > 0}">
+                                <span class="badge bg-warning me-1">TB: ${priority3}</span>
+                              </c:if>
+                              <c:if test="${priority2 > 0}">
+                                <span class="badge bg-info me-1">Thấp: ${priority2}</span>
+                              </c:if>
+                              <c:if test="${priority1 > 0}">
+                                <span class="badge bg-success">Rất thấp: ${priority1}</span>
+                              </c:if>
                             </div>
 
                             <div class="mb-1">
@@ -214,12 +242,17 @@
                         <button class="btn btn-sm btn-outline-primary" onclick="viewBatchDetailOpen('${batch.key}')">
                           <i class="fas fa-eye"></i> Xem chi tiết
                         </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="editBatch('${batch.key}')">
+                          <i class="fas fa-edit"></i> Chỉnh sửa
+                        </button>
                         <button class="btn btn-sm btn-outline-danger" onclick="deleteBatch('${batch.key}')">
                           <i class="fas fa-trash"></i> Xóa Batch
                         </button>
-                        <button class="btn btn-sm btn-outline-info" onclick="contactWorker(${batch.value[0].assignedTo.accountId})">
-                          <i class="fas fa-phone"></i> Liên hệ
-                        </button>
+                        <c:if test="${not empty batch.value[0].assignedTo}">
+                          <button class="btn btn-sm btn-outline-info" onclick="contactWorker(${batch.value[0].assignedTo.accountId})">
+                            <i class="fas fa-phone"></i> Liên hệ
+                          </button>
+                        </c:if>
                       </div>
                     </div>
                   </div>
@@ -236,29 +269,49 @@
                 Task đơn lẻ đang thực hiện
               </h5>
               <c:forEach var="task" items="${singleDoingTasks}">
-                <div class="card mb-2 task-card">
+                <div class="card mb-2 task-card" data-task-card>
                   <div class="card-body py-2">
-                    <div class="row">
-                      <div class="col-md-3">
+                    <div class="row align-items-center">
+                      <div class="col-md-2">
                         <strong>Task #${task.taskID}</strong>
                       </div>
                       <div class="col-md-2">
                         <span class="badge bg-dark">Thùng ${task.bin.binID}</span>
                       </div>
                       <div class="col-md-2">
-                        <span class="badge ${task.taskType == 'COLLECT' ? 'bg-primary' : task.taskType == 'CLEAN' ? 'bg-info' : 'bg-warning'}">
-                            ${task.taskType}
+                        <span class="badge ${task.taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${task.taskType}">
+                          <c:choose>
+                            <c:when test="${task.taskType == 'COLLECTION'}">Thu gom</c:when>
+                            <c:when test="${task.taskType == 'MAINTENANCE'}">Bảo trì</c:when>
+                            <c:otherwise>${task.taskType}</c:otherwise>
+                          </c:choose>
                         </span>
                       </div>
                       <div class="col-md-2">
-                        <span class="badge ${task.priority == 1 ? 'bg-danger' : task.priority == 2 ? 'bg-warning' : 'bg-success'}">
-                          Ưu tiên ${task.priority}
+                        <span class="badge ${task.priority == 5 ? 'bg-danger' : task.priority == 4 ? 'bg-danger' : task.priority == 3 ? 'bg-warning' : task.priority == 2 ? 'bg-info' : 'bg-success'}"
+                              style="${task.priority == 4 ? 'opacity: 0.8;' : ''}" data-priority="${task.priority}">
+                          <c:choose>
+                            <c:when test="${task.priority == 5}">Rất cao</c:when>
+                            <c:when test="${task.priority == 4}">Cao</c:when>
+                            <c:when test="${task.priority == 3}">Trung bình</c:when>
+                            <c:when test="${task.priority == 2}">Thấp</c:when>
+                            <c:when test="${task.priority == 1}">Rất thấp</c:when>
+                            <c:otherwise>Ưu tiên ${task.priority}</c:otherwise>
+                          </c:choose>
                         </span>
                       </div>
-                      <div class="col-md-3">
+                      <div class="col-md-2">
                         <c:if test="${not empty task.assignedTo}">
                           <span class="text-muted">${task.assignedTo.fullName}</span>
                         </c:if>
+                      </div>
+                      <div class="col-md-2 text-end">
+                        <button class="btn btn-sm btn-outline-success me-1" onclick="editTask(${task.taskID})" title="Chỉnh sửa">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewTaskDetail(${task.taskID})" title="Xem chi tiết">
+                          <i class="fas fa-eye"></i>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -269,7 +322,7 @@
 
           <!-- Hiển thị khi không có task nào -->
           <c:if test="${empty doingTasksByBatch and empty singleDoingTasks}">
-            <div class="text-center py-5">
+            <div class="text-center py-5" id="emptyState">
               <i class="fas fa-play-circle fa-3x text-muted mb-3"></i>
               <h5 class="text-muted">Không có task nào đang thực hiện</h5>
               <p class="text-muted">Tất cả các task hiện đã hoàn thành hoặc chưa được bắt đầu</p>
@@ -282,6 +335,18 @@
             <h5 class="text-muted">Không tìm thấy task phù hợp</h5>
             <p class="text-muted">Hãy thử điều chỉnh từ khóa tìm kiếm hoặc bộ lọc</p>
           </div>
+
+          <!-- Pagination -->
+          <div class="d-flex justify-content-between align-items-center mt-4" id="paginationSection">
+            <div class="text-muted small">
+              Hiển thị <span id="pageShowingFrom">1</span> - <span id="pageShowingTo">0</span> của <span id="pageTotalItems">0</span> mục
+            </div>
+            <nav>
+              <ul class="pagination pagination-sm mb-0" id="pagination">
+                <!-- Pagination will be generated by JavaScript -->
+              </ul>
+            </nav>
+          </div>
         </div>
       </div>
     </main>
@@ -290,97 +355,63 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+  // ==================== BIẾN TOÀN CỤC ====================
+  let allBatchCards = [];
+  let allTaskCards = [];
+  let filteredItems = [];
+  let currentPage = 1;
+  let itemsPerPage = 2;
+
   // ==================== KHỞI TẠO ====================
   document.addEventListener('DOMContentLoaded', function() {
     initializePage();
   });
 
   function initializePage() {
-    // Khởi tạo các sự kiện
-    setupEventListeners();
+    // Lấy tất cả các card
+    allBatchCards = Array.from(document.querySelectorAll('[data-batch-card]'));
+    allTaskCards = Array.from(document.querySelectorAll('[data-task-card]'));
+
+    // Khởi tạo filtered items
+    filteredItems = [...allBatchCards, ...allTaskCards];
+
+    console.log('Total batch cards:', allBatchCards.length);
+    console.log('Total task cards:', allTaskCards.length);
+    console.log('Total items:', filteredItems.length);
+
+    // Hiển thị trang đầu tiên
+    displayPage(1);
   }
 
-  function setupEventListeners() {
-    document.getElementById('searchKeyword').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        searchDoingTasks();
-      }
-    });
-  }
-
-  // ==================== TÌM KIẾM ====================
-  function searchDoingTasks() {
+  // ==================== TÌM KIẾM REALTIME ====================
+  function performSearch() {
     const keyword = document.getElementById('searchKeyword').value.toLowerCase();
     const type = document.getElementById('searchType').value;
     const priority = document.getElementById('searchPriority').value;
-    const worker = document.getElementById('searchWorker').value;
 
-    const batchCards = document.querySelectorAll('.batch-card');
-    const taskCards = document.querySelectorAll('.task-card');
-    let visibleCount = 0;
+    filteredItems = [];
 
     // Lọc batch cards
-    batchCards.forEach(card => {
-      const cardText = card.textContent.toLowerCase();
-      let isVisible = true;
-
-      if (keyword && !cardText.includes(keyword)) {
-        isVisible = false;
+    allBatchCards.forEach(card => {
+      let isVisible = matchesFilters(card, keyword, type, priority);
+      if (isVisible) {
+        filteredItems.push(card);
       }
-
-      if (type) {
-        const typeBadges = card.querySelectorAll('.badge');
-        let hasMatchingType = false;
-        typeBadges.forEach(badge => {
-          if (badge.textContent.toUpperCase().includes(type)) {
-            hasMatchingType = true;
-          }
-        });
-        if (!hasMatchingType) {
-          isVisible = false;
-        }
-      }
-
-      if (worker) {
-        const workerText = card.textContent;
-        if (!workerText.includes(worker)) {
-          isVisible = false;
-        }
-      }
-
-      card.style.display = isVisible ? 'block' : 'none';
-      if (isVisible) visibleCount++;
     });
 
     // Lọc task cards
-    taskCards.forEach(card => {
-      const cardText = card.textContent.toLowerCase();
-      let isVisible = true;
-
-      if (keyword && !cardText.includes(keyword)) {
-        isVisible = false;
+    allTaskCards.forEach(card => {
+      let isVisible = matchesFilters(card, keyword, type, priority);
+      if (isVisible) {
+        filteredItems.push(card);
       }
-
-      if (type) {
-        const typeBadges = card.querySelectorAll('.badge');
-        let hasMatchingType = false;
-        typeBadges.forEach(badge => {
-          if (badge.textContent.toUpperCase().includes(type)) {
-            hasMatchingType = true;
-          }
-        });
-        if (!hasMatchingType) {
-          isVisible = false;
-        }
-      }
-
-      card.style.display = isVisible ? 'block' : 'none';
-      if (isVisible) visibleCount++;
     });
 
-    updateSearchInfo(visibleCount, keyword, type, priority, worker);
+    // Reset về trang 1
+    currentPage = 1;
+    displayPage(1);
 
+    // Highlight text nếu có keyword
     if (keyword) {
       setTimeout(() => highlightText(keyword), 100);
     } else {
@@ -388,36 +419,186 @@
     }
   }
 
-  function updateSearchInfo(visibleCount, keyword, type, priority, worker) {
-    const resultInfo = document.getElementById('searchResultInfo');
-    const noResults = document.getElementById('noResults');
-    const hasFilter = keyword || type || priority || worker;
+  function matchesFilters(card, keyword, type, priority) {
+    const cardText = card.textContent.toLowerCase();
+    let isVisible = true;
 
-    if (hasFilter) {
-      resultInfo.textContent = `Tìm thấy ${visibleCount} task phù hợp`;
-    } else {
-      resultInfo.textContent = `Hiển thị ${visibleCount} task đang thực hiện`;
+    // Lọc theo keyword
+    if (keyword && !cardText.includes(keyword)) {
+      isVisible = false;
     }
 
-    if (visibleCount === 0 && hasFilter) {
+    // Lọc theo loại task
+    if (type) {
+      const taskTypeElement = card.querySelector('[data-task-type]');
+      if (!taskTypeElement || taskTypeElement.getAttribute('data-task-type') !== type) {
+        isVisible = false;
+      }
+    }
+
+    // Lọc theo độ ưu tiên
+    if (priority) {
+      const priorityElement = card.querySelector('[data-priority]');
+      const prioritiesElement = card.querySelector('[data-priorities]');
+
+      let hasPriority = false;
+
+      // Kiểm tra task đơn lẻ
+      if (priorityElement && priorityElement.getAttribute('data-priority') === priority) {
+        hasPriority = true;
+      }
+
+      // Kiểm tra batch (có chứa task với priority này không)
+      if (prioritiesElement) {
+        const priorityCount = parseInt(prioritiesElement.getAttribute('data-p' + priority)) || 0;
+        if (priorityCount > 0) {
+          hasPriority = true;
+        }
+      }
+
+      if (!hasPriority) {
+        isVisible = false;
+      }
+    }
+
+    return isVisible;
+  }
+
+  // ==================== PHÂN TRANG ====================
+  function displayPage(page) {
+    currentPage = page;
+    const totalItems = filteredItems.length;
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+    console.log('Display page:', page);
+    console.log('Total items:', totalItems);
+    console.log('Start index:', startIndex);
+    console.log('End index:', endIndex);
+
+    // Ẩn tất cả các card
+    [...allBatchCards, ...allTaskCards].forEach(card => {
+      card.style.display = 'none';
+    });
+
+    // Hiển thị các card trong trang hiện tại
+    for (let i = startIndex; i < endIndex; i++) {
+      if (filteredItems[i]) {
+        filteredItems[i].style.display = 'block';
+      }
+    }
+
+    // Cập nhật thông tin phân trang
+    updatePaginationInfo(startIndex + 1, endIndex, totalItems);
+
+    // Tạo các nút phân trang
+    createPaginationButtons(totalItems);
+
+    // Hiển thị/ẩn thông báo
+    updateNoResultsMessage(totalItems);
+  }
+
+  function updatePaginationInfo(from, to, total) {
+    document.getElementById('showingFrom').textContent = total > 0 ? from : 0;
+    document.getElementById('showingTo').textContent = to;
+    document.getElementById('totalResults').textContent = total;
+
+    document.getElementById('pageShowingFrom').textContent = total > 0 ? from : 0;
+    document.getElementById('pageShowingTo').textContent = to;
+    document.getElementById('pageTotalItems').textContent = total;
+  }
+
+  function createPaginationButtons(totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const paginationContainer = document.getElementById('pagination');
+    paginationContainer.innerHTML = '';
+
+    if (totalPages <= 1) {
+      document.getElementById('paginationSection').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('paginationSection').style.display = 'flex';
+
+    // Nút Previous
+    const prevLi = document.createElement('li');
+    prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+    prevLi.innerHTML = '<a class="page-link" href="#" onclick="goToPage(' + (currentPage - 1) + '); return false;">«</a>';
+    paginationContainer.appendChild(prevLi);
+
+    // Tính toán phạm vi trang hiển thị
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+
+    // Nút trang đầu
+    if (startPage > 1) {
+      const firstLi = document.createElement('li');
+      firstLi.className = 'page-item';
+      firstLi.innerHTML = '<a class="page-link" href="#" onclick="goToPage(1); return false;">1</a>';
+      paginationContainer.appendChild(firstLi);
+
+      if (startPage > 2) {
+        const dotsLi = document.createElement('li');
+        dotsLi.className = 'page-item disabled';
+        dotsLi.innerHTML = '<a class="page-link" href="#">...</a>';
+        paginationContainer.appendChild(dotsLi);
+      }
+    }
+
+    // Các trang ở giữa
+    for (let i = startPage; i <= endPage; i++) {
+      const pageLi = document.createElement('li');
+      pageLi.className = 'page-item' + (i === currentPage ? ' active' : '');
+      pageLi.innerHTML = '<a class="page-link" href="#" onclick="goToPage(' + i + '); return false;">' + i + '</a>';
+      paginationContainer.appendChild(pageLi);
+    }
+
+    // Nút trang cuối
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        const dotsLi = document.createElement('li');
+        dotsLi.className = 'page-item disabled';
+        dotsLi.innerHTML = '<a class="page-link" href="#">...</a>';
+        paginationContainer.appendChild(dotsLi);
+      }
+
+      const lastLi = document.createElement('li');
+      lastLi.className = 'page-item';
+      lastLi.innerHTML = '<a class="page-link" href="#" onclick="goToPage(' + totalPages + '); return false;">' + totalPages + '</a>';
+      paginationContainer.appendChild(lastLi);
+    }
+
+    // Nút Next
+    const nextLi = document.createElement('li');
+    nextLi.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
+    nextLi.innerHTML = '<a class="page-link" href="#" onclick="goToPage(' + (currentPage + 1) + '); return false;">»</a>';
+    paginationContainer.appendChild(nextLi);
+  }
+
+  function goToPage(page) {
+    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+    if (page < 1 || page > totalPages) return;
+
+    displayPage(page);
+
+    // Cuộn lên đầu danh sách
+    document.querySelector('.card-header').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function updateNoResultsMessage(totalItems) {
+    const noResults = document.getElementById('noResults');
+    const emptyState = document.getElementById('emptyState');
+    const keyword = document.getElementById('searchKeyword').value;
+    const type = document.getElementById('searchType').value;
+    const priority = document.getElementById('searchPriority').value;
+    const hasFilter = keyword || type || priority;
+
+    if (totalItems === 0 && hasFilter) {
       noResults.style.display = 'block';
+      if (emptyState) emptyState.style.display = 'none';
     } else {
       noResults.style.display = 'none';
     }
-  }
-
-  function clearSearch() {
-    document.getElementById('searchKeyword').value = '';
-    document.getElementById('searchType').value = '';
-    document.getElementById('searchPriority').value = '';
-    document.getElementById('searchWorker').value = '';
-    searchDoingTasks();
-  }
-
-  // ==================== LỌC THEO LOẠI TASK ====================
-  function filterByType(taskType) {
-    document.getElementById('searchType').value = taskType;
-    searchDoingTasks();
   }
 
   // ==================== HIGHLIGHT TEXT ====================
@@ -425,7 +606,7 @@
     clearHighlights();
 
     const walker = document.createTreeWalker(
-            document.body,
+            document.getElementById('batchTasksSection'),
             NodeFilter.SHOW_TEXT,
             {
               acceptNode: function(node) {
@@ -481,18 +662,21 @@
     window.location.href = '${pageContext.request.contextPath}/tasks/batchOpen/' + batchId;
   }
 
-  function updateBatchStatus(batchId, status) {
-    if(confirm('Bạn có chắc muốn đánh dấu toàn bộ batch này là đã hoàn thành?')) {
-      fetch('${pageContext.request.contextPath}/tasks/batch/' + batchId + '/status', {
-        method: 'PUT',
+  function editBatch(batchId) {
+    window.location.href = '${pageContext.request.contextPath}/tasks/batch/' + batchId + '/edit';
+  }
+
+  function deleteBatch(batchId) {
+    if(confirm('Bạn có chắc muốn xóa batch này?\nTất cả các task trong batch cũng sẽ bị xóa.')) {
+      fetch('${pageContext.request.contextPath}/tasks/batch/' + batchId, {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({status: status})
+        }
       })
               .then(response => {
                 if(response.ok) {
-                  alert('Cập nhật thành công!');
+                  alert('Xóa batch thành công!');
                   location.reload();
                 } else {
                   alert('Có lỗi xảy ra. Vui lòng thử lại!');
@@ -503,6 +687,14 @@
                 alert('Có lỗi xảy ra. Vui lòng thử lại!');
               });
     }
+  }
+
+  function editTask(taskId) {
+    window.location.href = '${pageContext.request.contextPath}/tasks/' + taskId + '/edit';
+  }
+
+  function viewTaskDetail(taskId) {
+    window.location.href = '${pageContext.request.contextPath}/tasks/' + taskId;
   }
 
   function contactWorker(workerId) {

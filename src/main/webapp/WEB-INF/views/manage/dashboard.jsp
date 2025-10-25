@@ -73,20 +73,20 @@
 
             <!-- Main Layout: Filter Left, Map Right -->
             <div class="row g-4 mb-4">
-                <!-- Filter Panel - Left Side -->
-                <div class="col-md-4">
+                <!-- Filter Panel - Left Side (Giảm từ col-md-4 xuống col-md-3) -->
+                <div class="col-md-3">
                     <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white border-bottom-0">
-                            <h5 class="mb-0">
+                        <div class="card-header bg-white border-bottom-0 py-2">
+                            <h6 class="mb-0">
                                 <i class="fas fa-filter me-2"></i>Bộ lọc
-                            </h5>
+                            </h6>
                         </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="cityFilter" class="form-label fw-semibold">
+                        <div class="card-body py-3">
+                            <div class="mb-2">
+                                <label for="cityFilter" class="form-label fw-semibold small mb-1">
                                     <i class="fas fa-city me-1 text-primary"></i>Khu vực:
                                 </label>
-                                <select class="form-select" id="cityFilter">
+                                <select class="form-select form-select-sm" id="cityFilter">
                                     <option value="">-- Tất cả --</option>
                                     <c:forEach var="city" items="${cities}">
                                         <option value="${city}">${city}</option>
@@ -94,11 +94,11 @@
                                 </select>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="wardFilter" class="form-label fw-semibold">
+                            <div class="mb-2">
+                                <label for="wardFilter" class="form-label fw-semibold small mb-1">
                                     <i class="fas fa-map-marker-alt me-1 text-success"></i>Phường/Xã:
                                 </label>
-                                <select class="form-select" id="wardFilter">
+                                <select class="form-select form-select-sm" id="wardFilter">
                                     <option value="">-- Tất cả --</option>
                                     <c:forEach var="ward" items="${wards}">
                                         <option value="${ward}">${ward}</option>
@@ -106,11 +106,11 @@
                                 </select>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="fillFilter" class="form-label fw-semibold">
+                            <div class="mb-2">
+                                <label for="fillFilter" class="form-label fw-semibold small mb-1">
                                     <i class="fas fa-chart-bar me-1 text-warning"></i>Mức đầy:
                                 </label>
-                                <select class="form-select" id="fillFilter">
+                                <select class="form-select form-select-sm" id="fillFilter">
                                     <option value="">-- Tất cả --</option>
                                     <c:forEach var="f" items="${currentFills}">
                                         <option value="${f}">
@@ -124,12 +124,9 @@
                                 </select>
                             </div>
 
-
-
-
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Hoạt động:</label>
-                                <select class="form-select" id="statusFilter">
+                                <label class="form-label fw-semibold small mb-1">Hoạt động:</label>
+                                <select class="form-select form-select-sm" id="statusFilter">
                                     <option value="">-- Tất cả --</option>
                                     <c:forEach var="s" items="${statuses}">
                                         <option value="${s}">
@@ -143,9 +140,9 @@
                             </div>
 
                             <!-- Results Summary -->
-                            <div class="alert alert-info">
+                            <div class="alert alert-info py-2 mb-2">
                                 <small>
-                                    <strong id="resultCount">0</strong> thùng rác được tìm thấy
+                                    <strong id="resultCount">0</strong> thùng rác
                                 </small>
                             </div>
 
@@ -155,18 +152,18 @@
                                     📊 Xuất báo cáo
                                 </button>
                                 <button class="btn btn-outline-primary btn-sm" onclick="focusOnResults()">
-                                    📍 Xem trên bản đồ
+                                    📍 Xem bản đồ
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Map Section - Right Side -->
-                <div class="col-md-8">
+                <!-- Map Section - Right Side (Tăng từ col-md-8 lên col-md-9) -->
+                <div class="col-md-9">
                     <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">🗺️ Bản đồ thùng rác</h5>
+                        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-2">
+                            <h6 class="mb-0">🗺️ Bản đồ thùng rác</h6>
                             <div class="btn-group btn-group-sm" role="group">
                                 <button type="button" class="btn btn-outline-secondary" onclick="map.zoomIn()">
                                     ➕
@@ -180,7 +177,8 @@
                             </div>
                         </div>
                         <div class="card-body p-0">
-                            <div id="map" style="height: 500px;" class="rounded-bottom"></div>
+                            <!-- Giảm chiều cao bản đồ từ 500px xuống 400px -->
+                            <div id="map" style="height: 400px;" class="rounded-bottom"></div>
                         </div>
                     </div>
                 </div>
@@ -188,8 +186,8 @@
 
             <!-- Table Section with Pagination -->
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">📋 Danh sách thùng rác</h5>
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-2">
+                    <h6 class="mb-0">📋 Danh sách thùng rác</h6>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -244,7 +242,7 @@
 
                     <!-- Pagination -->
                     <div class="d-flex justify-content-between align-items-center p-3 border-top">
-                        <div class="text-muted">
+                        <div class="text-muted small">
                             Hiển thị <span id="showingFrom">1</span> đến <span id="showingTo">25</span>
                             trong tổng số <span id="totalItems">0</span> mục
                         </div>

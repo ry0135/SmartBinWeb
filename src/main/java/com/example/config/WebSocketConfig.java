@@ -6,22 +6,25 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-// WebSocketConfig.java
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Endpoint client sẽ kết nối tới (JS → /ws-bin)
-        registry.addEndpoint("/ws-bin").setAllowedOriginPatterns("*").withSockJS();
+        // ✅ 1. Endpoint cho Android App (WebSocket thuần)
+        registry.addEndpoint("/ws-bin")
+                .setAllowedOriginPatterns("*");
+
+        // ✅ 2. Endpoint cho Web Dashboard (SockJS)
+        registry.addEndpoint("/ws-bin-sockjs")
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // topic: nơi server đẩy dữ liệu
         registry.enableSimpleBroker("/topic");
-        // app: prefix client gửi request (nếu có)
         registry.setApplicationDestinationPrefixes("/app");
     }
 }

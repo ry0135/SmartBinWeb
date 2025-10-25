@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -269,22 +267,33 @@ public class TasksService {
    @Autowired
     private FirebaseStorageService firebaseStorageService;
 
-    public String completeTask(Integer taskId, Double lat, Double lng, MultipartFile image) throws IOException {
-        Optional<Task> optionalTask = taskRepository.findById(taskId);
+    public String completeTask(Integer taskId, Double lat, Double lng, MultipartFile image) {
+        try {
+            // ✅ SỬA: Xử lý Optional đúng cách
+            Task task = taskRepository.findById(taskId)
+                    .orElseThrow(() -> new RuntimeException("Task không tồn tại với ID: " + taskId));
 
-        Task task = optionalTask.get();
+            // ✅ Validate ảnh
+            if (image == null || image.isEmpty()) {
+                throw new RuntimeException("Ảnh minh chứng không được để trống");
+            }
 
-        //  Upload ảnh lên Firebase
-        String imageUrl = firebaseStorageService.uploadFile(image, "/task/collect");
+            // Upload ảnh lên Firebase
+            String imageUrl = firebaseStorageService.uploadFile(image, "task/collect");
 
-        //  Cập nhật thông tin task
-        task.setAfterImage(imageUrl);
-        task.setCompletedAt(new Date());
-        task.setCompletedLat(lat);
-        task.setCompletedLng(lng);
-        task.setStatus("COMPLETED");
-        taskRepository.save(task);
+            // Cập nhật thông tin task
+            task.setAfterImage(imageUrl);
+            task.setCompletedAt(new Date());
+            task.setCompletedLat(lat);
+            task.setCompletedLng(lng);
+            task.setStatus("COMPLETED");
 
-        return " Hoàn thành nhiệm vụ thành công!";
+            taskRepository.save(task);
+
+            return "✅ Hoàn thành nhiệm vụ thành công!";
+
+        } catch (Exception e) {
+            throw new RuntimeException("❌ Lỗi: " + e.getMessage());
+        }
     }
 }

@@ -1,6 +1,9 @@
 package com.example.controller.app;
 
 import com.example.dto.LoginRequest;
+import com.example.exception.EmailAlreadyExistsException;
+import com.example.exception.EmailNotVerifiedException;
+import com.example.exception.MailSendException;
 import com.example.model.Account;
 import com.example.model.ApiMessage;
 import com.example.repository.AccountRepository;
@@ -35,38 +38,47 @@ public class AccountAppController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody Account account) {
-
         String encodedPassword = passwordEncoder.encode(account.getPassword());
         String code = randomService.generateRandomCode();
-        if (accountService.isEmailExistsAndIsVerifiedTrue(account.getEmail())){
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiMessage("EMAIL_REGISTERED", "Email đã đăng ký"));
-        }if (accountService.isEmailExistsAndIsVerifiedFalse(account.getEmail())) {
+
+        if (accountService.isEmailExistsAndIsVerifiedTrue(account.getEmail())) {
+            throw new EmailAlreadyExistsException("Email đã được đăng ký và xác minh.");
+        }
+
+        if (accountService.isEmailExistsAndIsVerifiedFalse(account.getEmail())) {
             Optional<Account> existOpt = accountRepository.findByEmail(account.getEmail());
             if (existOpt.isPresent()) {
                 Account existing = existOpt.get();
                 existing.setCode(code);
-                existing.setPassword(account.getPassword());
+                existing.setPassword(encodedPassword);
                 existing.setFullName(account.getFullName());
-
-                // cập nhật code mới
                 accountRepository.save(existing);
-                emailService.sendCodeToEmail(existing.getEmail(), code);
 
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(new ApiMessage("EMAIL_NOT_VERIFIED", "Email đã đăng ký nhưng chưa xác minh. Mã xác minh mới đã được gửi."));
+                try {
+                    emailService.sendCodeToEmail(existing.getEmail(), code);
+                } catch (Exception e) {
+                    throw new MailSendException("Gửi email xác minh thất bại.");
+                }
+
+                throw new EmailNotVerifiedException("Email đã đăng ký nhưng chưa xác minh. Mã mới đã được gửi.");
             }
         }
 
         account.setPassword(encodedPassword);
         account.setCode(code);
         account.setIsVerified(false);
-        account.setWardID(account.getWardID());
         accountRepository.save(account);
-        emailService.sendCodeToEmail(account.getEmail(), code);
+
+        try {
+            emailService.sendCodeToEmail(account.getEmail(), code);
+        } catch (Exception e) {
+            throw new MailSendException("Không thể gửi email xác minh.");
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiMessage("CREATED", "Đăng ký thành công. Vui lòng kiểm tra email để xác minh."));
+                .body(new ApiMessage("CREATED", "Đăng ký thành công. Vui lòng kiểm tra email."));
     }
+
 
     @PostMapping("/verificode")
     public ResponseEntity<?> verifyCode(@RequestBody Account account) {
@@ -120,7 +132,6 @@ public class AccountAppController {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "success");
         response.put("message", "Token updated");
-
         return ResponseEntity.ok(response);
     }
 

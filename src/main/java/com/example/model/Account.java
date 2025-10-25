@@ -54,9 +54,6 @@ public class Account {
     private String fcmToken;
     @Column(name = "AvatarUrl", length = 500)
     private String avatarUrl;
-
-
-
     // Relationship với Ward
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "WardID", insertable = false, updatable = false)

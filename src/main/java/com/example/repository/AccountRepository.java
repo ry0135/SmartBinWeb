@@ -8,6 +8,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+// ---------- THÊM CÁC HÀM PHÂN TRANG / TÌM KIẾM ----------
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 public interface AccountRepository extends JpaRepository<Account, Integer> {
 
     Optional<Account> findByEmail(String email);

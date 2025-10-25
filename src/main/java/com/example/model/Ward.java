@@ -9,7 +9,7 @@ public class Ward {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "WardID")
-    private Integer wardID;
+    private Integer wardId;   // đổi từ Long -> Integer
 
     @Column(name = "WardName", nullable = false, length = 200)
     private String wardName;
@@ -19,12 +19,12 @@ public class Ward {
     private Province province;
 
     // Getter & Setter
-    public Integer getWardID() {
-        return wardID;
+    public Integer getWardId() {
+        return wardId;
     }
 
-    public void setWardID(Long wardId) {
-        this.wardID = wardID;
+    public void setWardId(Integer wardId) {
+        this.wardId = wardId;
     }
 
     public String getWardName() {

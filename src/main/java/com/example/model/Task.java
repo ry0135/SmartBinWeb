@@ -46,16 +46,6 @@ public class Task {
     @Column(name = "BatchID")
     private String batchId; // ID để nhóm các task được giao cùng lúc
 
-
-    @Column(name = "CompletedLat")
-    private Double completedLat;
-
-    @Column(name = "CompletedLng")
-    private Double completedLng;
-
-    @Column(name = "AfterImage", length = 500)
-    private String afterImage;
-
     // Constructors
     public Task() {
         this.createdAt = new Date();
@@ -92,28 +82,4 @@ public class Task {
 
     public String getBatchId() { return batchId; }
     public void setBatchId(String batchId) { this.batchId = batchId; }
-
-    public double getCompletedLat() {
-        return completedLat;
-    }
-
-    public void setCompletedLat(double completedLat) {
-        this.completedLat = completedLat;
-    }
-
-    public double getCompletedLng() {
-        return completedLng;
-    }
-
-    public void setCompletedLng(double completedLng) {
-        this.completedLng = completedLng;
-    }
-
-    public String getAfterImage() {
-        return afterImage;
-    }
-
-    public void setAfterImage(String afterImage) {
-        this.afterImage = afterImage;
-    }
 }

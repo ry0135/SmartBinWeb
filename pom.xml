@@ -1,18 +1,19 @@
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="
+         http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.fsoft.ctc</groupId>
   <artifactId>SmartBinWeb</artifactId>
   <packaging>war</packaging>
   <version>0.0.1-SNAPSHOT</version>
-  <name>JspServlet Maven Webapp</name>
-  <url>http://maven.apache.org</url>
+  <name>SmartBinWeb</name>
 
   <properties>
     <java.version>1.8</java.version>
     <spring.boot.version>2.5.6</spring.boot.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <spring.framework.version>5.3.12</spring.framework.version>
   </properties>
 
   <repositories>
@@ -20,7 +21,6 @@
       <id>central</id>
       <url>https://repo.maven.apache.org/maven2</url>
     </repository>
-
     <repository>
       <id>local-libs</id>
       <url>file://${project.basedir}/libs</url>
@@ -28,16 +28,19 @@
   </repositories>
 
   <dependencies>
+    <!-- Test -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
+
+    <!-- Servlet/JSP/JSTL cho WAR (Tomcat cung cấp servlet API) -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
+      <version>4.0.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -50,20 +53,26 @@
       <artifactId>javax.el-api</artifactId>
       <version>3.0.0</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.tomcat.embed</groupId>
-      <artifactId>tomcat-embed-jasper</artifactId>
-      <version>8.5.34</version>
-    </dependency>
+
+    <!-- JDBC SQL Server -->
     <dependency>
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>mssql-jdbc</artifactId>
       <version>9.2.0.jre8</version>
     </dependency>
+
+    <!-- Spring Boot starters (đảm bảo đồng bộ Spring 5.3.12) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
       <version>${spring.boot.version}</version>
+      <!-- WAR trên Tomcat ngoài: để tránh kéo Tomcat embedded -->
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -76,15 +85,25 @@
       <version>${spring.boot.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-core</artifactId>
-      <version>5.4.30.Final</version>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
+      <version>${spring.boot.version}</version>
     </dependency>
+    <!-- Security đầy đủ (thay vì tự ghép lẻ) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+      <version>${spring.boot.version}</version>
+    </dependency>
+
+    <!-- Bcrypt (đã có trong starter-security, nhưng bạn đang dùng trực tiếp—giữ cũng không sao) -->
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-crypto</artifactId>
       <version>5.5.2</version>
     </dependency>
+
+    <!-- Mail javax (đã đủ qua starter-mail, giữ api + impl hiện tại vẫn OK) -->
     <dependency>
       <groupId>javax.mail</groupId>
       <artifactId>javax.mail-api</artifactId>
@@ -95,106 +114,49 @@
       <artifactId>javax.mail</artifactId>
       <version>1.6.2</version>
     </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-mail</artifactId>
-      <version>${spring.boot.version}</version>
-    </dependency>
+
+    <!-- Commons upload/IO (mỗi cái 1 bản, bỏ trùng) -->
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
       <version>1.4</version>
     </dependency>
-    <!-- Apache Commons IO -->
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>2.4</version>
     </dependency>
 
-
-    <dependency>
-      <groupId>commons-fileupload</groupId>
-      <artifactId>commons-fileupload</artifactId>
-      <version>1.4</version>
-    </dependency>
-    <!-- Apache Commons IO -->
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.4</version>
-    </dependency>
-
-
+    <!-- JSON libs theo bạn đang dùng -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.11.0</version> <!-- Kiểm tra phiên bản mới nhất -->
+      <version>2.11.0</version>
     </dependency>
-
-
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.5.13</version> <!-- Kiểm tra phiên bản mới nhất -->
+      <version>4.5.13</version>
     </dependency>
-
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.8.6</version><!-- Nếu bạn sử dụng Gson -->
+      <version>2.8.6</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
       <version>1.1.1</version>
     </dependency>
 
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>4.0.1</version><!-- Hoặc phiên bản khác tùy theo yêu cầu -->
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
-      <version>5.3.12</version> <!-- Kiểm tra phiên bản -->
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-web</artifactId>
-      <version>5.3.12</version> <!-- Cùng phiên bản với spring-core -->
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-websocket</artifactId>
-      <version>5.3.12</version> <!-- hoặc phiên bản tương tự -->
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-messaging</artifactId>
-      <version>5.3.12</version>
-    </dependency>
-
-
-    <dependency>
-      <groupId>com.paypal.sdk</groupId>
-      <artifactId>rest-api-sdk</artifactId>
-      <version>1.14.0</version>
-    </dependency>
-
-    <!-- https://mvnrepository.com/artifact/com.google.cloud/google-cloud-storage -->
+    <!-- Google Cloud Storage (tuỳ dự án) -->
     <dependency>
       <groupId>com.google.cloud</groupId>
       <artifactId>google-cloud-storage</artifactId>
       <version>2.48.2</version>
     </dependency>
 
+    <!-- Lombok -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -202,25 +164,49 @@
       <scope>provided</scope>
     </dependency>
 
-
+    <!-- Ép spring-expression đúng bản (fix NoSuchMethodError) -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-expression</artifactId>
+      <version>5.3.12</version>
+    </dependency>
     <dependency>
       <groupId>com.google.firebase</groupId>
       <artifactId>firebase-admin</artifactId>
       <version>9.2.0</version>
     </dependency>
+    <!-- Taglibs cho JSP -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-taglibs</artifactId>
+      <version>5.7.11</version> <!-- hoặc cùng version với các spring-security khác trong dự án -->
+    </dependency>
+    <!-- WebSocket & Messaging (TRỰC TIẾP, KHÔNG scope=provided) -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-websocket</artifactId>
+      <version>5.3.12</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-messaging</artifactId>
+      <version>5.3.12</version>
+    </dependency>
+
+
+
+
+
+
+
 
 
 
   </dependencies>
 
-
   <build>
+    <finalName>SmartBinWeb</finalName>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-war-plugin</artifactId>
-        <version>3.3.2</version>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -231,7 +217,11 @@
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.3.2</version>
+      </plugin>
     </plugins>
-    <finalName>SmartBin</finalName>
   </build>
 </project>

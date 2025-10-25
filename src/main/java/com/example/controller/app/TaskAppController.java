@@ -5,13 +5,11 @@ package com.example.controller.app;
 import com.example.dto.BinDTO;
 import com.example.dto.TaskDTO;
 import com.example.dto.TaskSummaryDTO;
-import com.example.model.ApiMessage;
 import com.example.model.Task;
 import com.example.service.TasksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,21 +52,6 @@ public class TaskAppController {
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
-    }
-
-
-    @PostMapping("/complete")
-    public ResponseEntity<?> completeTask(
-            @RequestParam("taskId") Integer taskId,
-            @RequestParam("lat") Double lat,
-            @RequestParam("lng") Double lng,
-            @RequestParam("image") MultipartFile image) {
-        try {
-            String message = taskService.completeTask(taskId, lat, lng, image);
-            return ResponseEntity.ok(new ApiMessage(message));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new ApiMessage("❌ Lỗi: " + e.getMessage()));
-        }
     }
 
 

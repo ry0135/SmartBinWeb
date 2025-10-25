@@ -8,6 +8,6 @@ public class HomeController {
 
     @RequestMapping("/home")
     public String Homepage() {
-        return "home";
+        return "manager/header_manager";
     }
 }

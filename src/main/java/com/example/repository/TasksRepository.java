@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface TasksRepository extends JpaRepository<Task, Integer> {
-
         // Đếm số task đang mở/doing của nhân viên
         @Query("SELECT COUNT(t) FROM Task t WHERE t.assignedTo.accountId = :workerId AND t.status IN ('OPEN','DOING')")
         int countOpenTasksByWorker(@Param("workerId") int workerId);
@@ -22,22 +21,23 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
         int countTasksByBinExclude(@Param("binId") int binId);
         @Query("SELECT t FROM Task t WHERE t.batchId = :batchId ORDER BY t.createdAt DESC")
         List<Task> findByBatchId(@Param("batchId") String batchId);
+        @Query("SELECT t FROM Task t WHERE t.batchId = :batchId AND t.status = 'OPEN' ORDER BY t.createdAt DESC")
+        List<Task> findByBatchIdOpen(@Param("batchId") String batchId);
+        @Query("SELECT t FROM Task t WHERE t.batchId = :batchId AND t.status = 'DOING' ORDER BY t.createdAt DESC")
+        List<Task> findByBatchIdDoing(@Param("batchId") String batchId);
+        @Query("SELECT t FROM Task t WHERE t.batchId = :batchId AND t.status = 'COMPLETED' ORDER BY t.createdAt DESC")
+        List<Task> findByBatchIdCompeleted(@Param("batchId") String batchId);
+
         @Query("SELECT t FROM Task t WHERE t.assignedTo.accountId = :workerId AND t.status IN ('OPEN','DOING')")
         List<Task> findOpenTasksByWorker(@Param("workerId") int workerId);
 
-
         // 1. Lấy danh sách batch (gom nhóm)
         @Query("SELECT new com.example.dto.TaskSummaryDTO(" +
-                "t.batchId, " +
-                "t.assignedTo.accountId, " +
-                "MAX(t.notes), " +
-                "MIN(t.priority), " +
-                "MAX(t.status)) " +
+                "t.batchId, t.assignedTo.accountId, MAX(t.notes), MIN(t.priority)) " +
                 "FROM Task t " +
                 "WHERE t.assignedTo.accountId = :assignedTo " +
                 "GROUP BY t.batchId, t.assignedTo.accountId")
         List<TaskSummaryDTO> findTaskSummaryByAssignedTo(@Param("assignedTo") int assignedTo);
-
 
         // 2. Lấy chi tiết task trong batch
         List<Task> findByAssignedTo_AccountIdAndBatchIdOrderByPriorityAsc(int assignedTo, String batchId);
@@ -59,6 +59,8 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
         List<Task> findOpenTasks();
         @Query("SELECT t FROM Task t WHERE t.status = 'COMPLETED' ORDER BY t.createdAt DESC")
         List<Task> findCompletedTasks();
+        @Query("SELECT t FROM Task t WHERE t.status = 'CANCEL' ORDER BY t.createdAt DESC")
+        List<Task> findCancelTasks();
 
         // Lấy doing tasks theo worker
         @Query("SELECT t FROM Task t WHERE t.status = 'DOING' AND t.assignedTo.accountId = :workerId ORDER BY t.createdAt DESC")

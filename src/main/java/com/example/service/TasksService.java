@@ -94,6 +94,15 @@ public class TasksService {
     public List<Task> getTasksByBatch(String batchId) {
         return taskRepository.findByBatchId(batchId);
     }
+    public List<Task> getTasksByBatchOpen(String batchId) {
+        return taskRepository.findByBatchIdOpen(batchId);
+    }
+    public List<Task> getTasksByBatchDoing(String batchId) {
+        return taskRepository.findByBatchIdDoing(batchId);
+    }
+    public List<Task> getTasksByBatchComplete(String batchId) {
+        return taskRepository.findByBatchIdCompeleted(batchId);
+    }
 
     // Lấy danh sách nhân viên có thể giao task
     public List<Account> getAvailableWorkers(int wardID) {
@@ -215,6 +224,9 @@ public class TasksService {
     public List<Task> getCompletedTasks() {
         return taskRepository.findCompletedTasks();
     }
+    public List<Task> getCancelTasks() {
+        return taskRepository.findCancelTasks();
+    }
     public List<Task> getDoingTasksByWorker(int workerId) {
         return taskRepository.findDoingTasksByWorker(workerId);
     }
@@ -269,33 +281,51 @@ public class TasksService {
     @Autowired
     private FirebaseStorageService firebaseStorageService;
 
-    public String completeTask(Integer taskId, Double lat, Double lng, MultipartFile image) {
-        try {
-            // ✅ SỬA: Xử lý Optional đúng cách
-            Task task = taskRepository.findById(taskId)
-                    .orElseThrow(() -> new RuntimeException("Task không tồn tại với ID: " + taskId));
+    public String completeTask(Integer taskId, Double lat, Double lng, MultipartFile image) throws IOException {
+        Optional<Task> optionalTask = taskRepository.findById(taskId);
 
-            // ✅ Validate ảnh
-            if (image == null || image.isEmpty()) {
-                throw new RuntimeException("Ảnh minh chứng không được để trống");
-            }
+        Task task = optionalTask.get();
 
-            // Upload ảnh lên Firebase
-            String imageUrl = firebaseStorageService.uploadFile(image, "task/collect");
+        //  Upload ảnh lên Firebase
+        String imageUrl = firebaseStorageService.uploadFile(image, "/task/collect");
 
-            // Cập nhật thông tin task
-            task.setAfterImage(imageUrl);
-            task.setCompletedAt(new Date());
-            task.setCompletedLat(lat);
-            task.setCompletedLng(lng);
-            task.setStatus("COMPLETED");
+        //  Cập nhật thông tin task
+        task.setAfterImage(imageUrl);
+        task.setCompletedAt(new Date());
+        task.setCompletedLat(lat);
+        task.setCompletedLng(lng);
+        task.setStatus("COMPLETED");
+        taskRepository.save(task);
 
+        return " Hoàn thành nhiệm vụ thành công!";
+    }
+    // Cập nhật batch - đơn giản như insert
+    // Cập nhật batch - đơn giản
+    @Transactional
+    public void updateBatch(String batchId, int workerId, int priority, String notes) throws Exception {
+
+        List<Task> batchTasks = taskRepository.findByBatchId(batchId);
+        if (batchTasks.isEmpty()) {
+            throw new RuntimeException("Batch không tồn tại");
+        }
+
+        Account worker = accountRepository.findById(workerId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy worker với ID = " + workerId));
+
+        // Cập nhật tất cả task trong batch
+        for (Task task : batchTasks) {
+            task.setAssignedTo(worker);
+            task.setPriority(priority);
+            task.setNotes(notes);
             taskRepository.save(task);
+        }
 
-            return "✅ Hoàn thành nhiệm vụ thành công!";
-
-        } catch (Exception e) {
-            throw new RuntimeException("❌ Lỗi: " + e.getMessage());
+        // Gửi thông báo cho worker
+        String token = accountService.getFcmTokenByWorkerId(workerId);
+        if (token != null && !token.isEmpty()) {
+            String title = "Batch được cập nhật";
+            String body = "Batch " + batchId + " đã được cập nhật thông tin";
+            fcmService.sendNotification(token, title, body, batchId);
         }
     }
 }

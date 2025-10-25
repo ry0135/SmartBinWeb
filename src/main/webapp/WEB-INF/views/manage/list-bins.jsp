@@ -158,10 +158,47 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Pagination Section -->
+            <div class="card-footer bg-white border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted me-2">Hiển thị:</span>
+                        <select class="form-select form-select-sm" id="rowsPerPage" style="width: auto;">
+                            <option value="10">10</option>
+                            <option value="25" selected>25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <span class="text-muted ms-3" id="pageInfo">Hiển thị 1-25 của 100</span>
+                    </div>
+
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0" id="pagination">
+                            <li class="page-item disabled" id="prevPage">
+                                <a class="page-link" href="#" tabindex="-1">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            <!-- Các số trang sẽ được tạo bởi JavaScript -->
+                            <li class="page-item" id="nextPage">
+                                <a class="page-link" href="#">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
 <script>
+    let currentPage = 1;
+    let rowsPerPage = 25;
+    let filteredRows = [];
+
     // Hàm xử lý sửa thùng rác
     function editBin(binId) {
         if (confirm('Bạn có chắc muốn chỉnh sửa thùng rác này?')) {
@@ -172,7 +209,6 @@
     // Hàm xử lý xóa thùng rác
     function deleteBin(binId) {
         if (confirm('Bạn có chắc muốn xóa thùng rác này? Hành động này không thể hoàn tác.')) {
-            // Gửi yêu cầu xóa đến server
             fetch('${pageContext.request.contextPath}/manage/bin/delete/' + binId, {
                 method: 'DELETE',
             })
@@ -198,8 +234,10 @@
         var status = document.getElementById("statusFilter").value;
         var fill = document.getElementById("fillFilter").value;
 
-        // Lọc bảng
-        document.querySelectorAll("#binTable tbody tr").forEach(function(row) {
+        filteredRows = [];
+        var allRows = document.querySelectorAll("#binTable tbody tr");
+
+        allRows.forEach(function(row) {
             var rowCity = row.getAttribute("data-city");
             var rowWard = row.getAttribute("data-ward");
             var rowStatus = row.getAttribute("data-status");
@@ -217,15 +255,166 @@
                 && (!status || status === rowStatus)
                 && matchFill;
 
-            row.style.display = match ? "" : "none";
+            if (match) {
+                filteredRows.push(row);
+            }
         });
+
+        currentPage = 1;
+        displayPage();
     }
+
+    // Hàm hiển thị trang
+    function displayPage() {
+        var allRows = document.querySelectorAll("#binTable tbody tr");
+        allRows.forEach(row => row.style.display = "none");
+
+        var start = (currentPage - 1) * rowsPerPage;
+        var end = start + rowsPerPage;
+        var rowsToShow = filteredRows.length > 0 ? filteredRows : Array.from(allRows);
+
+        for (var i = start; i < end && i < rowsToShow.length; i++) {
+            rowsToShow[i].style.display = "";
+        }
+
+        updatePagination(rowsToShow.length);
+        updatePageInfo(start, end, rowsToShow.length);
+    }
+
+    // Cập nhật thông tin trang
+    function updatePageInfo(start, end, total) {
+        var pageInfo = document.getElementById("pageInfo");
+        var displayStart = total > 0 ? start + 1 : 0;
+        var displayEnd = Math.min(end, total);
+        pageInfo.textContent = `Hiển thị ${displayStart}-${displayEnd} của ${total}`;
+    }
+
+    // Cập nhật phân trang
+    function updatePagination(totalRows) {
+        var totalPages = Math.ceil(totalRows / rowsPerPage);
+        var pagination = document.getElementById("pagination");
+
+        // Xóa các nút trang cũ (giữ lại prev và next)
+        var pageItems = pagination.querySelectorAll(".page-item:not(#prevPage):not(#nextPage)");
+        pageItems.forEach(item => item.remove());
+
+        // Cập nhật nút Previous
+        var prevPage = document.getElementById("prevPage");
+        if (currentPage === 1) {
+            prevPage.classList.add("disabled");
+        } else {
+            prevPage.classList.remove("disabled");
+        }
+
+        // Tạo các nút số trang
+        var nextPage = document.getElementById("nextPage");
+        var maxPagesToShow = 5;
+        var startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+        var endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+        if (endPage - startPage < maxPagesToShow - 1) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+        }
+
+        // Nút trang đầu
+        if (startPage > 1) {
+            var firstPageLi = createPageItem(1, false);
+            pagination.insertBefore(firstPageLi, nextPage);
+
+            if (startPage > 2) {
+                var dotsLi = document.createElement("li");
+                dotsLi.className = "page-item disabled";
+                dotsLi.innerHTML = '<span class="page-link">...</span>';
+                pagination.insertBefore(dotsLi, nextPage);
+            }
+        }
+
+        // Các trang ở giữa
+        for (var i = startPage; i <= endPage; i++) {
+            var pageLi = createPageItem(i, i === currentPage);
+            pagination.insertBefore(pageLi, nextPage);
+        }
+
+        // Nút trang cuối
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                var dotsLi = document.createElement("li");
+                dotsLi.className = "page-item disabled";
+                dotsLi.innerHTML = '<span class="page-link">...</span>';
+                pagination.insertBefore(dotsLi, nextPage);
+            }
+            var lastPageLi = createPageItem(totalPages, false);
+            pagination.insertBefore(lastPageLi, nextPage);
+        }
+
+        // Cập nhật nút Next
+        if (currentPage === totalPages || totalPages === 0) {
+            nextPage.classList.add("disabled");
+        } else {
+            nextPage.classList.remove("disabled");
+        }
+    }
+
+    // Tạo một item phân trang
+    function createPageItem(pageNum, isActive) {
+        var li = document.createElement("li");
+        li.className = "page-item" + (isActive ? " active" : "");
+
+        var a = document.createElement("a");
+        a.className = "page-link";
+        a.href = "#";
+        a.textContent = pageNum;
+        a.onclick = function(e) {
+            e.preventDefault();
+            if (!isActive) {
+                currentPage = pageNum;
+                displayPage();
+            }
+        };
+
+        li.appendChild(a);
+        return li;
+    }
+
+    // Xử lý nút Previous
+    document.getElementById("prevPage").addEventListener("click", function(e) {
+        e.preventDefault();
+        if (currentPage > 1) {
+            currentPage--;
+            displayPage();
+        }
+    });
+
+    // Xử lý nút Next
+    document.getElementById("nextPage").addEventListener("click", function(e) {
+        e.preventDefault();
+        var allRows = document.querySelectorAll("#binTable tbody tr");
+        var rowsToShow = filteredRows.length > 0 ? filteredRows : Array.from(allRows);
+        var totalPages = Math.ceil(rowsToShow.length / rowsPerPage);
+
+        if (currentPage < totalPages) {
+            currentPage++;
+            displayPage();
+        }
+    });
+
+    // Xử lý thay đổi số hàng trên mỗi trang
+    document.getElementById("rowsPerPage").addEventListener("change", function() {
+        rowsPerPage = parseInt(this.value);
+        currentPage = 1;
+        displayPage();
+    });
 
     // Thêm event listeners cho các bộ lọc
     document.getElementById("cityFilter").addEventListener("change", applyFilter);
     document.getElementById("wardFilter").addEventListener("change", applyFilter);
     document.getElementById("statusFilter").addEventListener("change", applyFilter);
     document.getElementById("fillFilter").addEventListener("change", applyFilter);
+
+    // Khởi tạo hiển thị ban đầu
+    window.addEventListener("DOMContentLoaded", function() {
+        applyFilter();
+    });
 </script>
 </body>
 </html>

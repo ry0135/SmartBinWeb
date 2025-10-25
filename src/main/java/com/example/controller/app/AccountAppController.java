@@ -21,7 +21,6 @@ import java.util.Optional;
 @RestController("accountControllerApp")
 @RequestMapping("/api/accounts")
 public class AccountAppController {
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Autowired
     private AccountService accountService;
     @Autowired
@@ -32,6 +31,7 @@ public class AccountAppController {
     private EmailService emailService;
     @Autowired
     private AccountRepository accountRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody Account account) {

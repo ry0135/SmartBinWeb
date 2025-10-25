@@ -9,4 +9,9 @@ import java.util.List;
 @Repository
 public interface WardRepository extends JpaRepository<Ward, Integer> {
     List<Ward> findByProvince_ProvinceId(Integer provinceId);
+
+    List<Ward> findAllByOrderByWardNameAsc();
+
+    // ===================== ADD-ON =====================
+    Ward findByWardId(int wardId);
 }

@@ -21,7 +21,7 @@ public class LoginController {
     // Hiển thị trang login
     @GetMapping("/login")
     public String showLoginPage() {
-        return "login"; // Trả về login.jsp
+        return "login"; // /WEB-INF/views/login.jsp
     }
 
     // Xử lý đăng nhập
@@ -32,42 +32,53 @@ public class LoginController {
             HttpSession session,
             Model model) {
 
-        Optional<Account> accountOpt = accountService.authenticate(email, password);
+        String emailTrim = email == null ? null : email.trim();
+        Optional<Account> accountOpt = accountService.authenticate(emailTrim, password);
 
-        if (accountOpt.isPresent()) {
-            Account account = accountOpt.get();
-
-            // Kiểm tra trạng thái tài khoản
-            if (account.getStatus() == 0) {
-                model.addAttribute("error", "Tài khoản đã bị khóa");
-                return "login";
-            }
-
-            // Lưu thông tin đăng nhập vào session
-            session.setAttribute("currentUser", account);
-            session.setAttribute("userRole", account.getRole());
-            session.setAttribute("userName", account.getFullName());
-
-            // Chuyển hướng theo role
-            if (account.getRole() == 1) { // Admin
-                return "redirect:/admin/dashboard";
-            } else if (account.getRole() == 2) { // Manager
-                return "redirect:/home";
-            } else {
-                model.addAttribute("error", "Không có quyền truy cập");
-                return "login";
-            }
-
-        } else {
+        if (!accountOpt.isPresent()) {
             model.addAttribute("error", "Email hoặc mật khẩu không đúng");
             return "login";
+        }
+
+        Account account = accountOpt.get();
+
+        // Tài khoản bị khóa?
+        if (account.getStatus() == 0) {
+            model.addAttribute("error", "Tài khoản đã bị khóa");
+            return "login";
+        }
+
+        // ===== LƯU SESSION (chuẩn theo Cách 1) =====
+        // Các key bạn đang dùng
+        session.setAttribute("currentUser", account);
+        session.setAttribute("userRole", account.getRole());
+        session.setAttribute("userName", account.getFullName());
+
+        // Thêm 2 key mà AdminAccountController cần
+        session.setAttribute("currentAccountId", account.getAccountId());
+        session.setAttribute("account", account);
+        // ==========================================
+
+        // Điều hướng theo role (tuỳ dự án, bạn đổi URL cho phù hợp)
+        switch (account.getRole()) {
+            case 1: // Admin
+                return "redirect:/admin/overview";
+            case 2: // Manager
+                return "redirect:/manage";
+            case 3: // Worker (nếu có)
+                return "redirect:/manager"; // hoặc trang worker riêng của bạn
+            case 4: // User/Citizen (nếu cho phép đăng nhập web)
+                return "redirect:/";
+            default:
+                model.addAttribute("error", "Không có quyền truy cập");
+                return "login";
         }
     }
 
     // Đăng xuất
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        session.invalidate(); // Xóa toàn bộ session
+        session.invalidate();
         return "redirect:/login";
     }
 }

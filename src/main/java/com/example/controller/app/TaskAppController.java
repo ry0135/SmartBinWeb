@@ -1,7 +1,5 @@
 package com.example.controller.app;
 
-
-
 import com.example.dto.BinDTO;
 import com.example.dto.TaskDTO;
 import com.example.dto.TaskSummaryDTO;
@@ -10,16 +8,20 @@ import com.example.model.Task;
 import com.example.service.TasksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskAppController {
-
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
     @Autowired
     private TasksService taskService;
 
@@ -63,11 +65,24 @@ public class TaskAppController {
             @RequestParam("lat") Double lat,
             @RequestParam("lng") Double lng,
             @RequestParam("image") MultipartFile image) {
+
+
         try {
+            // 1️⃣ Xử lý logic upload ảnh + cập nhật DB
             String message = taskService.completeTask(taskId, lat, lng, image);
-            return ResponseEntity.ok(new ApiMessage(message));
+
+            // 2️⃣ Gửi thông báo real-time đến tất cả client đang subscribe
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("taskId", taskId);
+            payload.put("status", "COMPLETED");
+            messagingTemplate.convertAndSend("/topic/task-updates", payload);  // ✅ phát thông điệp tới topic
+
+            // 3️⃣ Trả về response cho client Retrofit
+            return ResponseEntity.ok(new ApiMessage("✅ " + message));
+
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new ApiMessage("❌ Lỗi: " + e.getMessage()));
+            return ResponseEntity.internalServerError()
+                    .body(new ApiMessage("❌ Lỗi: " + e.getMessage()));
         }
     }
 

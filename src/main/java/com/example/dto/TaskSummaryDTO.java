@@ -14,6 +14,15 @@ public class TaskSummaryDTO {
         this.minPriority = minPriority;
     }
 
+    public TaskSummaryDTO(String batchId, int accountId, String notes, int priority, String status) {
+        this.batchId = batchId;
+        this.assignedTo = accountId;
+        this.note = notes;
+        this.minPriority = priority;
+        this.status = status;
+    }
+
+
     public String getBatchId() {
         return batchId;
     }

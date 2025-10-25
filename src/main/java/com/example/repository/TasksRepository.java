@@ -28,11 +28,16 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
 
         // 1. Lấy danh sách batch (gom nhóm)
         @Query("SELECT new com.example.dto.TaskSummaryDTO(" +
-                "t.batchId, t.assignedTo.accountId, MAX(t.notes), MIN(t.priority)) " +
+                "t.batchId, " +
+                "t.assignedTo.accountId, " +
+                "MAX(t.notes), " +
+                "MIN(t.priority), " +
+                "MAX(t.status)) " +
                 "FROM Task t " +
                 "WHERE t.assignedTo.accountId = :assignedTo " +
                 "GROUP BY t.batchId, t.assignedTo.accountId")
         List<TaskSummaryDTO> findTaskSummaryByAssignedTo(@Param("assignedTo") int assignedTo);
+
 
         // 2. Lấy chi tiết task trong batch
         List<Task> findByAssignedTo_AccountIdAndBatchIdOrderByPriorityAsc(int assignedTo, String batchId);

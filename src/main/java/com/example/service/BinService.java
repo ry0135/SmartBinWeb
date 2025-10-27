@@ -42,12 +42,14 @@ public class BinService {
             return binRepository.save(existing);
         }
     }
+
     public void deleteBin(int id) {
         Bin bin = binRepository.findById(id).orElse(null);
         if (bin != null) {
             binRepository.delete(bin);
         }
     }
+>
 
 
     // Tìm thùng rác gần nhất theo bán kính (km) và giới hạn số lượng

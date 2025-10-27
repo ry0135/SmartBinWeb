@@ -1,35 +1,54 @@
 <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="
-         http://xmlns.jcp.org/xml/ns/javaee
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
          http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
+
+  <!-- ✅ Cho phép load class @Configuration -->
+  <context-param>
+    <param-name>contextClass</param-name>
+    <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+  </context-param>
+
+  <!-- ✅ Load cả applicationContext.xml và WebSocketConfig (Java Config) -->
   <context-param>
     <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/dispatcher-servlet.xml</param-value>
+    <param-value>
+      /WEB-INF/applicationContext.xml,
+      com.example.config.WebSocketConfig
+    </param-value>
   </context-param>
+
+  <context-param>
+    <param-name>gcp.credentials.location</param-name>
+    <param-value>${GOOGLE_APPLICATION_CREDENTIALS}</param-value>
+  </context-param>
+
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
+
+  <!-- DispatcherServlet -->
   <servlet>
-    <!--    <multipart-config>-->
-    <!--      <max-file-size>268435456</max-file-size> &lt;!&ndash; 256MB &ndash;&gt;-->
-    <!--      <max-request-size>536870912</max-request-size> &lt;!&ndash; 512MB &ndash;&gt;-->
-    <!--      <file-size-threshold>0</file-size-threshold>-->
-    <!--    </multipart-config>-->
     <servlet-name>dispatcher</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>/WEB-INF/dispatcher-servlet.xml</param-value>
+    </init-param>
     <load-on-startup>1</load-on-startup>
     <multipart-config>
-      <max-file-size>268435456</max-file-size> <!-- 256MB -->
-      <max-request-size>536870912</max-request-size> <!-- 512MB -->
+      <max-file-size>268435456</max-file-size>
+      <max-request-size>536870912</max-request-size>
       <file-size-threshold>0</file-size-threshold>
     </multipart-config>
   </servlet>
+
   <servlet-mapping>
     <servlet-name>dispatcher</servlet-name>
     <url-pattern>/</url-pattern>
   </servlet-mapping>
+
   <filter>
     <filter-name>characterEncodingFilter</filter-name>
     <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>

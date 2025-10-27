@@ -170,21 +170,21 @@ public class BinService {
     }
 
     // ================== CHECKER ==================
-    @Scheduled(fixedRate = 60000)
-    public void checkInactiveBins() {
-        List<Bin> allBins = binRepository.findAll();
-        long now = System.currentTimeMillis();
-        for (Bin bin : allBins) {
-            Date lu = bin.getLastUpdated();
-            if (lu == null) continue; // phòng null
-            long diffMinutes = TimeUnit.MILLISECONDS.toMinutes(now - lu.getTime());
-            if (diffMinutes >= 2 && bin.getStatus() != 2) {
-                bin.setStatus(2); // 2 = đầy/mất kết nối
-                binRepository.save(bin);
-                System.out.println("[CHECKER] Bin " + bin.getBinCode() + " mất kết nối!");
-            }
-        }
-    }
+//    @Scheduled(fixedRate = 60000)
+//    public void checkInactiveBins() {
+//        List<Bin> allBins = binRepository.findAll();
+//        long now = System.currentTimeMillis();
+//        for (Bin bin : allBins) {
+//            Date lu = bin.getLastUpdated();
+//            if (lu == null) continue; // phòng null
+//            long diffMinutes = TimeUnit.MILLISECONDS.toMinutes(now - lu.getTime());
+//            if (diffMinutes >= 2 && bin.getStatus() != 2) {
+//                bin.setStatus(2); // 2 = đầy/mất kết nối
+//                binRepository.save(bin);
+//                System.out.println("[CHECKER] Bin " + bin.getBinCode() + " mất kết nối!");
+//            }
+//        }
+//    }
 
     // Tìm thùng rác gần nhất theo bán kính (km) và giới hạn số lượng
     public List<Bin> getNearbyBins(double latitude, double longitude, double radiusKm, int limit) {

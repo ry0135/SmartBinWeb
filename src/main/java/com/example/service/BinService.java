@@ -49,9 +49,6 @@ public class BinService {
             binRepository.delete(bin);
         }
     }
->
-
-
     // Tìm thùng rác gần nhất theo bán kính (km) và giới hạn số lượng
     public List<Bin> getNearbyBins(double latitude, double longitude, double radiusKm, int limit) {
         List<Bin> all = binRepository.findAllWithWardAndProvince();

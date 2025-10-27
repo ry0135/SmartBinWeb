@@ -1,8 +1,10 @@
 package com.example.controller;
 
 import com.example.model.Bin;
+import com.example.model.Ward;
 import com.example.service.BinService;
 import com.example.service.TasksService;
+import com.example.service.WardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +20,8 @@ public class ManageController {
     private BinService binService;
     @Autowired
     private TasksService tasksService;
-
+    @Autowired
+    private WardService wardService;
     @GetMapping("/manage")
     public String manage(Model model) {
         List<Bin> bins = binService.getAllBins();
@@ -119,7 +122,11 @@ public class ManageController {
             return "redirect:/bins";
         }
 
+        // Lấy danh sách tất cả các phường/xã
+        List<Ward> wards = wardService.getAllWards();
+
         model.addAttribute("bin", bin);
+        model.addAttribute("wards", wards);
         model.addAttribute("isEdit", true);
         return "manage/bin-form";
     }

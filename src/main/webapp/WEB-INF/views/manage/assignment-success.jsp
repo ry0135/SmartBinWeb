@@ -205,7 +205,7 @@
                                 <a href="${pageContext.request.contextPath}/tasks/task-management" class="btn btn-primary me-2">
                                     <i class="fas fa-plus me-1"></i> Giao thêm nhiệm vụ
                                 </a>
-                                <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-success">
+                                <a href="${pageContext.request.contextPath}/manage" class="btn btn-success">
                                     <i class="fas fa-home me-1"></i> Về trang chủ
                                 </a>
                             </div>

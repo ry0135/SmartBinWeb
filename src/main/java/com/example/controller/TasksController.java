@@ -220,14 +220,14 @@ public class TasksController {
     }
     // Thêm vào TasksController.java
 
-    @GetMapping("/management")
-    public String taskManagement(
+    @GetMapping("/cancel")
+    public String taskCancel(
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "type", required = false) String taskType,
             @RequestParam(value = "priority", required = false) Integer priority,
             Model model) {
 
-        List<Task> allTasks = taskService.getAllTasks();
+        List<Task> allTasks = taskService.getCancelTasks();
 
         List<Task> filteredTasks = allTasks.stream()
                 .filter(task -> status == null || status.isEmpty() || task.getStatus().equals(status))
@@ -257,7 +257,7 @@ public class TasksController {
         model.addAttribute("doingTasks", allTasks.stream().filter(t -> t.getStatus().equals("DOING")).count());
         model.addAttribute("completedTasks", allTasks.stream().filter(t -> t.getStatus().equals("COMPLETED")).count());
 
-        return "manage/task-management";
+        return "manage/batch-cancel";
     }
     @GetMapping("/doing")
     public String getDoingTasks(
@@ -363,6 +363,8 @@ public class TasksController {
             return "error";
         }
     }
+
+
     @GetMapping("/completed")
     public String getCompeleTasks(
             @RequestParam(value = "type", required = false) String taskType,
@@ -423,7 +425,27 @@ public class TasksController {
         model.addAttribute("batchId", batchId);
         return "manage/batch-detail";
     }
-
+    @GetMapping("/batchOpen/{batchId}")
+    public String viewBatchDetailOpen(@PathVariable String batchId, Model model) {
+        List<Task> batchTasks = taskService.getTasksByBatchOpen(batchId);
+        model.addAttribute("batchTasks", batchTasks);
+        model.addAttribute("batchId", batchId);
+        return "manage/task-open";
+    }
+    @GetMapping("/batchDoing/{batchId}")
+    public String viewBatchDetailDoing(@PathVariable String batchId, Model model) {
+        List<Task> batchTasks = taskService.getTasksByBatchDoing(batchId);
+        model.addAttribute("batchTasks", batchTasks);
+        model.addAttribute("batchId", batchId);
+        return "manage/task-doing";
+    }
+    @GetMapping("/batchCompleted/{batchId}")
+    public String viewBatchDetailCompleted(@PathVariable String batchId, Model model) {
+        List<Task> batchTasks = taskService.getTasksByBatchComplete(batchId);
+        model.addAttribute("batchTasks", batchTasks);
+        model.addAttribute("batchId", batchId);
+        return "manage/task-completed";
+    }
     // Xóa batch
 
     // Xóa batch
@@ -489,6 +511,57 @@ public class TasksController {
             Map<String, String> response = new HashMap<>();
             response.put("error", "Lỗi khi cập nhật task: " + e.getMessage());
             return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @GetMapping("/batch/{batchId}/edit")
+    public String showEditBatchPage(@PathVariable String batchId, Model model) {
+        try {
+            List<Task> batchTasks = taskService.getTasksByBatch(batchId);
+            if (batchTasks.isEmpty()) {
+                return "redirect:/tasks/management?error=Batch không tồn tại";
+            }
+
+            // Lấy danh sách worker có sẵn (có thể lấy từ ward của task đầu tiên)
+            Task firstTask = batchTasks.get(0);
+            int wardId = firstTask.getBin().getWard().getWardId();
+
+            List<Account> workers;
+            if ("MAINTENANCE".equals(firstTask.getTaskType())) {
+                workers = taskService.getAvailableWorkersMaintenance(wardId);
+            } else {
+                workers = taskService.getAvailableWorkers(wardId);
+            }
+
+            model.addAttribute("batchTasks", batchTasks);
+            model.addAttribute("batchId", batchId);
+            model.addAttribute("workers", workers);
+            model.addAttribute("firstTask", firstTask);
+
+            return "manage/update-batch";
+
+        } catch (Exception e) {
+            return "redirect:/tasks/management?error=" + e.getMessage();
+        }
+    }
+
+    // ==================== CẬP NHẬT BATCH ====================
+    @PostMapping("/batch/{batchId}/update")
+    public String updateBatch(
+            @PathVariable String batchId,
+            @RequestParam("workerId") int workerId,
+            @RequestParam("priority") int priority,
+            @RequestParam(value = "notes", required = false) String notes,
+            Model model) {
+
+        try {
+            taskService.updateBatch(batchId, workerId, priority, notes);
+            model.addAttribute("message", "Cập nhật batch thành công");
+            return "redirect:/tasks/open";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Lỗi khi cập nhật batch: " + e.getMessage());
+            return "manage/update-error";
         }
     }
 }

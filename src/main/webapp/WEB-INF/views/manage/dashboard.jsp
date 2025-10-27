@@ -73,20 +73,20 @@
 
             <!-- Main Layout: Filter Left, Map Right -->
             <div class="row g-4 mb-4">
-                <!-- Filter Panel - Left Side -->
-                <div class="col-md-4">
+                <!-- Filter Panel - Left Side (Giảm từ col-md-4 xuống col-md-3) -->
+                <div class="col-md-3">
                     <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white border-bottom-0">
-                            <h5 class="mb-0">
+                        <div class="card-header bg-white border-bottom-0 py-2">
+                            <h6 class="mb-0">
                                 <i class="fas fa-filter me-2"></i>Bộ lọc
-                            </h5>
+                            </h6>
                         </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="cityFilter" class="form-label fw-semibold">
+                        <div class="card-body py-3">
+                            <div class="mb-2">
+                                <label for="cityFilter" class="form-label fw-semibold small mb-1">
                                     <i class="fas fa-city me-1 text-primary"></i>Khu vực:
                                 </label>
-                                <select class="form-select" id="cityFilter">
+                                <select class="form-select form-select-sm" id="cityFilter">
                                     <option value="">-- Tất cả --</option>
                                     <c:forEach var="city" items="${cities}">
                                         <option value="${city}">${city}</option>
@@ -94,11 +94,11 @@
                                 </select>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="wardFilter" class="form-label fw-semibold">
+                            <div class="mb-2">
+                                <label for="wardFilter" class="form-label fw-semibold small mb-1">
                                     <i class="fas fa-map-marker-alt me-1 text-success"></i>Phường/Xã:
                                 </label>
-                                <select class="form-select" id="wardFilter">
+                                <select class="form-select form-select-sm" id="wardFilter">
                                     <option value="">-- Tất cả --</option>
                                     <c:forEach var="ward" items="${wards}">
                                         <option value="${ward}">${ward}</option>
@@ -106,11 +106,11 @@
                                 </select>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="fillFilter" class="form-label fw-semibold">
+                            <div class="mb-2">
+                                <label for="fillFilter" class="form-label fw-semibold small mb-1">
                                     <i class="fas fa-chart-bar me-1 text-warning"></i>Mức đầy:
                                 </label>
-                                <select class="form-select" id="fillFilter">
+                                <select class="form-select form-select-sm" id="fillFilter">
                                     <option value="">-- Tất cả --</option>
                                     <c:forEach var="f" items="${currentFills}">
                                         <option value="${f}">
@@ -124,12 +124,9 @@
                                 </select>
                             </div>
 
-
-
-
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Hoạt động:</label>
-                                <select class="form-select" id="statusFilter">
+                                <label class="form-label fw-semibold small mb-1">Hoạt động:</label>
+                                <select class="form-select form-select-sm" id="statusFilter">
                                     <option value="">-- Tất cả --</option>
                                     <c:forEach var="s" items="${statuses}">
                                         <option value="${s}">
@@ -143,9 +140,9 @@
                             </div>
 
                             <!-- Results Summary -->
-                            <div class="alert alert-info">
+                            <div class="alert alert-info py-2 mb-2">
                                 <small>
-                                    <strong id="resultCount">0</strong> thùng rác được tìm thấy
+                                    <strong id="resultCount">0</strong> thùng rác
                                 </small>
                             </div>
 
@@ -155,18 +152,18 @@
                                     📊 Xuất báo cáo
                                 </button>
                                 <button class="btn btn-outline-primary btn-sm" onclick="focusOnResults()">
-                                    📍 Xem trên bản đồ
+                                    📍 Xem bản đồ
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Map Section - Right Side -->
-                <div class="col-md-8">
+                <!-- Map Section - Right Side (Tăng từ col-md-8 lên col-md-9) -->
+                <div class="col-md-9">
                     <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">🗺️ Bản đồ thùng rác</h5>
+                        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-2">
+                            <h6 class="mb-0">🗺️ Bản đồ thùng rác</h6>
                             <div class="btn-group btn-group-sm" role="group">
                                 <button type="button" class="btn btn-outline-secondary" onclick="map.zoomIn()">
                                     ➕
@@ -180,7 +177,8 @@
                             </div>
                         </div>
                         <div class="card-body p-0">
-                            <div id="map" style="height: 500px;" class="rounded-bottom"></div>
+                            <!-- Giảm chiều cao bản đồ từ 500px xuống 400px -->
+                            <div id="map" style="height: 400px;" class="rounded-bottom"></div>
                         </div>
                     </div>
                 </div>
@@ -188,8 +186,8 @@
 
             <!-- Table Section with Pagination -->
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">📋 Danh sách thùng rác</h5>
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-2">
+                    <h6 class="mb-0">📋 Danh sách thùng rác</h6>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -244,7 +242,7 @@
 
                     <!-- Pagination -->
                     <div class="d-flex justify-content-between align-items-center p-3 border-top">
-                        <div class="text-muted">
+                        <div class="text-muted small">
                             Hiển thị <span id="showingFrom">1</span> đến <span id="showingTo">25</span>
                             trong tổng số <span id="totalItems">0</span> mục
                         </div>
@@ -393,6 +391,245 @@
                 if (m._map) m.remove();
             }
         });
+    }
+    // ==================== BIẾN TOÀN CỤC ====================
+    var currentPage = 1;
+    var itemsPerPage = 3;
+    var allRows = [];
+
+    // ==================== KHỞI TẠO ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        initializePagination();
+    });
+
+    function initializePagination() {
+        // Lấy tất cả các dòng từ bảng
+        allRows = Array.from(document.querySelectorAll("#binTable tbody tr"));
+
+        // Hiển thị trang đầu tiên
+        displayPage(1);
+
+        // Thêm event listener cho các bộ lọc
+        document.getElementById("cityFilter").addEventListener("change", function() {
+            applyFilter();
+            displayPage(1);
+        });
+
+        document.getElementById("wardFilter").addEventListener("change", function() {
+            applyFilter();
+            displayPage(1);
+        });
+
+        document.getElementById("statusFilter").addEventListener("change", function() {
+            applyFilter();
+            displayPage(1);
+        });
+
+        document.getElementById("fillFilter").addEventListener("change", function() {
+            applyFilter();
+            displayPage(1);
+        });
+    }
+
+    // ==================== LỌC DỮ LIỆU ====================
+    function applyFilter() {
+        var city = document.getElementById("cityFilter").value;
+        var ward = document.getElementById("wardFilter").value;
+        var status = document.getElementById("statusFilter").value;
+        var fill = document.getElementById("fillFilter").value;
+
+        // Lọc bảng
+        allRows.forEach(function(row) {
+            var rowCity = row.getAttribute("data-city");
+            var rowWard = row.getAttribute("data-ward");
+            var rowStatus = row.getAttribute("data-status");
+            var rowFill = parseInt(row.getAttribute("data-fill")) || 0;
+
+            var matchFill = true;
+            if (fill) {
+                if (fill == 80) matchFill = rowFill >= 80;
+                else if (fill == 40) matchFill = rowFill >= 40 && rowFill < 80;
+                else if (fill == 0) matchFill = rowFill < 40;
+            }
+
+            var match = (!city || city === rowCity)
+                && (!ward || ward === rowWard)
+                && (!status || status === rowStatus)
+                && matchFill;
+
+            if (match) {
+                row.classList.remove('filtered-out');
+            } else {
+                row.classList.add('filtered-out');
+            }
+        });
+
+        // Lọc markers trên bản đồ
+        if (typeof markers !== 'undefined') {
+            markers.forEach(function(m) {
+                var matchFill = true;
+                if (fill) {
+                    if (fill == 80) matchFill = m.bin.fullness >= 80;
+                    else if (fill == 40) matchFill = m.bin.fullness >= 40 && m.bin.fullness < 80;
+                    else if (fill == 0) matchFill = m.bin.fullness < 40;
+                }
+
+                var match = (!city || city === m.bin.city)
+                    && (!ward || ward === m.bin.ward)
+                    && (!status || status == m.bin.status)
+                    && matchFill;
+
+                if (match) {
+                    if (!m._map) m.addTo(map);
+                } else {
+                    if (m._map) m.remove();
+                }
+            });
+        }
+
+        // Cập nhật số lượng kết quả
+        updateResultCount();
+    }
+
+    // ==================== PHÂN TRANG ====================
+    function displayPage(page) {
+        currentPage = page;
+
+        // Lấy các dòng đang hiển thị (không bị lọc)
+        var visibleRows = allRows.filter(row => !row.classList.contains('filtered-out'));
+        var totalItems = visibleRows.length;
+
+        // Tính toán chỉ số
+        var startIndex = (page - 1) * itemsPerPage;
+        var endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+        // Ẩn tất cả các dòng trước
+        allRows.forEach(row => row.style.display = 'none');
+
+        // Hiển thị các dòng trong trang hiện tại
+        for (var i = startIndex; i < endIndex; i++) {
+            visibleRows[i].style.display = '';
+        }
+
+        // Cập nhật thông tin phân trang
+        updatePaginationInfo(startIndex + 1, endIndex, totalItems);
+
+        // Tạo các nút phân trang
+        createPaginationButtons(totalItems);
+    }
+
+    function updatePaginationInfo(from, to, total) {
+        document.getElementById("showingFrom").textContent = total > 0 ? from : 0;
+        document.getElementById("showingTo").textContent = to;
+        document.getElementById("totalItems").textContent = total;
+    }
+
+    function createPaginationButtons(totalItems) {
+        var totalPages = Math.ceil(totalItems / itemsPerPage);
+        var paginationContainer = document.getElementById("pagination");
+        paginationContainer.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        // Nút Previous
+        var prevLi = document.createElement('li');
+        prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+        prevLi.innerHTML = '<a class="page-link" href="#" onclick="goToPage(' + (currentPage - 1) + '); return false;">«</a>';
+        paginationContainer.appendChild(prevLi);
+
+        // Tính toán phạm vi trang hiển thị
+        var startPage = Math.max(1, currentPage - 2);
+        var endPage = Math.min(totalPages, currentPage + 2);
+
+        // Nút trang đầu
+        if (startPage > 1) {
+            var firstLi = document.createElement('li');
+            firstLi.className = 'page-item';
+            firstLi.innerHTML = '<a class="page-link" href="#" onclick="goToPage(1); return false;">1</a>';
+            paginationContainer.appendChild(firstLi);
+
+            if (startPage > 2) {
+                var dotsLi = document.createElement('li');
+                dotsLi.className = 'page-item disabled';
+                dotsLi.innerHTML = '<a class="page-link" href="#">...</a>';
+                paginationContainer.appendChild(dotsLi);
+            }
+        }
+
+        // Các trang ở giữa
+        for (var i = startPage; i <= endPage; i++) {
+            var pageLi = document.createElement('li');
+            pageLi.className = 'page-item' + (i === currentPage ? ' active' : '');
+            pageLi.innerHTML = '<a class="page-link" href="#" onclick="goToPage(' + i + '); return false;">' + i + '</a>';
+            paginationContainer.appendChild(pageLi);
+        }
+
+        // Nút trang cuối
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                var dotsLi = document.createElement('li');
+                dotsLi.className = 'page-item disabled';
+                dotsLi.innerHTML = '<a class="page-link" href="#">...</a>';
+                paginationContainer.appendChild(dotsLi);
+            }
+
+            var lastLi = document.createElement('li');
+            lastLi.className = 'page-item';
+            lastLi.innerHTML = '<a class="page-link" href="#" onclick="goToPage(' + totalPages + '); return false;">' + totalPages + '</a>';
+            paginationContainer.appendChild(lastLi);
+        }
+
+        // Nút Next
+        var nextLi = document.createElement('li');
+        nextLi.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
+        nextLi.innerHTML = '<a class="page-link" href="#" onclick="goToPage(' + (currentPage + 1) + '); return false;">»</a>';
+        paginationContainer.appendChild(nextLi);
+    }
+
+    function goToPage(page) {
+        var visibleRows = allRows.filter(row => !row.classList.contains('filtered-out'));
+        var totalPages = Math.ceil(visibleRows.length / itemsPerPage);
+
+        if (page < 1 || page > totalPages) return;
+
+        displayPage(page);
+
+        // Cuộn lên đầu bảng
+        document.getElementById('binTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function updateResultCount() {
+        var visibleRows = allRows.filter(row => !row.classList.contains('filtered-out'));
+        document.getElementById("resultCount").textContent = visibleRows.length;
+    }
+
+    // ==================== CÁC HÀM TIỆN ÍCH ====================
+    function exportReport() {
+        alert("Chức năng xuất báo cáo đang được phát triển!");
+    }
+
+    function focusOnResults() {
+        if (typeof map !== 'undefined') {
+            // Lấy tất cả markers đang hiển thị
+            var visibleMarkers = markers.filter(m => m._map);
+
+            if (visibleMarkers.length > 0) {
+                var bounds = new vietmapgl.LngLatBounds();
+                visibleMarkers.forEach(m => {
+                    bounds.extend([m.bin.lng, m.bin.lat]);
+                });
+                map.fitBounds(bounds, { padding: 50 });
+            }
+        }
+    }
+
+    function resetMapView() {
+        if (typeof map !== 'undefined') {
+            map.flyTo({
+                center: [108.2068, 16.0471],
+                zoom: 12
+            });
+        }
     }
 
     document.getElementById("cityFilter").addEventListener("change", applyFilter);

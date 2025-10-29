@@ -73,7 +73,7 @@
 
             <!-- Main Layout: Filter Left, Map Right -->
             <div class="row g-4 mb-4">
-                <!-- Filter Panel - Left Side (Giảm từ col-md-4 xuống col-md-3) -->
+                <!-- Filter Panel - Left Side -->
                 <div class="col-md-3">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-header bg-white border-bottom-0 py-2">
@@ -159,7 +159,7 @@
                     </div>
                 </div>
 
-                <!-- Map Section - Right Side (Tăng từ col-md-8 lên col-md-9) -->
+                <!-- Map Section - Right Side -->
                 <div class="col-md-9">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-2">
@@ -177,7 +177,6 @@
                             </div>
                         </div>
                         <div class="card-body p-0">
-                            <!-- Giảm chiều cao bản đồ từ 500px xuống 400px -->
                             <div id="map" style="height: 400px;" class="rounded-bottom"></div>
                         </div>
                     </div>
@@ -258,41 +257,183 @@
     </div>
 </div>
 
+<!-- ====================== LIBRARIES ====================== -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
 <script>
-    // Hàm chọn icon theo mức đầy
-    function getBinIcon(level, status) {
-        if (status == 2) {
-            return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="gray" viewBox="0 0 24 24">
-                    <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
-                    <rect x="5" y="16" width="14" height="4" fill="rgba(0,0,0,0.3)"/>
-                </svg>
-            `);
-        } else if (level >= 80) {
-            return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="red" viewBox="0 0 24 24">
-                    <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
-                    <rect x="5" y="8" width="14" height="12" fill="rgba(0,0,0,0.3)"/>
-                </svg>
-            `);
-        } else if (level >= 40) {
-            return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="orange" viewBox="0 0 24 24">
-                    <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
-                    <rect x="5" y="12" width="14" height="8" fill="rgba(0,0,0,0.3)"/>
-                </svg>
-            `);
-        } else {
-            return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="green" viewBox="0 0 24 24">
-                    <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
-                    <rect x="5" y="16" width="14" height="4" fill="rgba(0,0,0,0.3)"/>
-                </svg>
-            `);
+    // ====================== REALTIME SOCKET ======================
+    var socket = new SockJS('${pageContext.request.contextPath}/ws-bin-sockjs');
+    var stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        console.log("✅ WebSocket connected: " + frame);
+
+        stompClient.subscribe('/topic/binUpdates', function (message) {
+            var bin = JSON.parse(message.body);
+            console.log("📡 Cập nhật mới:", bin);
+            updateBinRow(bin);
+            updateBinMarker(bin);
+        });
+
+        stompClient.subscribe('/topic/binRemoved', function (message) {
+            var bin = JSON.parse(message.body);
+            console.log("🗑 Bin bị xóa:", bin.binID);
+            removeBinRow(bin.binID);
+            removeBinMarker(bin.binID);
+        });
+    });
+
+    // ======= Cập nhật trong bảng =======
+    function updateBinRow(bin) {
+        const rows = document.querySelectorAll("#binTableBody tr");
+        let found = false;
+
+        rows.forEach(row => {
+            const code = row.querySelector("td:first-child").textContent.trim();
+            if (code === bin.binCode) {
+                found = true;
+                const fillCell = row.querySelector("td:nth-child(3) span");
+                const statusCell = row.querySelector("td:nth-child(5) span");
+
+                fillCell.textContent = bin.currentFill + "%";
+                fillCell.className = "badge " + (
+                    bin.currentFill >= 80 ? "bg-danger" :
+                        bin.currentFill >= 40 ? "bg-warning" : "bg-success"
+                );
+
+                statusCell.textContent = (bin.status == 1 ? "Online" : "Offline");
+                statusCell.className = "badge " + (bin.status == 1 ? "bg-success" : "bg-secondary");
+
+                row.setAttribute("data-fill", bin.currentFill);
+                row.setAttribute("data-status", bin.status);
+            }
+        });
+
+        if (!found) {
+            const tbody = document.getElementById("binTableBody");
+            const newRow = document.createElement("tr");
+
+            newRow.setAttribute("data-city", bin.ward && bin.ward.province ? bin.ward.province.provinceName : '');
+            newRow.setAttribute("data-ward", bin.ward ? bin.ward.wardName : '');
+            newRow.setAttribute("data-status", bin.status);
+            newRow.setAttribute("data-fill", bin.currentFill);
+
+            newRow.innerHTML = `
+            <td class="fw-medium">\${bin.binCode}</td>
+            <td>\${bin.street}\${bin.ward ? ', ' + bin.ward.wardName : ''}\${bin.ward && bin.ward.province ? ', ' + bin.ward.province.provinceName : ''}</td>
+            <td><span class="badge \${bin.currentFill >= 80 ? 'bg-danger' : bin.currentFill >= 40 ? 'bg-warning' : 'bg-success'}">\${bin.currentFill}%</span></td>
+            <td>\${bin.capacity || 0}</td>
+            <td><span class="badge \${bin.status == 1 ? 'bg-success' : 'bg-secondary'}">\${bin.status == 1 ? 'Online' : 'Offline'}</span></td>
+            <td><a href="${pageContext.request.contextPath}/manage/bin/\${bin.binID}" class="btn btn-primary btn-sm">Chi tiết</a></td>
+        `;
+            tbody.prepend(newRow);
+            allRows.unshift(newRow);
+            displayPage(currentPage);
         }
     }
 
-    // Khởi tạo bản đồ VietMap
+    // ======= Cập nhật marker bản đồ =======
+    function updateBinMarker(bin) {
+        if (!markers || markers.length === 0) return;
+
+        let marker = markers.find(m => m.bin.code === bin.binCode);
+        if (marker) {
+            marker.bin.fullness = bin.currentFill;
+            marker.bin.status = bin.status;
+            marker.bin.lat = bin.latitude;
+            marker.bin.lng = bin.longitude;
+            marker.bin.address = bin.street;
+            marker.setLngLat([bin.longitude, bin.latitude]);
+            marker.getElement().src = getBinIcon(bin.currentFill, bin.status);
+        } else {
+            var el = document.createElement("img");
+            el.src = getBinIcon(bin.currentFill, bin.status);
+            el.style.width = "32px";
+            el.style.height = "32px";
+
+            var popup = new vietmapgl.Popup({ offset: 25 }).setHTML(
+                "<b>Mã:</b> " + bin.binCode +
+                "<br><b>Địa chỉ:</b> " + bin.street +
+                "<br><b>Đầy:</b> " + bin.currentFill + "%" +
+                "<br><b>Trạng thái:</b> " + (bin.status == 1 ? "Online" : "Offline")
+            );
+
+            var newMarker = new vietmapgl.Marker({ element: el })
+                .setLngLat([bin.longitude, bin.latitude])
+                .setPopup(popup)
+                .addTo(map);
+
+            newMarker.bin = {
+                code: bin.binCode,
+                binID: bin.binID,
+                lat: bin.latitude,
+                lng: bin.longitude,
+                fullness: bin.currentFill,
+                status: bin.status,
+                city: bin.ward && bin.ward.province ? bin.ward.province.provinceName : '',
+                ward: bin.ward ? bin.ward.wardName : ''
+            };
+            markers.push(newMarker);
+        }
+    }
+
+    // ======= Xóa bin =======
+    function removeBinRow(binID) {
+        const rows = document.querySelectorAll("#binTableBody tr");
+        rows.forEach(row => {
+            const link = row.querySelector("a");
+            if (link && link.href.includes("/manage/bin/" + binID)) {
+                const index = allRows.indexOf(row);
+                if (index > -1) allRows.splice(index, 1);
+                row.remove();
+                displayPage(currentPage);
+            }
+        });
+    }
+
+    function removeBinMarker(binID) {
+        if (!markers || markers.length === 0) return;
+        const index = markers.findIndex(m => m.bin.binID === binID);
+        if (index !== -1) {
+            markers[index].remove();
+            markers.splice(index, 1);
+        }
+    }
+
+    // ====================== BẢN ĐỒ ======================
+    function getBinIcon(level, status) {
+        if (status == 2) {
+            return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="gray" viewBox="0 0 24 24">
+                <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
+                <rect x="5" y="16" width="14" height="4" fill="rgba(0,0,0,0.3)"/>
+            </svg>
+        `);
+        } else if (level >= 80) {
+            return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="red" viewBox="0 0 24 24">
+                <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
+                <rect x="5" y="8" width="14" height="12" fill="rgba(0,0,0,0.3)"/>
+            </svg>
+        `);
+        } else if (level >= 40) {
+            return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="orange" viewBox="0 0 24 24">
+                <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
+                <rect x="5" y="12" width="14" height="8" fill="rgba(0,0,0,0.3)"/>
+            </svg>
+        `);
+        } else {
+            return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="green" viewBox="0 0 24 24">
+                <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
+                <rect x="5" y="16" width="14" height="4" fill="rgba(0,0,0,0.3)"/>
+            </svg>
+        `);
+        }
+    }
+
     var map = new vietmapgl.Map({
         container: "map",
         style: "https://maps.vietmap.vn/maps/styles/tm/style.json?apikey=ecdbd35460b2d399e18592e6264186757aaaddd8755b774c",
@@ -345,71 +486,19 @@
         });
     });
 
-    function applyFilter() {
-        var city = document.getElementById("cityFilter").value;
-        var ward = document.getElementById("wardFilter").value;
-        var status = document.getElementById("statusFilter").value;
-        var fill = document.getElementById("fillFilter").value;
-
-        document.querySelectorAll("#binTable tbody tr").forEach(function(row) {
-            var rowCity = row.getAttribute("data-city");
-            var rowWard = row.getAttribute("data-ward");
-            var rowStatus = row.getAttribute("data-status");
-            var rowFill = parseInt(row.getAttribute("data-fill")) || 0;
-
-            var matchFill = true;
-            if (fill) {
-                if (fill == 80) matchFill = rowFill >= 80;
-                else if (fill == 40) matchFill = rowFill >= 40 && rowFill < 80;
-                else if (fill == 0) matchFill = rowFill < 40;
-            }
-
-            var match = (!city || city === rowCity)
-                && (!ward || ward === rowWard)
-                && (!status || status === rowStatus)
-                && matchFill;
-
-            row.style.display = match ? "" : "none";
-        });
-
-        markers.forEach(function(m) {
-            var matchFill = true;
-            if (fill) {
-                if (fill == 80) matchFill = m.bin.fullness >= 80;
-                else if (fill == 40) matchFill = m.bin.fullness >= 40 && m.bin.fullness < 80;
-                else if (fill == 0) matchFill = m.bin.fullness < 40;
-            }
-
-            var match = (!city || city === m.bin.city)
-                && (!ward || ward === m.bin.ward)
-                && (!status || status == m.bin.status)
-                && matchFill;
-
-            if (match) {
-                if (!m._map) m.addTo(map);
-            } else {
-                if (m._map) m.remove();
-            }
-        });
-    }
-    // ==================== BIẾN TOÀN CỤC ====================
+    // ==================== PHÂN TRANG ====================
     var currentPage = 1;
-    var itemsPerPage = 3;
+    var itemsPerPage = 25;
     var allRows = [];
 
-    // ==================== KHỞI TẠO ====================
     document.addEventListener('DOMContentLoaded', function() {
         initializePagination();
     });
 
     function initializePagination() {
-        // Lấy tất cả các dòng từ bảng
         allRows = Array.from(document.querySelectorAll("#binTable tbody tr"));
-
-        // Hiển thị trang đầu tiên
         displayPage(1);
 
-        // Thêm event listener cho các bộ lọc
         document.getElementById("cityFilter").addEventListener("change", function() {
             applyFilter();
             displayPage(1);
@@ -431,14 +520,12 @@
         });
     }
 
-    // ==================== LỌC DỮ LIỆU ====================
     function applyFilter() {
         var city = document.getElementById("cityFilter").value;
         var ward = document.getElementById("wardFilter").value;
         var status = document.getElementById("statusFilter").value;
         var fill = document.getElementById("fillFilter").value;
 
-        // Lọc bảng
         allRows.forEach(function(row) {
             var rowCity = row.getAttribute("data-city");
             var rowWard = row.getAttribute("data-ward");
@@ -464,7 +551,6 @@
             }
         });
 
-        // Lọc markers trên bản đồ
         if (typeof markers !== 'undefined') {
             markers.forEach(function(m) {
                 var matchFill = true;
@@ -487,34 +573,24 @@
             });
         }
 
-        // Cập nhật số lượng kết quả
         updateResultCount();
     }
 
-    // ==================== PHÂN TRANG ====================
     function displayPage(page) {
         currentPage = page;
-
-        // Lấy các dòng đang hiển thị (không bị lọc)
         var visibleRows = allRows.filter(row => !row.classList.contains('filtered-out'));
         var totalItems = visibleRows.length;
 
-        // Tính toán chỉ số
         var startIndex = (page - 1) * itemsPerPage;
         var endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
-        // Ẩn tất cả các dòng trước
         allRows.forEach(row => row.style.display = 'none');
 
-        // Hiển thị các dòng trong trang hiện tại
         for (var i = startIndex; i < endIndex; i++) {
             visibleRows[i].style.display = '';
         }
 
-        // Cập nhật thông tin phân trang
         updatePaginationInfo(startIndex + 1, endIndex, totalItems);
-
-        // Tạo các nút phân trang
         createPaginationButtons(totalItems);
     }
 
@@ -531,17 +607,14 @@
 
         if (totalPages <= 1) return;
 
-        // Nút Previous
         var prevLi = document.createElement('li');
         prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
         prevLi.innerHTML = '<a class="page-link" href="#" onclick="goToPage(' + (currentPage - 1) + '); return false;">«</a>';
         paginationContainer.appendChild(prevLi);
 
-        // Tính toán phạm vi trang hiển thị
         var startPage = Math.max(1, currentPage - 2);
         var endPage = Math.min(totalPages, currentPage + 2);
 
-        // Nút trang đầu
         if (startPage > 1) {
             var firstLi = document.createElement('li');
             firstLi.className = 'page-item';
@@ -556,7 +629,6 @@
             }
         }
 
-        // Các trang ở giữa
         for (var i = startPage; i <= endPage; i++) {
             var pageLi = document.createElement('li');
             pageLi.className = 'page-item' + (i === currentPage ? ' active' : '');
@@ -564,7 +636,6 @@
             paginationContainer.appendChild(pageLi);
         }
 
-        // Nút trang cuối
         if (endPage < totalPages) {
             if (endPage < totalPages - 1) {
                 var dotsLi = document.createElement('li');
@@ -579,7 +650,6 @@
             paginationContainer.appendChild(lastLi);
         }
 
-        // Nút Next
         var nextLi = document.createElement('li');
         nextLi.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
         nextLi.innerHTML = '<a class="page-link" href="#" onclick="goToPage(' + (currentPage + 1) + '); return false;">»</a>';
@@ -593,8 +663,6 @@
         if (page < 1 || page > totalPages) return;
 
         displayPage(page);
-
-        // Cuộn lên đầu bảng
         document.getElementById('binTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -603,14 +671,13 @@
         document.getElementById("resultCount").textContent = visibleRows.length;
     }
 
-    // ==================== CÁC HÀM TIỆN ÍCH ====================
+    // ==================== TIỆN ÍCH ====================
     function exportReport() {
         alert("Chức năng xuất báo cáo đang được phát triển!");
     }
 
     function focusOnResults() {
         if (typeof map !== 'undefined') {
-            // Lấy tất cả markers đang hiển thị
             var visibleMarkers = markers.filter(m => m._map);
 
             if (visibleMarkers.length > 0) {
@@ -631,11 +698,6 @@
             });
         }
     }
-
-    document.getElementById("cityFilter").addEventListener("change", applyFilter);
-    document.getElementById("wardFilter").addEventListener("change", applyFilter);
-    document.getElementById("statusFilter").addEventListener("change", applyFilter);
-    document.getElementById("fillFilter").addEventListener("change", applyFilter);
 </script>
 </body>
 </html>

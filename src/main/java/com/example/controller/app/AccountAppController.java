@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -172,5 +173,64 @@ public class AccountAppController {
 
         Account saved = accountRepository.save(account);
         return ResponseEntity.ok(saved);
+    }
+
+    /** Gửi mã xác minh quên mật khẩu */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        Optional<Account> opt = accountRepository.findByEmail(email);
+        if (!opt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiMessage("NOT_FOUND", "Email không tồn tại"));
+        }
+
+        Account acc = opt.get();
+        String code = randomService.generateRandomCode();
+
+        acc.setCode(code);
+        accountRepository.save(acc);
+
+        emailService.sendForgotPasswordCode(email, code);
+        return ResponseEntity.ok(new ApiMessage("SENT", "Đã gửi mã xác minh qua email"));
+    }
+
+    /** Kiểm tra mã xác minh quên mật khẩu (giống verify OTP) */
+    @PostMapping("/verify-reset-code")
+    public ResponseEntity<?> verifyResetCode(@RequestParam String email, @RequestParam String code) {
+        Optional<Account> opt = accountRepository.findByEmail(email);
+        if (!opt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiMessage("NOT_FOUND", "Email không tồn tại"));
+        }
+
+        Account acc = opt.get();
+
+        if (!acc.getCode().equals(code)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiMessage("INVALID", "Mã xác minh không đúng"));
+        }
+
+        return ResponseEntity.ok(new ApiMessage("VERIFIED", "Mã xác minh hợp lệ"));
+    }
+
+    /** Đặt lại mật khẩu mới */
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(
+            @RequestParam String email,
+            @RequestParam String newPassword) {
+
+        Optional<Account> opt = accountRepository.findByEmail(email);
+        if (!opt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiMessage("NOT_FOUND", "Email không tồn tại"));
+        }
+
+        Account acc = opt.get();
+        acc.setPassword(passwordEncoder.encode(newPassword));
+        acc.setCode(null);
+        acc.setIsVerified(true);
+        accountRepository.save(acc);
+
+        return ResponseEntity.ok(new ApiMessage("SUCCESS", "Đặt lại mật khẩu thành công"));
     }
 }

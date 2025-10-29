@@ -43,6 +43,36 @@ public class EmailService {
         }
     }
 
+
+    public void sendForgotPasswordCode(String email, String code) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(email);
+            helper.setSubject(" Khôi Phục Mật Khẩu - SmartBin");
+
+            String content = "<html><body style='font-family:Arial,sans-serif; line-height:1.6;'>"
+                    + "<h2 style='color:#4CAF50;'>Yêu cầu đặt lại mật khẩu</h2>"
+                    + "<p>Xin chào,</p>"
+                    + "<p>Bạn vừa yêu cầu <b>đặt lại mật khẩu</b> cho tài khoản SmartBin của mình.</p>"
+                    + "<p>🔑 Mã xác minh của bạn là: <b style='color:#d32f2f;font-size:18px;'>" + code + "</b></p>"
+                    + "Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>"
+                    + "<hr style='margin:20px 0;border:none;border-top:1px solid #eee;'>"
+                    + "<p>🌱 <b>Đội ngũ SmartBin</b><br>"
+                    + "🌐 <a href='" + linkweb + "'>Website SmartBin</a><br>"
+                    + "📧 Email hỗ trợ: " + supportEmail + "<br>"
+                    + "📞 Hotline: " + hotline + "</p>"
+                    + "</body></html>";
+
+            helper.setText(content, true);
+            mailSender.send(mimeMessage);
+            System.out.println("✅ Đã gửi email mã khôi phục mật khẩu thành công đến: " + email);
+        } catch (MessagingException e) {
+            System.err.println("❌ Lỗi khi gửi email khôi phục mật khẩu: " + e.getMessage());
+        }
+    }
+
+
     public void sendCodeToEmailResendCode(String email, String code) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         try {

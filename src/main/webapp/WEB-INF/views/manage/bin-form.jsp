@@ -76,9 +76,16 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label for="wardID" class="form-label fw-semibold">Mã phường/xã:</label>
-                            <input type="number" class="form-control" id="wardID" name="wardID"
-                                   value="${bin.wardID}" required>
+                            <label for="wardID" class="form-label fw-semibold">Phường/Xã:</label>
+                            <select class="form-select" id="wardID" name="wardID" required>
+                                <option value="">-- Chọn phường/xã --</option>
+                                <c:forEach items="${wards}" var="ward">
+                                    <option value="${ward.wardId}"
+                                        ${bin.wardID == ward.wardId ? 'selected' : ''}>
+                                            ${ward.wardName}
+                                    </option>
+                                </c:forEach>
+                            </select>
                         </div>
                     </div>
 

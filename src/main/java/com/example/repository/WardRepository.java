@@ -2,6 +2,7 @@ package com.example.repository;
 
 import com.example.model.Ward;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,4 +15,13 @@ public interface WardRepository extends JpaRepository<Ward, Integer> {
 
     // ===================== ADD-ON =====================
     Ward findByWardId(int wardId);
+    @Query("SELECT COUNT(w) FROM Ward w")
+    long countAllWards();
+    @Query("SELECT w FROM Ward w ORDER BY w.wardName ASC")
+    List<Ward> findAllWards();
+
+
+    boolean existsByWardNameIgnoreCaseAndProvince_ProvinceId(String wardName, Integer provinceId);
+
+
 }

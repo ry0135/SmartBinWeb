@@ -19,7 +19,12 @@ public class BinService {
     public List<Bin> getAllBins() {
         return binRepository.findAllWithWardAndProvince();
     }
-
+    public List<Bin> getActiveBinsWithHighFill() {
+        return binRepository.findActiveBinsWithHighFill();
+    }
+    public List<Bin> getOffLineBins() {
+        return binRepository.findOffLineBins();
+    }
     // Sử dụng JOIN FETCH để lấy bin theo ID với đầy đủ thông tin
     public Bin getBinById(int id) {
         return binRepository.findByIdWithWardAndProvince(id).orElse(null);

@@ -64,38 +64,38 @@ public class AdminBinController {
         return "admin/bin-edit";
     }
 
-    // Submit update
-    @PostMapping("/{id}/update")
-    public String doUpdate(@PathVariable int id,
-                           @ModelAttribute("bin") Bin form,
-                           RedirectAttributes ra,
-                           Model model) {
-        try {
-            binService.updateBin(id, form);
-            ra.addFlashAttribute("success", "Cập nhật thành công");
-            return "redirect:/admin/bins/list";
-        } catch (Exception e) {
-            model.addAttribute("wards", wardRepository.findAll());
-            model.addAttribute("error", e.getMessage());
-            return "admin/bin-edit";
-        }
-    }
-
-    // Xoá
-    @PostMapping("/{id}/delete")
-    public String doDelete(@PathVariable int id, RedirectAttributes ra) {
-        try {
-            binService.delete(id);
-            ra.addFlashAttribute("success", "Đã xoá BinID=" + id);
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", "Không thể xoá: " + e.getMessage());
-        }
-        return "redirect:/admin/bins/list";
-    }
-    @org.springframework.web.bind.annotation.InitBinder
-    public void initBinder(org.springframework.web.bind.WebDataBinder binder) {
-        // Không cho client bind vào binCode từ request (kể cả ai đó tự tạo field ẩn)
-        binder.setDisallowedFields("binCode");
-    }
+//    // Submit update
+//    @PostMapping("/{id}/update")
+//    public String doUpdate(@PathVariable int id,
+//                           @ModelAttribute("bin") Bin form,
+//                           RedirectAttributes ra,
+//                           Model model) {
+//        try {
+//            binService.updateBin(id, form);
+//            ra.addFlashAttribute("success", "Cập nhật thành công");
+//            return "redirect:/admin/bins/list";
+//        } catch (Exception e) {
+//            model.addAttribute("wards", wardRepository.findAll());
+//            model.addAttribute("error", e.getMessage());
+//            return "admin/bin-edit";
+//        }
+//    }
+//
+//    // Xoá
+//    @PostMapping("/{id}/delete")
+//    public String doDelete(@PathVariable int id, RedirectAttributes ra) {
+//        try {
+//            binService.delete(id);
+//            ra.addFlashAttribute("success", "Đã xoá BinID=" + id);
+//        } catch (Exception e) {
+//            ra.addFlashAttribute("error", "Không thể xoá: " + e.getMessage());
+//        }
+//        return "redirect:/admin/bins/list";
+//    }
+//    @org.springframework.web.bind.annotation.InitBinder
+//    public void initBinder(org.springframework.web.bind.WebDataBinder binder) {
+//        // Không cho client bind vào binCode từ request (kể cả ai đó tự tạo field ẩn)
+//        binder.setDisallowedFields("binCode");
+//    }
 
 }

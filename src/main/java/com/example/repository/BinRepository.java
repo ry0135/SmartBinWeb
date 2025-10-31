@@ -23,5 +23,10 @@ public interface BinRepository extends JpaRepository<Bin, Integer> {
     // JOIN để lấy bins theo wardID với thông tin đầy đủ
     @Query("SELECT b FROM Bin b JOIN FETCH b.ward w JOIN FETCH w.province WHERE b.wardID = :wardID")
     List<Bin> findByWardIDWithWardAndProvince(@Param("wardID") int wardID);
+    @Query("SELECT b FROM Bin b JOIN FETCH b.ward w JOIN FETCH w.province WHERE b.status = 1 AND b.currentFill > 60")
+    List<Bin> findActiveBinsWithHighFill();
+
+    @Query("SELECT b FROM Bin b JOIN FETCH b.ward w JOIN FETCH w.province WHERE b.status = 2")
+    List<Bin> findOffLineBins();
     boolean existsByBinCode(String binCode);
 }

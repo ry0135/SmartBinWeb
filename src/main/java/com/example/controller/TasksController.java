@@ -28,11 +28,11 @@ public class TasksController {
 
     @GetMapping("/task-management")
     public String manage(Model model) {
-        List<Bin> allBins = binService.getAllBins();
+        // Sử dụng repository trực tiếp để lấy bins với status = 1 và currentFill > 60
+        List<Bin> highFillBins = binService.getActiveBinsWithHighFill();
 
-        // Lọc bỏ bin đã có task OPEN / DOING / COMPLETED và chỉ lấy bin có status == 1
-        List<Bin> bins = allBins.stream()
-                .filter(bin -> bin.getStatus() == 1) // thêm điều kiện status == 1
+        // Lọc bỏ bin đã có task OPEN / DOING / COMPLETED
+        List<Bin> bins = highFillBins.stream()
                 .filter(bin -> !taskService.hasRestrictedTask(bin.getBinID()))
                 .collect(Collectors.toList());
 
@@ -70,11 +70,10 @@ public class TasksController {
     }
     @GetMapping("/maintenance-management")
     public String maintenance(Model model) {
-        List<Bin> allBins = binService.getAllBins();
+        List<Bin> allBins = binService.getOffLineBins();
 
         // Lọc bỏ bin đã có task OPEN / DOING / COMPLETED và chỉ lấy bin có status == 2
         List<Bin> bins = allBins.stream()
-                .filter(bin -> bin.getStatus() == 2) // thêm điều kiện status == 2
                 .filter(bin -> !taskService.hasRestrictedTask(bin.getBinID()))
                 .collect(Collectors.toList());
 

@@ -42,9 +42,9 @@ public class ReportExportUtil {
             int r = 1;
             for (Report rep : reports) {
                 Row row = sheet.createRow(r++);
-                row.createCell(0).setCellValue(rep.getReportID());
-                row.createCell(1).setCellValue(rep.getBinID());
-                row.createCell(2).setCellValue(rep.getAccountID());
+                row.createCell(0).setCellValue(rep.getReportId());
+                row.createCell(1).setCellValue(rep.getBinId());
+                row.createCell(2).setCellValue(rep.getAccountId());
                 row.createCell(3).setCellValue(rep.getReportType() == null ? "" : rep.getReportType());
                 row.createCell(4).setCellValue(rep.getDescription() == null ? "" : rep.getDescription());
                 row.createCell(5).setCellValue(rep.getStatus() == null ? "" : rep.getStatus());
@@ -105,9 +105,9 @@ public class ReportExportUtil {
         sb.append("<tbody>");
         for (Report r : reports) {
             sb.append("<tr>");
-            sb.append("<td>").append(r.getReportID()).append("</td>");
-            sb.append("<td>").append(r.getBinID()).append("</td>");
-            sb.append("<td>").append(r.getAccountID()).append("</td>");
+            sb.append("<td>").append(r.getReportId()).append("</td>");
+            sb.append("<td>").append(r.getBinId()).append("</td>");
+            sb.append("<td>").append(r.getAccountId()).append("</td>");
             sb.append("<td>").append(escapeHtml(r.getReportType())).append("</td>");
             sb.append("<td>").append(escapeHtml(r.getDescription())).append("</td>");
             sb.append("<td>").append(escapeHtml(r.getStatus())).append("</td>");

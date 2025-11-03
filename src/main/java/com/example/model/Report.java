@@ -51,8 +51,8 @@ public class Report {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "BinID", insertable = false, updatable = false)
     private Bin bin;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "AccountID", insertable = false, updatable = false)
     private Account account;
     

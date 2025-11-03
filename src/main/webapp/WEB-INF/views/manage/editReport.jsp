@@ -160,9 +160,9 @@
         <h3> <span>Update</span></h3>
 
         <form action="${pageContext.request.contextPath}/update" method="post">
-            <input type="hidden" name="reportID" value="${report.reportID}" />
-            <input type="hidden" name="binID" value="${report.binID}" />
-            <input type="hidden" name="accountID" value="${report.accountID}" />
+            <input type="hidden" name="reportID" value="${report.reportId}" />
+            <input type="hidden" name="binID" value="${report.binId}" />
+            <input type="hidden" name="accountID" value="${report.accountId}" />
 
             <div class="form-group">
                 <label>Loại báo cáo:</label>
@@ -201,7 +201,7 @@
             </div>
 
             <div class="action-buttons">
-                <a href="${pageContext.request.contextPath}/detail/${report.reportID}" class="btn btn-secondary">
+                <a href="${pageContext.request.contextPath}/detail/${report.reportId}" class="btn btn-secondary">
                     <i class="fa-solid fa-arrow-left"></i> Quay lại
                 </a>
                 <button type="submit" class="btn btn-success">

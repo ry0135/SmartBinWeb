@@ -14,8 +14,8 @@ import java.util.List;
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Integer> {
     List<Report> findAll();
-  
-    Report findById(int id);
+
+    Report findByReportId(Integer reportId);
     
     // Tìm báo cáo theo AccountID
     List<Report> findByAccountIdOrderByCreatedAtDesc(Integer accountId);

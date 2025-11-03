@@ -95,17 +95,17 @@
 <div class="content-wrapper">
   <div class="card shadow detail-card">
     <div class="card-header text-white d-flex justify-content-between align-items-center">
-      <span>📋 Chi tiết báo cáo #${report.reportID}</span>
-      <a href="${pageContext.request.contextPath}/edit/${report.reportID}" class="btn btn-warning btn-modern text-white">
+      <span>📋 Chi tiết báo cáo #${report.reportId}</span>
+      <a href="${pageContext.request.contextPath}/edit/${report.reportId}" class="btn btn-warning btn-modern text-white">
         Update
       </a>
     </div>
 
     <div class="card-body">
       <table class="table table-bordered detail-table">
-        <tr><th>ID</th><td>${report.reportID}</td></tr>
-        <tr><th>BinID</th><td>${report.binID}</td></tr>
-        <tr><th>AccountID</th><td>${report.accountID}</td></tr>
+        <tr><th>ID</th><td>${report.reportId}</td></tr>
+        <tr><th>BinID</th><td>${report.binId}</td></tr>
+        <tr><th>AccountID</th><td>${report.accountId}</td></tr>
         <tr><th>Loại báo cáo</th><td>${report.reportType}</td></tr>
         <tr><th>Mô tả</th><td>${report.description}</td></tr>
 
@@ -153,8 +153,8 @@
         </button>
       </div>
       <div class="modal-body text-center">
-        <a href="${pageContext.request.contextPath}/export/excel/${report.reportID}" class="btn btn-success btn-modern m-2">⬇ Tải Excel</a>
-        <a href="${pageContext.request.contextPath}/export/pdf/${report.reportID}" class="btn btn-danger btn-modern m-2">⬇ Tải PDF</a>
+        <a href="${pageContext.request.contextPath}/export/excel/${report.reportId}" class="btn btn-success btn-modern m-2">⬇ Tải Excel</a>
+        <a href="${pageContext.request.contextPath}/export/pdf/${report.reportId}" class="btn btn-danger btn-modern m-2">⬇ Tải PDF</a>
       </div>
     </div>
   </div>
@@ -177,7 +177,7 @@
         </button>
 
         <!-- ✅ Chia sẻ qua Zalo -->
-        <a href="https://zalo.me/share?url=${pageContext.request.contextPath}/report/${report.reportID}"
+        <a href="https://zalo.me/share?url=${pageContext.request.contextPath}/report/${report.reportId}"
            target="_blank"
            class="btn btn-success btn-modern m-2">
           💬 Zalo
@@ -199,7 +199,7 @@
           </button>
         </div>
         <div class="modal-body">
-          <input type="hidden" name="reportId" value="${report.reportID}">
+          <input type="hidden" name="reportId" value="${report.reportId}">
 
           <div class="form-group">
             <label>Nhập Email người nhận:</label>

@@ -163,8 +163,8 @@
                     <tbody>
                     <c:forEach var="report" items="${reports}">
                         <tr>
-                            <td>${report.reportID}</td>
-                            <td>${report.binID}</td>
+                            <td>${report.reportId}</td>
+                            <td>${report.binId}</td>
                             <!-- ✅ Hiển thị FullName từ liên kết Account -->
                             <td>
                                 <c:choose>
@@ -194,7 +194,7 @@
                             <td>${report.updatedAt}</td>
                             <td>${report.resolvedAt}</td>
                             <td class="text-center">
-                                <a href="${pageContext.request.contextPath}/detail/${report.reportID}"
+                                <a href="${pageContext.request.contextPath}/detail/${report.reportId}"
                                    class="btn btn-sm btn-info">
                                    <i class="fa-solid fa-eye"></i> Xem
                                 </a>

@@ -216,8 +216,8 @@
                         <tbody>
                         <c:forEach var="f" items="${feedbacks}">
                             <tr class="<c:if test='${f.rating <= 3}'>low-rating</c:if>">
-                                <td>${f.feedbackID}</td>
-                                <td>${f.accountID}</td>
+                                <td>${f.feedbackId}</td>
+                                <td>${f.accountId}</td>
                                  <td>${f.ward.wardName}</td> <!-- ✅ Hiển thị tên phường -->
                                 <td>
                                     ${f.rating} ⭐
@@ -226,16 +226,16 @@
                                     </c:if>
                                 </td>
                                 <td style="text-align: left;">${f.comment}</td>
-                                <td>${f.reportID}</td>
+                                <td>${f.reportId}</td>
                                 <td>${f.createdAt}</td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-info action-btn view-btn"
-                                            data-id="${f.feedbackID}"
-                                            data-account="${f.accountID}"
+                                            data-id="${f.feedbackId}"
+                                            data-account="${f.accountId}"
                                             data-ward="${f.ward.wardName}"
                                             data-rating="${f.rating}"
                                             data-comment="${f.comment}"
-                                            data-report="${f.reportID}"
+                                            data-report="${f.reportId}"
                                             data-created="${f.createdAt}">
                                         <i class="fa-solid fa-eye"></i> Xem
                                     </button>

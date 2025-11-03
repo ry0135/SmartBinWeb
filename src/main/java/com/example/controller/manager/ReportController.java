@@ -12,6 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -40,8 +41,9 @@ public class ReportController {
 
     @PostMapping("/reports/add")
     public String addReport(@ModelAttribute("report") Report report) {
-        report.setCreatedAt(new Date());
-        report.setStatus("OPEN"); // mặc định khi thêm
+        report.setCreatedAt(LocalDateTime.now());   // dùng LocalDateTime thay vì Date
+        report.setUpdatedAt(LocalDateTime.now());   // nên thêm dòng này để tránh null
+        report.setStatus("OPEN");                   // mặc định khi thêm
         reportService.saveReport(report);
         return "redirect:/reports";
     }
@@ -140,9 +142,9 @@ public class ReportController {
 
             // HTML bảng báo cáo
             String htmlTable = "<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse;width:100%;'>"
-                    + "<tr><th>ID</th><td>" + report.getReportID() + "</td></tr>"
-                    + "<tr><th>BinID</th><td>" + report.getBinID() + "</td></tr>"
-                    + "<tr><th>AccountID</th><td>" + report.getAccountID() + "</td></tr>"
+                    + "<tr><th>ID</th><td>" + report.getReportId() + "</td></tr>"
+                    + "<tr><th>BinID</th><td>" + report.getBinId() + "</td></tr>"
+                    + "<tr><th>AccountID</th><td>" + report.getAccountId() + "</td></tr>"
                     + "<tr><th>Loại báo cáo</th><td>" + report.getReportType() + "</td></tr>"
                     + "<tr><th>Mô tả</th><td>" + report.getDescription() + "</td></tr>"
                     + "<tr><th>Trạng thái</th><td>" + report.getStatus() + "</td></tr>"

@@ -1,3 +1,9 @@
+
+
+package com.example.model;
+
+import javax.persistence.*;
+import java.util.Date;
 package com.example.model;
 
 import javax.persistence.*;
@@ -6,6 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "Feedbacks")
 public class Feedback {
+  
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "FeedbackID")

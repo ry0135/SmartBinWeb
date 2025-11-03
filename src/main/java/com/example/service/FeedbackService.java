@@ -1,6 +1,14 @@
 package com.example.service;
 
 import com.example.model.Feedback;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class FeedbackService {
+
+
 import com.example.repository.FeedbackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -176,4 +184,3 @@ public class FeedbackService {
         feedbackRepository.deleteAll();
     }
 }
-

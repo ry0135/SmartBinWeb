@@ -1,8 +1,13 @@
 package com.example.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.persistence.*;
+import java.util.Date;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Entity
 @Table(name = "Reports")

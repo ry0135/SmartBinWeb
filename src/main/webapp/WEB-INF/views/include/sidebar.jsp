@@ -77,15 +77,14 @@
         </a>
       </li>
 
-      <li class="nav-item mb-2">
-        <a href="${pageContext.request.contextPath}/users"
-           class="nav-link text-dark d-flex align-items-center py-3 px-3 rounded sidebar-link"
-           data-path="/users">
-          <span class="me-3 fs-5">👥</span>
-          <span class="fw-semibold">Người dùng</span>
-        </a>
-      </li>
-
+        <li class="nav-item mb-2">
+            <a href="${pageContext.request.contextPath}/feedbacks"
+               class="nav-link text-white d-flex align-items-center py-3 px-3 rounded sidebar-link"
+               data-path="/feedbacks">
+                <span class="me-3 fs-5">📈</span>
+                <span class="fw-semibold">Phản Hồi</span>
+            </a>
+        </li>
       <li class="nav-item mb-2">
         <a href="${pageContext.request.contextPath}/settings"
            class="nav-link text-dark d-flex align-items-center py-3 px-3 rounded sidebar-link"

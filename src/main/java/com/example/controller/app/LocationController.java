@@ -24,7 +24,7 @@ public class LocationController {
     }
 
     @GetMapping("/wards/{provinceId}")
-    public List<Ward> getWardsByProvince(@PathVariable Long provinceId) {
+    public List<Ward> getWardsByProvince(@PathVariable int provinceId) {
         return locationService.getWardsByProvince(provinceId);
     }
 }

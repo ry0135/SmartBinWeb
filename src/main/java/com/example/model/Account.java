@@ -35,26 +35,30 @@ public class Account {
     @Column(name = "Code")
     private String code;
 
-    @Column(name = "WardID")
-    private int wardID;
-
+    @Column(name = "Phone")
+    private String phone;
+    @Column(name = "WardID", nullable = true)
+    private Integer wardID;
     @JsonIgnore
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CreatedAt", updatable = false)
     private Date createdAt;
+
+    @Column(name = "AddressDetail")
+    private String addressDetail;
 
     @Column(name = "IsVerified")
     private Boolean isVerified;
 
     @Column(name = "fcm_token")
     private String fcmToken;
-
+    @Column(name = "AvatarUrl", length = 500)
+    private String avatarUrl;
     // Relationship với Ward
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "WardID", insertable = false, updatable = false)
-    @JsonIgnore   // thêm cái này
+    @JsonIgnore
     private Ward ward;
-
     // Field tạm (không lưu DB)
     @Transient
     private int taskCount;
@@ -104,6 +108,22 @@ public class Account {
         this.password = password;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddressDetail() {
+        return addressDetail;
+    }
+
+    public void setAddressDetail(String addressDetail) {
+        this.addressDetail = addressDetail;
+    }
+
     public int getRole() {
         return role;
     }
@@ -118,10 +138,10 @@ public class Account {
         this.code = code;
     }
 
-    public int getWardID() {
+    public Integer getWardID() {
         return wardID;
     }
-    public void setWardID(int wardID) {
+    public void setWardID(Integer wardID) {
         this.wardID = wardID;
     }
 
@@ -168,5 +188,17 @@ public class Account {
 
     public void setFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+    // Getter & Setter
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 }

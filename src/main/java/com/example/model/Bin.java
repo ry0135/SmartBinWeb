@@ -4,6 +4,7 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
+@EntityListeners(com.example.listener.BinEntityListener.class)
 @Table(name = "Bins")
 public class Bin {
 

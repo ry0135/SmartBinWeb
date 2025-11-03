@@ -4,6 +4,7 @@ import com.example.model.Bin;
 import com.example.repository.BinRepository;
 import com.example.service.BinService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -61,6 +62,22 @@ public class BinAppController {
 
         return result;
     }
+
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateBin(@PathVariable int id, @RequestBody Bin updated) {
+        return binRepository.findById(id)
+                .map(bin -> {
+                    bin.setCurrentFill(updated.getCurrentFill());
+                    bin.setStatus(updated.getStatus());
+                    bin.setLastUpdated(new java.util.Date());
+                    Bin saved = binRepository.save(bin);
+                    return ResponseEntity.ok(saved);
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 
 }
 

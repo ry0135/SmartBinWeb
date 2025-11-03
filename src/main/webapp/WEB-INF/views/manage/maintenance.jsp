@@ -12,7 +12,6 @@
   <%@include file="../include/sidebar.jsp"%>
 
   <!-- Main Content -->
-  <!-- Main Content -->
   <div class="flex-grow-1" style="margin-left: 250px;">
     <!-- Header -->
     <div class="bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
@@ -84,39 +83,18 @@
               <div class="mt-4 pt-3 border-top">
                 <h6 class="text-muted mb-3">Thống kê nhanh</h6>
                 <div class="row text-center">
-                  <div class="col-6 mb-2">
-                    <div class="bg-success bg-opacity-10 rounded p-2">
-                      <i class="fas fa-wifi text-success"></i>
-                      <div class="small fw-bold text-success">Online</div>
-                      <div class="small" id="onlineCount">0</div>
+                  <div class="col-6">
+                    <div class="bg-success bg-opacity-10 rounded p-3">
+                      <i class="fas fa-wifi text-success fs-4"></i>
+                      <div class="small fw-bold text-success mt-2">Online</div>
+                      <div class="fw-bold fs-4 text-success" id="onlineCount">0</div>
                     </div>
                   </div>
-                  <div class="col-6 mb-2">
-                    <div class="bg-secondary bg-opacity-10 rounded p-2">
-                      <i class="fas fa-wifi-slash text-secondary"></i>
-                      <div class="small fw-bold text-secondary">Offline</div>
-                      <div class="small" id="offlineCount">0</div>
-                    </div>
-                  </div>
-                  <div class="col-4">
-                    <div class="bg-danger bg-opacity-10 rounded p-2">
-                      <i class="fas fa-exclamation-triangle text-danger"></i>
-                      <div class="small fw-bold text-danger">>=80%</div>
-                      <div class="small" id="highFillCount">0</div>
-                    </div>
-                  </div>
-                  <div class="col-4">
-                    <div class="bg-warning bg-opacity-10 rounded p-2">
-                      <i class="fas fa-clock text-warning"></i>
-                      <div class="small fw-bold text-warning">40-79%</div>
-                      <div class="small" id="mediumFillCount">0</div>
-                    </div>
-                  </div>
-                  <div class="col-4">
-                    <div class="bg-success bg-opacity-10 rounded p-2">
-                      <i class="fas fa-check text-success"></i>
-                      <div class="small fw-bold text-success"><40%</div>
-                      <div class="small" id="lowFillCount">0</div>
+                  <div class="col-6">
+                    <div class="bg-secondary bg-opacity-10 rounded p-3">
+                      <i class="fas fa-wifi-slash text-secondary fs-4"></i>
+                      <div class="small fw-bold text-secondary mt-2">Offline</div>
+                      <div class="fw-bold fs-4 text-secondary" id="offlineCount">0</div>
                     </div>
                   </div>
                 </div>
@@ -148,24 +126,16 @@
               <!-- Map Legend -->
               <div class="position-absolute bottom-0 start-0 m-2 bg-white rounded shadow-sm p-2" style="z-index: 1000;">
                 <div class="d-flex align-items-center small">
-                  <div class="me-2 d-flex align-items-center">
-                    <div class="bg-danger rounded-circle me-1" style="width: 8px; height: 8px;"></div>
-                    <span>>=80%</span>
+                  <div class="me-3 d-flex align-items-center">
+                    <div class="bg-success rounded-circle me-1" style="width: 10px; height: 10px;"></div>
+                    <span>Online</span>
                   </div>
-                  <div class="me-2 d-flex align-items-center">
-                    <div class="bg-warning rounded-circle me-1" style="width: 8px; height: 8px;"></div>
-                    <span>40-79%</span>
-                  </div>
-                  <div class="me-2 d-flex align-items-center">
-                    <div class="bg-success rounded-circle me-1" style="width: 8px; height: 8px;"></div>
-                    <span><40%</span>
-                  </div>
-                  <div class="me-2 d-flex align-items-center">
-                    <div class="bg-secondary rounded-circle me-1" style="width: 8px; height: 8px;"></div>
+                  <div class="me-3 d-flex align-items-center">
+                    <div class="bg-secondary rounded-circle me-1" style="width: 10px; height: 10px;"></div>
                     <span>Offline</span>
                   </div>
                   <div class="d-flex align-items-center">
-                    <div class="bg-dark rounded-circle me-1" style="width: 8px; height: 8px;"></div>
+                    <div class="bg-dark rounded-circle me-1" style="width: 10px; height: 10px;"></div>
                     <span>Đã chọn</span>
                   </div>
                 </div>
@@ -177,6 +147,16 @@
 
       <!-- Table Section -->
       <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-list me-2"></i>Danh sách thùng rác
+          </h5>
+          <div class="text-muted small">
+            Tổng: <span id="totalBins">${fn:length(bins)}</span> thùng |
+            Hiển thị: <span id="visibleBins">0</span> thùng
+          </div>
+        </div>
+
         <!-- Selection Actions Bar -->
         <div class="card-body border-bottom d-none" id="selectionActions">
           <div class="row align-items-center">
@@ -184,7 +164,7 @@
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="selectAllVisible">
                 <label class="form-check-label fw-medium" for="selectAllVisible">
-                  Chọn tất cả hiển thị
+                  Chọn tất cả trang này
                 </label>
               </div>
             </div>
@@ -196,7 +176,7 @@
             <div class="col-md-4 text-end">
               <button id="assignTaskBtn" class="btn btn-success">
                 <i class="fas fa-tasks me-1"></i>
-                 Giao nhiệm vụ bảo trì
+                Giao nhiệm vụ bảo trì
               </button>
             </div>
           </div>
@@ -215,7 +195,6 @@
                 </th>
                 <th class="fw-semibold">Mã</th>
                 <th class="fw-semibold">Địa chỉ</th>
-                <th class="fw-semibold">Đầy (%)</th>
                 <th class="fw-semibold">Mức chứa</th>
                 <th class="fw-semibold">Hoạt Động</th>
               </tr>
@@ -239,20 +218,6 @@
                   <td>
                       ${bin.street}<c:if test="${not empty bin.ward}">, ${bin.ward.wardName}</c:if><c:if test="${not empty bin.ward and not empty bin.ward.province}">, ${bin.ward.province.provinceName}</c:if>
                   </td>
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="progress me-2" style="width: 60px; height: 8px;">
-                        <div class="progress-bar ${bin.currentFill >= 80 ? 'bg-danger' : bin.currentFill >= 40 ? 'bg-warning' : 'bg-success'}"
-                             role="progressbar"
-                             style="width: ${bin.currentFill}%"
-                             aria-valuenow="${bin.currentFill}"
-                             aria-valuemin="0"
-                             aria-valuemax="100">
-                        </div>
-                      </div>
-                      <small class="text-muted">${bin.currentFill}%</small>
-                    </div>
-                  </td>
                   <td>${bin.capacity}L</td>
                   <td>
                     <c:choose>
@@ -274,12 +239,47 @@
             </table>
           </div>
         </div>
+
+        <!-- Pagination Section -->
+        <div class="card-footer bg-white border-top">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <span class="text-muted me-2">Hiển thị:</span>
+              <select class="form-select form-select-sm" id="rowsPerPage" style="width: auto;">
+                <option value="10">10</option>
+                <option value="25" selected>25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span class="text-muted ms-3" id="pageInfo">Hiển thị 0-0 của 0</span>
+            </div>
+
+            <nav>
+              <ul class="pagination pagination-sm mb-0" id="pagination">
+                <li class="page-item disabled" id="prevPage">
+                  <a class="page-link" href="#" tabindex="-1">
+                    <i class="fas fa-chevron-left"></i>
+                  </a>
+                </li>
+                <li class="page-item" id="nextPage">
+                  <a class="page-link" href="#">
+                    <i class="fas fa-chevron-right"></i>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+  let currentPage = 1;
+  let rowsPerPage = 25;
+  let filteredRows = [];
+
   document.addEventListener("DOMContentLoaded", function () {
     // Add selected row styling
     const style = document.createElement('style');
@@ -306,7 +306,7 @@
     const wardWarningContainer = document.getElementById("wardWarningContainer");
 
     // State
-    let currentFilter = { city: "", ward: "", status: "", fill: "" };
+    let currentFilter = { city: "", ward: "" };
     let markers = [];
 
     // Helper functions
@@ -315,7 +315,10 @@
     }
 
     function getVisibleCheckboxes() {
-      return getAllCheckboxes().filter(cb => cb.closest("tr").style.display !== "none");
+      return getAllCheckboxes().filter(cb => {
+        const row = cb.closest("tr");
+        return row.style.display !== "none" && row.classList.contains("page-visible");
+      });
     }
 
     function checkSameWard(selectedCheckboxes) {
@@ -335,18 +338,15 @@
       else row.classList.remove("row-selected");
     }
 
-    // Updated function to change marker color instead of just highlighting
     function highlightMarkerForBin(binId, highlight) {
       const m = findMarkerByBinId(binId);
       if (!m) return;
       const el = m.getElement();
 
       if (highlight) {
-        // Change to black icon when selected
         el.src = getBlackBinIcon();
         el.classList.add("marker-selected");
       } else {
-        // Restore original color based on fill level and status
         const bin = m.bin;
         el.src = getBinIcon(bin.fullness, bin.status);
         el.classList.remove("marker-selected");
@@ -356,13 +356,13 @@
     // Selection UI update
     function updateSelectionUI() {
       const visible = getVisibleCheckboxes();
-      const selected = visible.filter(cb => cb.checked);
-      const count = selected.length;
+      const allChecked = getAllCheckboxes().filter(cb => cb.checked);
+      const count = allChecked.length;
       selectedCount.textContent = count;
 
       if (count > 0) {
         selectionActions.classList.remove("d-none");
-        if (!checkSameWard(selected)) {
+        if (!checkSameWard(allChecked)) {
           assignTaskBtn.disabled = true;
           assignTaskBtn.classList.add("disabled");
           wardWarningContainer.innerHTML = `
@@ -419,7 +419,6 @@
         return;
       }
 
-      // Xác định loại nhiệm vụ từ URL parameter
       const urlParams = new URLSearchParams(window.location.search);
       const taskType = urlParams.get('type');
 
@@ -440,7 +439,6 @@
       wardInput.value = selected[0].getAttribute("data-ward-id");
       form.appendChild(wardInput);
 
-      // Thêm tham số loại nhiệm vụ
       const typeInput = document.createElement("input");
       typeInput.type = "hidden";
       typeInput.name = "type";
@@ -483,31 +481,19 @@
       </c:forEach>
     ];
 
-    function getBinIcon(level,status) {
+    function getBinIcon(level, status) {
+      // Chỉ phân biệt theo trạng thái Online/Offline
       if (status == 2) {
-        return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="gray" viewBox="0 0 24 24">
-                    <path d="M3 6h18v2H3zm2 2h14v14H5z"/>
-                    <rect x="5" y="16" width="14" height="4" fill="rgba(0,0,0,0.3)"/>
-                </svg>
-            `);
-      }
-      if (level >= 80) {
         return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="red" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm2 2h14v14H5z"/><rect x="5" y="8" width="14" height="12" fill="rgba(0,0,0,0.3)"/></svg>'
-        );
-      } else if (level >= 40) {
-        return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="orange" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm2 2h14v14H5z"/><rect x="5" y="12" width="14" height="8" fill="rgba(0,0,0,0.3)"/></svg>'
+                '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="gray" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm2 2h14v14H5z"/><rect x="5" y="8" width="14" height="12" fill="rgba(0,0,0,0.3)"/></svg>'
         );
       } else {
         return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="green" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm2 2h14v14H5z"/><rect x="5" y="16" width="14" height="4" fill="rgba(0,0,0,0.3)"/></svg>'
+                '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="green" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm2 2h14v14H5z"/><rect x="5" y="8" width="14" height="12" fill="rgba(0,0,0,0.3)"/></svg>'
         );
       }
     }
 
-    // New function to create black icon for selected bins
     function getBlackBinIcon() {
       return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
               '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="black" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm2 2h14v14H5z"/><rect x="5" y="8" width="14" height="12" fill="rgba(255,255,255,0.8)"/><circle cx="12" cy="14" r="2" fill="white"/></svg>'
@@ -521,7 +507,7 @@
 
         bins.forEach(bin => {
           const el = document.createElement("img");
-          el.src = getBinIcon(bin.fullness,bin.status);
+          el.src = getBinIcon(bin.fullness, bin.status);
           el.style.width = "32px";
           el.style.height = "32px";
           el.style.cursor = "pointer";
@@ -530,7 +516,6 @@
           const popup = new vietmapgl.Popup({ offset: 25 }).setHTML(
                   "<b>Mã:</b> " + bin.code +
                   "<br><b>Địa chỉ:</b> " + bin.address +
-                  "<br><b>Đầy:</b> " + bin.fullness + "%" +
                   "<br><b>Trạng thái:</b> " + (bin.status == 1 ? "Online" : "Offline") +
                   "<br><b>Cập nhật:</b> " + bin.updated
           );
@@ -568,30 +553,145 @@
       map.on("load", addMarkers);
     }
 
-    // Filter logic
+    // Update statistics - CHỈ ĐẾM ONLINE/OFFLINE
+    function updateStatistics() {
+      let onlineCount = 0;
+      let offlineCount = 0;
+
+      filteredRows.forEach(row => {
+        const status = parseInt(row.getAttribute("data-status"));
+
+        if (status === 1) onlineCount++;
+        else if (status === 2) offlineCount++;
+      });
+
+      document.getElementById("onlineCount").textContent = onlineCount;
+      document.getElementById("offlineCount").textContent = offlineCount;
+      document.getElementById("visibleBins").textContent = filteredRows.length;
+    }
+
+    // Pagination functions
+    function displayPage() {
+      allRows.forEach(row => {
+        row.style.display = "none";
+        row.classList.remove("page-visible");
+      });
+
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+      const rowsToShow = filteredRows.length > 0 ? filteredRows : Array.from(allRows);
+
+      for (let i = start; i < end && i < rowsToShow.length; i++) {
+        rowsToShow[i].style.display = "";
+        rowsToShow[i].classList.add("page-visible");
+      }
+
+      updatePagination(rowsToShow.length);
+      updatePageInfo(start, end, rowsToShow.length);
+      updateSelectionUI();
+    }
+
+    function updatePageInfo(start, end, total) {
+      const pageInfo = document.getElementById("pageInfo");
+      const displayStart = total > 0 ? start + 1 : 0;
+      const displayEnd = Math.min(end, total);
+      pageInfo.textContent = `Hiển thị ${displayStart}-${displayEnd} của ${total}`;
+    }
+
+    function updatePagination(totalRows) {
+      const totalPages = Math.ceil(totalRows / rowsPerPage);
+      const pagination = document.getElementById("pagination");
+
+      const pageItems = pagination.querySelectorAll(".page-item:not(#prevPage):not(#nextPage)");
+      pageItems.forEach(item => item.remove());
+
+      const prevPage = document.getElementById("prevPage");
+      if (currentPage === 1) {
+        prevPage.classList.add("disabled");
+      } else {
+        prevPage.classList.remove("disabled");
+      }
+
+      const nextPage = document.getElementById("nextPage");
+      const maxPagesToShow = 5;
+      const startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+      const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+      if (startPage > 1) {
+        const firstPageLi = createPageItem(1, false);
+        pagination.insertBefore(firstPageLi, nextPage);
+
+        if (startPage > 2) {
+          const dotsLi = document.createElement("li");
+          dotsLi.className = "page-item disabled";
+          dotsLi.innerHTML = '<span class="page-link">...</span>';
+          pagination.insertBefore(dotsLi, nextPage);
+        }
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const pageLi = createPageItem(i, i === currentPage);
+        pagination.insertBefore(pageLi, nextPage);
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          const dotsLi = document.createElement("li");
+          dotsLi.className = "page-item disabled";
+          dotsLi.innerHTML = '<span class="page-link">...</span>';
+          pagination.insertBefore(dotsLi, nextPage);
+        }
+        const lastPageLi = createPageItem(totalPages, false);
+        pagination.insertBefore(lastPageLi, nextPage);
+      }
+
+      if (currentPage === totalPages || totalPages === 0) {
+        nextPage.classList.add("disabled");
+      } else {
+        nextPage.classList.remove("disabled");
+      }
+    }
+
+    function createPageItem(pageNum, isActive) {
+      const li = document.createElement("li");
+      li.className = "page-item" + (isActive ? " active" : "");
+
+      const a = document.createElement("a");
+      a.className = "page-link";
+      a.href = "#";
+      a.textContent = pageNum;
+      a.onclick = function(e) {
+        e.preventDefault();
+        if (!isActive) {
+          currentPage = pageNum;
+          displayPage();
+        }
+      };
+
+      li.appendChild(a);
+      return li;
+    }
+
+    // Filter logic - CHỈ ÁP DỤNG FILTER CITY VÀ WARD
     function applyFilter() {
       currentFilter.city = document.getElementById("cityFilter").value;
       currentFilter.ward = document.getElementById("wardFilter").value;
-      // Xóa 2 dòng này
-      // currentFilter.status = document.getElementById("statusFilter").value;
-      // currentFilter.fill = document.getElementById("fillFilter").value;
 
-      // Filter table rows - CHỈ ÁP DỤNG FILTER CITY VÀ WARD
+      filteredRows = [];
+
       allRows.forEach(function (row) {
         const rowCity = row.getAttribute("data-city");
         const rowWard = row.getAttribute("data-ward");
-        // Không cần lấy status và fill nữa
 
         const match =
                 (!currentFilter.city || currentFilter.city === rowCity) &&
                 (!currentFilter.ward || currentFilter.ward === rowWard);
-        // Xóa 2 điều kiện về status và fill
 
-        row.style.display = match ? "" : "none";
-
-        if (!match) {
+        if (match) {
+          filteredRows.push(row);
+        } else {
           const cb = row.querySelector(".bin-checkbox");
-          if (cb) {
+          if (cb && cb.checked) {
             cb.checked = false;
             highlightRowForCheckbox(cb);
             highlightMarkerForBin(cb.value, false);
@@ -599,25 +699,50 @@
         }
       });
 
-      // Filter markers - CHỈ ÁP DỤNG FILTER CITY VÀ WARD
       markers.forEach((marker) => {
         const bin = marker.bin;
 
         const match =
                 (!currentFilter.city || currentFilter.city === bin.city) &&
                 (!currentFilter.ward || currentFilter.ward === bin.ward);
-        // Xóa 2 điều kiện về status và fill
 
         try {
-          const markerElement = marker.getElement();
-          markerElement.style.display = match ? "block" : "none";
+          marker.getElement().style.display = match ? "block" : "none";
         } catch (err) {
           console.error("Marker display error:", err);
         }
       });
 
-      updateSelectionUI();
+      currentPage = 1;
+      updateStatistics();
+      displayPage();
     }
+
+    // Event listeners for pagination
+    document.getElementById("prevPage").addEventListener("click", function(e) {
+      e.preventDefault();
+      if (currentPage > 1) {
+        currentPage--;
+        displayPage();
+      }
+    });
+
+    document.getElementById("nextPage").addEventListener("click", function(e) {
+      e.preventDefault();
+      const rowsToShow = filteredRows.length > 0 ? filteredRows : Array.from(allRows);
+      const totalPages = Math.ceil(rowsToShow.length / rowsPerPage);
+
+      if (currentPage < totalPages) {
+        currentPage++;
+        displayPage();
+      }
+    });
+
+    document.getElementById("rowsPerPage").addEventListener("change", function() {
+      rowsPerPage = parseInt(this.value);
+      currentPage = 1;
+      displayPage();
+    });
 
     // Filter event listeners - CHỈ 2 FILTER
     ["cityFilter", "wardFilter"].forEach((id) => {
@@ -629,8 +754,10 @@
     if (selectAll) selectAll.addEventListener("change", function () { toggleSelectAll(this); });
     if (selectAllVisible) selectAllVisible.addEventListener("change", function () { toggleSelectAll(this); });
 
-    // Initial UI update
-    updateSelectionUI();
+    // Initial setup
+    filteredRows = Array.from(allRows);
+    updateStatistics();
+    displayPage();
   });
 </script>
 

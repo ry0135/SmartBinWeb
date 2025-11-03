@@ -4,6 +4,7 @@ import com.example.dto.LoginRequest;
 import com.example.model.Account;
 import com.example.model.ApiMessage;
 import com.example.repository.AccountRepository;
+import com.example.repository.WardRepository;
 import com.example.service.AccountService;
 import com.example.service.EmailService;
 import com.example.service.RandomService;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -20,15 +22,17 @@ import java.util.Optional;
 @RestController("accountControllerApp")
 @RequestMapping("/api/accounts")
 public class AccountAppController {
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private WardRepository wardRepository;
     @Autowired
     private RandomService randomService;
     @Autowired
     private EmailService emailService;
     @Autowired
     private AccountRepository accountRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody Account account) {
@@ -44,8 +48,8 @@ public class AccountAppController {
                 Account existing = existOpt.get();
                 existing.setCode(code);
                 existing.setPassword(account.getPassword());
-                existing.setFullName(account.getPassword());
-                existing.setPassword(account.getPassword());
+                existing.setFullName(account.getFullName());
+
                 // cập nhật code mới
                 accountRepository.save(existing);
                 emailService.sendCodeToEmail(existing.getEmail(), code);
@@ -54,6 +58,7 @@ public class AccountAppController {
                         .body(new ApiMessage("EMAIL_NOT_VERIFIED", "Email đã đăng ký nhưng chưa xác minh. Mã xác minh mới đã được gửi."));
             }
         }
+
         account.setPassword(encodedPassword);
         account.setCode(code);
         account.setIsVerified(false);
@@ -105,7 +110,6 @@ public class AccountAppController {
         }
     }
 
-
     @PostMapping("/{id}/update-token")
     public ResponseEntity<?> updateFcmToken(
             @PathVariable int id,
@@ -121,5 +125,112 @@ public class AccountAppController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getAccountById(@PathVariable Integer id) {
+        Account account = accountRepository.findByAccountId(id);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Account not found with id: " + id);
+        }
+        return ResponseEntity.ok(account);
+    }
 
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateAccount(@PathVariable Integer id, @RequestBody Account updatedAccount) {
+        Optional<Account> accountOpt = accountRepository.findById(id);
+
+        if (!accountOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
+        }
+
+        Account account = accountOpt.get();
+
+        //  Cập nhật thông tin
+        if (updatedAccount.getFullName() != null)
+            account.setFullName(updatedAccount.getFullName());
+
+        if (updatedAccount.getPhone() != null)
+            account.setPhone(updatedAccount.getPhone());
+
+        if (updatedAccount.getAddressDetail() != null)
+            account.setAddressDetail(updatedAccount.getAddressDetail());
+
+        if (updatedAccount.getAvatarUrl() != null)
+            account.setAvatarUrl(updatedAccount.getAvatarUrl());
+
+        // 🔹 Kiểm tra WardID có tồn tại không trước khi set
+        if (updatedAccount.getWardID() != null) {
+            Integer wardId = updatedAccount.getWardID();
+            boolean wardExists = wardRepository.existsById(wardId);
+
+            if (!wardExists) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("WardID " + wardId + " does not exist in Wards table");
+            }
+
+            account.setWardID(wardId);
+        }
+
+        Account saved = accountRepository.save(account);
+        return ResponseEntity.ok(saved);
+    }
+
+    /** Gửi mã xác minh quên mật khẩu */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        Optional<Account> opt = accountRepository.findByEmail(email);
+        if (!opt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiMessage("NOT_FOUND", "Email không tồn tại"));
+        }
+
+        Account acc = opt.get();
+        String code = randomService.generateRandomCode();
+
+        acc.setCode(code);
+        accountRepository.save(acc);
+
+        emailService.sendForgotPasswordCode(email, code);
+        return ResponseEntity.ok(new ApiMessage("SENT", "Đã gửi mã xác minh qua email"));
+    }
+
+    /** Kiểm tra mã xác minh quên mật khẩu (giống verify OTP) */
+    @PostMapping("/verify-reset-code")
+    public ResponseEntity<?> verifyResetCode(@RequestParam String email, @RequestParam String code) {
+        Optional<Account> opt = accountRepository.findByEmail(email);
+        if (!opt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiMessage("NOT_FOUND", "Email không tồn tại"));
+        }
+
+        Account acc = opt.get();
+
+        if (!acc.getCode().equals(code)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiMessage("INVALID", "Mã xác minh không đúng"));
+        }
+
+        return ResponseEntity.ok(new ApiMessage("VERIFIED", "Mã xác minh hợp lệ"));
+    }
+
+    /** Đặt lại mật khẩu mới */
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(
+            @RequestParam String email,
+            @RequestParam String newPassword) {
+
+        Optional<Account> opt = accountRepository.findByEmail(email);
+        if (!opt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiMessage("NOT_FOUND", "Email không tồn tại"));
+        }
+
+        Account acc = opt.get();
+        acc.setPassword(passwordEncoder.encode(newPassword));
+        acc.setCode(null);
+        acc.setIsVerified(true);
+        accountRepository.save(acc);
+
+        return ResponseEntity.ok(new ApiMessage("SUCCESS", "Đặt lại mật khẩu thành công"));
+    }
 }

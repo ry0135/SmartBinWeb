@@ -32,11 +32,18 @@
     </bean>
 
     <!-- Cấu hình DataSource -->
+<!--    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">-->
+<!--        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />-->
+<!--        <property name="url" value="jdbc:sqlserver://34.16.112.143:1433;databaseName=SmartBinManagement;encrypt=false;characterEncoding=UTF-8;" />-->
+<!--        <property name="username" value="sa" />-->
+<!--        <property name="password" value="123" />-->
+<!--    </bean>-->
+    <!-- Cấu hình DataSource -->
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-        <property name="url" value="jdbc:sqlserver://localhost:1433;databaseName=SmartBin;encrypt=false;characterEncoding=UTF-8;" />
-        <property name="username" value="sa" />
-        <property name="password" value="123" />
+        <property name="url" value="jdbc:sqlserver://smartbin-1.cl24qiggcaj5.ap-southeast-1.rds.amazonaws.com:1433;databaseName=SmartBinDB;encrypt=false;characterEncoding=UTF-8;" />
+        <property name="username" value="admin" />
+        <property name="password" value="12345678" />
     </bean>
 
     <!-- Cấu hình EntityManagerFactory -->

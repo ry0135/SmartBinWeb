@@ -23,11 +23,12 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
         List<Task> findByBatchId(@Param("batchId") String batchId);
         @Query("SELECT t FROM Task t WHERE t.batchId = :batchId AND t.status = 'OPEN' ORDER BY t.createdAt DESC")
         List<Task> findByBatchIdOpen(@Param("batchId") String batchId);
-        @Query("SELECT t FROM Task t WHERE t.batchId = :batchId AND t.status = 'DOING' ORDER BY t.createdAt DESC")
+        @Query("SELECT t FROM Task t WHERE t.batchId = :batchId AND t.status IN ('COMPLETED','DOING') ORDER BY t.createdAt DESC")
         List<Task> findByBatchIdDoing(@Param("batchId") String batchId);
         @Query("SELECT t FROM Task t WHERE t.batchId = :batchId AND t.status = 'COMPLETED' ORDER BY t.createdAt DESC")
         List<Task> findByBatchIdCompeleted(@Param("batchId") String batchId);
-
+        @Query("SELECT t FROM Task t WHERE t.batchId = :batchId AND t.status = 'CANCEL' ORDER BY t.createdAt DESC")
+        List<Task> findByBatchIdCancel(@Param("batchId") String batchId);
         @Query("SELECT t FROM Task t WHERE t.assignedTo.accountId = :workerId AND t.status IN ('OPEN','DOING')")
         List<Task> findOpenTasksByWorker(@Param("workerId") int workerId);
 

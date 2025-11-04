@@ -103,6 +103,9 @@ public class TasksService {
     public List<Task> getTasksByBatchComplete(String batchId) {
         return taskRepository.findByBatchIdCompeleted(batchId);
     }
+    public List<Task> getTasksByBatchCancel(String batchId) {
+        return taskRepository.findByBatchIdCancel(batchId);
+    }
 
     // Lấy danh sách nhân viên có thể giao task
     public List<Account> getAvailableWorkers(int wardID) {
@@ -326,6 +329,90 @@ public class TasksService {
             String title = "Batch được cập nhật";
             String body = "Batch " + batchId + " đã được cập nhật thông tin";
             fcmService.sendNotification(token, title, body, batchId);
+        }
+    }
+    // Thêm vào TasksService.java
+    public Map<String, Long> getBatchStats() {
+        List<Task> allTasks = taskRepository.findAll();
+
+        Map<String, Long> batchStats = new HashMap<>();
+
+        // Lấy tất cả batch ID duy nhất
+        List<String> allBatchIds = allTasks.stream()
+                .filter(task -> task.getBatchId() != null && !task.getBatchId().isEmpty())
+                .map(Task::getBatchId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // Tổng số batch
+        batchStats.put("totalBatches", (long) allBatchIds.size());
+
+        // Đếm batch theo từng trạng thái
+        long openBatches = 0;
+        long doingBatches = 0;
+        long completedBatches = 0;
+        long cancelBatches = 0;
+
+        for (String batchId : allBatchIds) {
+            List<Task> batchTasks = taskRepository.findByBatchId(batchId);
+            if (!batchTasks.isEmpty()) {
+                // Đếm số lượng task theo từng trạng thái trong batch
+                long openCount = batchTasks.stream().filter(t -> "OPEN".equals(t.getStatus())).count();
+                long doingCount = batchTasks.stream().filter(t -> "DOING".equals(t.getStatus())).count();
+                long completedCount = batchTasks.stream().filter(t -> "COMPLETED".equals(t.getStatus())).count();
+                long cancelCount = batchTasks.stream().filter(t -> "CANCEL".equals(t.getStatus())).count();
+                long totalTasks = batchTasks.size();
+
+                // Logic xác định trạng thái batch
+                if (cancelCount > 0) {
+                    // Nếu có task bị cancel, batch là CANCEL
+                    cancelBatches++;
+                } else if (doingCount > 0) {
+                    // Nếu có ít nhất 1 task đang DOING, batch là DOING (ưu tiên cao nhất)
+                    doingBatches++;
+                } else if (completedCount == totalTasks) {
+                    // Chỉ khi TẤT CẢ task đều COMPLETED, batch mới là COMPLETED
+                    completedBatches++;
+                } else if (openCount > 0) {
+                    // Nếu có task OPEN và không có task nào DOING/CANCEL
+                    openBatches++;
+                }
+            }
+        }
+
+        batchStats.put("openBatches", openBatches);
+        batchStats.put("doingBatches", doingBatches);
+        batchStats.put("completedBatches", completedBatches);
+        batchStats.put("cancelBatches", cancelBatches);
+
+        return batchStats;
+    }
+
+    // Thêm phương thức để lấy trạng thái của một batch cụ thể
+    public String getBatchStatus(String batchId) {
+        List<Task> batchTasks = taskRepository.findByBatchId(batchId);
+        if (batchTasks.isEmpty()) {
+            return "UNKNOWN";
+        }
+
+        // Đếm số lượng task theo từng trạng thái
+        long openCount = batchTasks.stream().filter(t -> "OPEN".equals(t.getStatus())).count();
+        long doingCount = batchTasks.stream().filter(t -> "DOING".equals(t.getStatus())).count();
+        long completedCount = batchTasks.stream().filter(t -> "COMPLETED".equals(t.getStatus())).count();
+        long cancelCount = batchTasks.stream().filter(t -> "CANCEL".equals(t.getStatus())).count();
+        long totalTasks = batchTasks.size();
+
+        // Logic xác định trạng thái batch
+        if (cancelCount > 0) {
+            return "CANCEL";
+        } else if (doingCount > 0) {
+            return "DOING";
+        } else if (completedCount == totalTasks) {
+            return "COMPLETED";
+        } else if (openCount > 0) {
+            return "OPEN";
+        } else {
+            return "UNKNOWN";
         }
     }
 }

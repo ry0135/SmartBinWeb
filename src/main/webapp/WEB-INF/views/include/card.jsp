@@ -106,10 +106,10 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Task đang mở
+                                Nhiệm vụ đang mở
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                ${openTasks != null ? openTasks : 0}
+                                ${openBatches != null ? openBatches : 0}
                             </div>
                         </div>
                         <div class="col-auto">
@@ -134,7 +134,7 @@
                                 Đang thực hiện
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                ${doingTasks != null ? doingTasks : 0}
+                                ${doingBatches != null ? doingBatches : 0}
                             </div>
                         </div>
                         <div class="col-auto">
@@ -159,7 +159,7 @@
                                 Đã hoàn thành
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                ${completedTasks != null ? completedTasks : 0}
+                                ${completedBatches != null ? completedBatches : 0}
                             </div>
                         </div>
                         <div class="col-auto">
@@ -181,10 +181,10 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                Task đã hủy
+                                Nhiệm vụ đã hủy
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                ${cancelTasks != null ? cancelTasks : 0}
+                                ${cancelBatches != null ? cancelBatches : 0}
                             </div>
                         </div>
                         <div class="col-auto">

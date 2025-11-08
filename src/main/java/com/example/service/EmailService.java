@@ -249,4 +249,31 @@ public class EmailService {
 
 
 
+
+    public void sendReportEmail(String email, String subject, String reportHtml) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(email);
+            helper.setSubject(subject);
+
+            // Nội dung HTML báo cáo
+            String content = "<h2 style='color:#1E90FF;'>📋 Chi tiết báo cáo SmartBin</h2>"
+                    + reportHtml
+                    + "<hr>"
+                    + "<p>Trân trọng,<br>"
+                    + "<b>🌟 Đội ngũ SmartBin</b><br>"
+                    + "🌐 <a href='" + linkweb + "'>" + linkweb + "</a><br>"
+                    + "📧 " + supportEmail + "<br>"
+                    + "📞 " + hotline + "</p>";
+
+            helper.setText(content, true);
+            mailSender.send(mimeMessage);
+
+            System.out.println("✅ Đã gửi báo cáo thành công đến: " + email);
+        } catch (MessagingException e) {
+            System.err.println("❌ Lỗi khi gửi báo cáo: " + e.getMessage());
+        }
+    }
+
 }

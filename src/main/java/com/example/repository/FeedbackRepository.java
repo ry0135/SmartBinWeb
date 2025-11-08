@@ -10,6 +10,9 @@ import java.util.List;
 
 @Repository
 public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
+    @Query("SELECT f FROM Feedback f JOIN FETCH f.account")
+    List<Feedback> findAllWithAccount();
+
     
     // Tìm feedback theo AccountID
     List<Feedback> findByAccountIdOrderByCreatedAtDesc(Integer accountId);
@@ -38,5 +41,3 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
     List<Feedback> findByRatingBetweenOrderByCreatedAtDesc(@Param("minRating") Integer minRating, 
                                                           @Param("maxRating") Integer maxRating);
 }
-
-

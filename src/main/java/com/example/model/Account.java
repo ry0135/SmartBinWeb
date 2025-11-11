@@ -3,6 +3,7 @@ package com.example.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
 import javax.persistence.*;
@@ -22,7 +23,7 @@ public class Account {
     @Column(name = "Email", length = 100, unique = true, nullable = false)
     private String email;
 
-    @JsonIgnore // Không để password lộ ra ngoài JSON
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "Password", length = 255, nullable = false)
     private String password;
 

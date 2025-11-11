@@ -9,6 +9,7 @@ import com.example.service.AccountService;
 import com.example.service.EmailService;
 import com.example.service.RandomService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,38 +37,51 @@ public class AccountAppController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody Account account) {
+        try {
+            String encodedPassword = passwordEncoder.encode(account.getPassword());
+            String code = randomService.generateRandomCode();
 
-        String encodedPassword = passwordEncoder.encode(account.getPassword());
-        String code = randomService.generateRandomCode();
-        if (accountService.isEmailExistsAndIsVerifiedTrue(account.getEmail())){
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiMessage("EMAIL_REGISTERED", "Email đã đăng ký"));
-        }if (accountService.isEmailExistsAndIsVerifiedFalse(account.getEmail())) {
-            Optional<Account> existOpt = accountRepository.findByEmail(account.getEmail());
-            if (existOpt.isPresent()) {
-                Account existing = existOpt.get();
-                existing.setCode(code);
-                existing.setPassword(account.getPassword());
-                existing.setFullName(account.getFullName());
-
-                // cập nhật code mới
-                accountRepository.save(existing);
-                emailService.sendCodeToEmail(existing.getEmail(), code);
-
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(new ApiMessage("EMAIL_NOT_VERIFIED", "Email đã đăng ký nhưng chưa xác minh. Mã xác minh mới đã được gửi."));
+            if (accountService.isEmailExistsAndIsVerifiedTrue(account.getEmail())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(new ApiMessage("EMAIL_REGISTERED", "Email đã đăng ký"));
             }
-        }
 
-        account.setPassword(encodedPassword);
-        account.setCode(code);
-        account.setIsVerified(false);
-        account.setWardID(account.getWardID());
-        accountRepository.save(account);
-        emailService.sendCodeToEmail(account.getEmail(), code);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiMessage("CREATED", "Đăng ký thành công. Vui lòng kiểm tra email để xác minh."));
+            if (accountService.isEmailExistsAndIsVerifiedFalse(account.getEmail())) {
+                Optional<Account> existOpt = accountRepository.findByEmail(account.getEmail());
+                if (existOpt.isPresent()) {
+                    Account existing = existOpt.get();
+                    existing.setCode(code);
+                    existing.setPassword(encodedPassword);
+                    existing.setFullName(account.getFullName());
+                    accountRepository.save(existing);
+
+                    emailService.sendCodeToEmail(existing.getEmail(), code);
+                    return ResponseEntity.status(HttpStatus.OK)
+                            .body(new ApiMessage("EMAIL_NOT_VERIFIED", "Email đã đăng ký nhưng chưa xác minh. Mã xác minh mới đã được gửi."));
+                }
+            }
+
+            account.setPassword(encodedPassword);
+            account.setCode(code);
+            account.setIsVerified(false);
+            accountRepository.save(account);
+            emailService.sendCodeToEmail(account.getEmail(), code);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ApiMessage("CREATED", "Đăng ký thành công. Vui lòng kiểm tra email để xác minh."));
+        }
+        catch (DataIntegrityViolationException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiMessage("EMAIL_CONFLICT", "Email đã tồn tại trong hệ thống"));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiMessage("SERVER_ERROR", "Lỗi hệ thống: " + e.getMessage()));
+        }
     }
+
 
     @PostMapping("/verificode")
     public ResponseEntity<?> verifyCode(@RequestBody Account account) {

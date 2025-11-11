@@ -6,12 +6,15 @@ import com.example.dto.BinDTO;
 import com.example.dto.TaskDTO;
 import com.example.dto.TaskSummaryDTO;
 import com.example.model.Task;
+import com.example.repository.TasksRepository;
 import com.example.service.TasksService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -20,7 +23,8 @@ public class TaskAppController {
 
     @Autowired
     private TasksService taskService;
-
+    @Autowired
+    private TasksRepository taskRepository;
     // 1. Đếm số task mở theo worker
     @GetMapping("/count/worker/{workerId}")
     public int countOpenTasksByWorker(@PathVariable int workerId) {
@@ -53,6 +57,23 @@ public class TaskAppController {
 
         return ResponseEntity.ok(dtos);
     }
+
+    @PutMapping("/{batchId}/status")
+    public ResponseEntity<?> updateTaskStatus(@PathVariable String batchId, @RequestParam String status) {
+        Optional<Task> taskOpt = taskRepository.findTaskByBatchId(batchId);
+        if (taskOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("❌ Không tìm thấy task có batchId = " + batchId);
+        }
+
+        Task task = taskOpt.get();
+        task.setStatus(status.toUpperCase());
+        taskRepository.save(task);
+
+        return ResponseEntity.ok("✅ Cập nhật trạng thái thành công!");
+    }
+
+
 
 
 }

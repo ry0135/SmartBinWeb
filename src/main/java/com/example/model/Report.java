@@ -1,6 +1,7 @@
 package com.example.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -37,13 +38,13 @@ public class Report {
     
     @Column(name = "TaskID")
     private Integer taskId;
-    
+    @JsonIgnore
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
-    
+    @JsonIgnore
     @Column(name = "UpdatedAt")
     private LocalDateTime updatedAt;
-    
+    @JsonIgnore
     @Column(name = "ResolvedAt")
     private LocalDateTime resolvedAt;
     

@@ -97,13 +97,13 @@
                                         </c:if>
                                     </td>
                                     <td class="py-3">
-                                            <span class="badge ${batch.value[0].taskType == 'COLLECT' || batch.value[0].taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${batch.value[0].taskType}">
-                                <c:choose>
-                                    <c:when test="${batch.value[0].taskType == 'COLLECT' || batch.value[0].taskType == 'COLLECTION'}">Thu gom</c:when>
-                                    <c:when test="${batch.value[0].taskType == 'MAINTENANCE'}">Bảo trì</c:when>
-                                    <c:otherwise>${batch.value[0].taskType}</c:otherwise>
-                                </c:choose>
-                              </span>
+                                           <span class="badge ${task.taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${task.taskType}">
+        <c:choose>
+            <c:when test="${task.taskType == 'COLLECTION'}">Thu gom</c:when>
+            <c:when test="${task.taskType == 'MAINTENANCE'}">Bảo trì</c:when>
+            <c:otherwise>${task.taskType}</c:otherwise>
+        </c:choose>
+    </span>
                                     </td>
                                     <td class="py-3">
                                             <span class="badge ${task.priority == 5 ? 'bg-danger' : task.priority == 4 ? 'bg-warning text-dark' : task.priority == 3 ? 'bg-info' : task.priority == 2 ? 'bg-secondary' : 'bg-light text-dark'} px-3 py-2">

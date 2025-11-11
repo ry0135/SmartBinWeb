@@ -105,19 +105,13 @@
                                         </c:choose>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge ${task.taskType == 'COLLECT' ? 'bg-primary' : task.taskType == 'CLEAN' ? 'bg-info' : 'bg-warning'} fs-6">
-                                            <c:choose>
-                                                <c:when test="${task.taskType == 'COLLECT'}">
-                                                    <i class="fas fa-hand-holding me-1"></i>Thu gom
-                                                </c:when>
-                                                <c:when test="${task.taskType == 'MAINTENANCE'}">
-                                                    <i class="fas fa-tools me-1"></i>Bảo trì
-                                                </c:when>
-                                                <c:otherwise>
-                                                    ${task.taskType}
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </span>
+                                         <span class="badge ${task.taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${task.taskType}">
+        <c:choose>
+            <c:when test="${task.taskType == 'COLLECTION'}">Thu gom</c:when>
+            <c:when test="${task.taskType == 'MAINTENANCE'}">Bảo trì</c:when>
+            <c:otherwise>${task.taskType}</c:otherwise>
+        </c:choose>
+    </span>
                                     </td>
                                     <td class="text-center">
                                         <c:choose>

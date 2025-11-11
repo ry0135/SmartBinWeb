@@ -1,11 +1,14 @@
 package com.example.model;
 
 import javax.persistence.*;
+import java.util.Date;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Feedbacks")
 public class Feedback {
+  
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "FeedbackID")
@@ -30,18 +33,24 @@ public class Feedback {
     private LocalDateTime createdAt;
     
     // Relationships
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "AccountID", insertable = false, updatable = false)
     private Account account;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "WardID", insertable = false, updatable = false)
     private Ward ward;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ReportID", insertable = false, updatable = false)
     private Report report;
-    
+
+    @Column(name = "adminReply")
+    private String adminReply;
+
+    @Column(name = "autoReply")
+    private String autoReply;
+
     // Constructors
     public Feedback() {}
     
@@ -84,6 +93,21 @@ public class Feedback {
     
     public Report getReport() { return report; }
     public void setReport(Report report) { this.report = report; }
+    public String getAdminReply() {
+        return adminReply;
+    }
+
+    public void setAdminReply(String adminReply) {
+        this.adminReply = adminReply;
+    }
+
+    public String getAutoReply() {
+        return autoReply;
+    }
+
+    public void setAutoReply(String autoReply) {
+        this.autoReply = autoReply;
+    }
 }
 
 

@@ -139,7 +139,7 @@
         <div class="card-body">
           <!-- Hiển thị Batch đã hoàn thành -->
           <div id="batchTasksSection">
-            <c:forEach var="batch" items="${doingTasksByBatch}">
+            <c:forEach var="batch" items="${completedTasksByBatch}">
               <div class="card mb-3 batch-card" data-batch-card>
                 <div class="card-body">
                   <div class="row">
@@ -313,7 +313,7 @@
           </c:if>
 
           <!-- Hiển thị khi không có task nào -->
-          <c:if test="${empty doingTasksByBatch and empty singleDoingTasks}">
+          <c:if test="${empty completedTasksByBatch and empty singleDoingTasks}">
             <div class="text-center py-5" id="emptyState">
               <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
               <h5 class="text-muted">Không có task nào đã hoàn thành</h5>

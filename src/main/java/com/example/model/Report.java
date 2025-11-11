@@ -3,8 +3,12 @@ package com.example.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.Date;
+
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Entity
 @Table(name = "Reports")
@@ -48,8 +52,8 @@ public class Report {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "BinID", insertable = false, updatable = false)
     private Bin bin;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "AccountID", insertable = false, updatable = false)
     private Account account;
     

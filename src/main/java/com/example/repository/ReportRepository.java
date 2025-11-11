@@ -2,6 +2,8 @@ package com.example.repository;
 
 import com.example.model.Report;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.Date;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -11,6 +13,9 @@ import java.util.List;
 
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Integer> {
+    List<Report> findAll();
+
+    Report findByReportId(Integer reportId);
     
     // Tìm báo cáo theo AccountID
     List<Report> findByAccountIdOrderByCreatedAtDesc(Integer accountId);
@@ -42,5 +47,6 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     @Query("SELECT r FROM Report r WHERE r.status IN :statuses ORDER BY r.createdAt DESC")
     List<Report> findByStatusInOrderByCreatedAtDesc(@Param("statuses") List<String> statuses);
 }
+
 
 

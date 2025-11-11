@@ -138,7 +138,7 @@
         <div class="card-body">
           <!-- Hiển thị Batch đang DOING -->
           <div id="batchTasksSection">
-            <c:forEach var="batch" items="${doingTasksByBatch}">
+            <c:forEach var="batch" items="${openTasksByBatch}">
               <div class="card mb-3 batch-card" data-batch-card>
                 <div class="card-body">
                   <div class="row">
@@ -150,7 +150,7 @@
                         </h5>
                         <div>
                           <span class="badge bg-secondary me-2">${batch.value.size()} tasks</span>
-                          <span class="badge doing-badge">ĐANG THỰC HIỆN</span>
+                          <span class="badge doing-badge">ĐANG Mở</span>
                         </div>
                       </div>
 
@@ -321,7 +321,7 @@
           </c:if>
 
           <!-- Hiển thị khi không có task nào -->
-          <c:if test="${empty doingTasksByBatch and empty singleDoingTasks}">
+          <c:if test="${empty openTasksByBatch and empty singleDoingTasks}">
             <div class="text-center py-5" id="emptyState">
               <i class="fas fa-play-circle fa-3x text-muted mb-3"></i>
               <h5 class="text-muted">Không có task nào đang thực hiện</h5>

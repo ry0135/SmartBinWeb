@@ -1,24 +1,28 @@
+
 package com.example.service;
 
 import com.example.model.Report;
 import com.example.model.ReportImage;
 import com.example.model.ReportStatusHistory;
-import com.example.repository.ReportRepository;
 import com.example.repository.ReportImageRepository;
+import com.example.repository.ReportRepository;
 import com.example.repository.ReportStatusHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class ReportService {
-    
-    @Autowired
+  
+   @Autowired
     private ReportRepository reportRepository;
     
     @Autowired
@@ -26,7 +30,62 @@ public class ReportService {
     
     @Autowired
     private ReportStatusHistoryRepository statusHistoryRepository;
-    
+
+    public List<Report> getAllReports() {
+        return reportRepository.findAll();
+    }
+    public Report saveReport(Report report) {
+        return reportRepository.save(report);
+    }
+    public Report getReportById(int id) {
+        return reportRepository.findByReportId(id);
+    }
+
+
+    public void updateReport(Report report) {
+        Report oldReport = reportRepository.findByReportId(report.getReportId());
+        if (oldReport != null) {
+            // Giữ nguyên ngày tạo ban đầu
+            report.setCreatedAt(oldReport.getCreatedAt());
+
+            // Ghi lại ngày giờ cập nhật hiện tại
+            report.setUpdatedAt(LocalDateTime.now());
+
+            reportRepository.save(report);
+        }
+    }
+
+    public List<Report> filterReports(String startDate, String endDate, String status) {
+        List<Report> allReports = reportRepository.findAll();
+
+        return allReports.stream()
+                .filter(r -> {
+                    boolean match = true;
+                    if (status != null && !status.isEmpty())
+                        match = match && r.getStatus().equalsIgnoreCase(status);
+
+                    // Ép LocalDateTime về Date
+                    if (r.getCreatedAt() != null) {
+                        Date createdAt = Date.from(r.getCreatedAt()
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant());
+
+                        if (startDate != null && !startDate.isEmpty())
+                            match = match && !createdAt.before(java.sql.Date.valueOf(startDate));
+
+                        if (endDate != null && !endDate.isEmpty())
+                            match = match && !createdAt.after(java.sql.Date.valueOf(endDate));
+                    }
+
+                    return match;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
+
+
     // Tạo báo cáo mới
     public Report createReport(Report report) {
         report.setCreatedAt(LocalDateTime.now());
@@ -98,11 +157,7 @@ public class ReportService {
     public List<Report> getReportsByAssignedTo(Integer assignedTo) {
         return reportRepository.findByAssignedToOrderByCreatedAtDesc(assignedTo);
     }
-    
-    // Lấy tất cả báo cáo
-    public List<Report> getAllReports() {
-        return reportRepository.findAll();
-    }
+
     
     // Lấy báo cáo theo khoảng thời gian
     public List<Report> getReportsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
@@ -153,14 +208,9 @@ public class ReportService {
         reportRepository.deleteById(reportId);
     }
     
-    // Cập nhật báo cáo
-    public Report updateReport(Report report) {
-        report.setUpdatedAt(LocalDateTime.now());
-        return reportRepository.save(report);
-    }
-    
     // Xóa tất cả báo cáo
     public void deleteAllReports() {
         reportRepository.deleteAll();
     }
 }
+

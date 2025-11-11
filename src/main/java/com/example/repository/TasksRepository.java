@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
+import java.util.Optional;
 
 public interface TasksRepository extends JpaRepository<Task, Integer> {
         // Đếm số task đang mở/doing của nhân viên
@@ -48,12 +49,9 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
 
         // Thêm vào TasksRepository.java
 
-
         @Modifying
         @Query("DELETE FROM Task t WHERE t.batchId = :batchId")
         void deleteByBatchId(@Param("batchId") String batchId);
-
-
 
 
         // Trong TasksRepository.java
@@ -73,6 +71,10 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
         // Lấy doing tasks theo batch
         @Query("SELECT t FROM Task t WHERE t.status = 'DOING' AND t.batchId = :batchId ORDER BY t.createdAt DESC")
         List<Task> findDoingTasksByBatch(@Param("batchId") String batchId);
+
+        @Query(value = "SELECT * FROM Tasks WHERE BatchID = :batchId", nativeQuery = true)
+        Optional<Task> findTaskByBatchId(@Param("batchId") String batchId);
+
 }
 
 

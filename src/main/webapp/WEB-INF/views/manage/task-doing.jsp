@@ -97,10 +97,13 @@
                                         </c:if>
                                     </td>
                                     <td class="py-3">
-                                            <span class="badge ${task.taskType == 'COLLECT' ? 'bg-primary' : task.taskType == 'CLEAN' ? 'bg-info' : 'bg-warning'} px-3 py-2">
-                                                <i class="fas ${task.taskType == 'COLLECT' ? 'fa-truck' : task.taskType == 'CLEAN' ? 'fa-broom' : 'fa-tools'} me-1"></i>
-                                                ${task.taskType}
-                                            </span>
+                                            <span class="badge ${batch.value[0].taskType == 'COLLECT' || batch.value[0].taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${batch.value[0].taskType}">
+                                <c:choose>
+                                    <c:when test="${batch.value[0].taskType == 'COLLECT' || batch.value[0].taskType == 'COLLECTION'}">Thu gom</c:when>
+                                    <c:when test="${batch.value[0].taskType == 'MAINTENANCE'}">Bảo trì</c:when>
+                                    <c:otherwise>${batch.value[0].taskType}</c:otherwise>
+                                </c:choose>
+                              </span>
                                     </td>
                                     <td class="py-3">
                                             <span class="badge ${task.priority == 1 ? 'bg-danger' : task.priority == 2 ? 'bg-warning text-dark' : 'bg-secondary'} px-3 py-2">
@@ -118,10 +121,13 @@
                                             </span>
                                     </td>
                                     <td class="py-3">
-                                            <span class="badge ${task.status == 'OPEN' ? 'bg-primary' : task.status == 'DOING' ? 'bg-warning text-dark' : task.status == 'COMPLETED' ? 'bg-success' : 'bg-secondary'} px-3 py-2">
-                                                <i class="fas ${task.status == 'OPEN' ? 'fa-folder-open' : task.status == 'DOING' ? 'fa-spinner' : task.status == 'COMPLETED' ? 'fa-check-circle' : 'fa-ban'} me-1"></i>
-                                                ${task.status}
-                                            </span>
+                                            <span class="badge ${batch.value[0].taskType == 'COLLECT' || batch.value[0].taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${batch.value[0].taskType}">
+                                <c:choose>
+                                    <c:when test="${batch.value[0].taskType == 'COLLECT' || batch.value[0].taskType == 'COLLECTION'}">Thu gom</c:when>
+                                    <c:when test="${batch.value[0].taskType == 'MAINTENANCE'}">Bảo trì</c:when>
+                                    <c:otherwise>${batch.value[0].taskType}</c:otherwise>
+                                </c:choose>
+                              </span>
                                     </td>
                                     <td class="py-3">
                                         <small class="text-muted">

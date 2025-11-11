@@ -110,9 +110,6 @@
                                                 <c:when test="${task.taskType == 'COLLECT'}">
                                                     <i class="fas fa-hand-holding me-1"></i>Thu gom
                                                 </c:when>
-                                                <c:when test="${task.taskType == 'CLEAN'}">
-                                                    <i class="fas fa-broom me-1"></i>Dọn dẹp
-                                                </c:when>
                                                 <c:when test="${task.taskType == 'MAINTENANCE'}">
                                                     <i class="fas fa-tools me-1"></i>Bảo trì
                                                 </c:when>

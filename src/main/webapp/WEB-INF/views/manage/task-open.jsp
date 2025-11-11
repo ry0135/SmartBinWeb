@@ -143,11 +143,7 @@
                                         </small>
                                     </td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-primary action-btn me-2"
-                                                onclick="updateTask(${task.taskID})"
-                                                title="Cập nhật">
-                                            <i class="fas fa-edit me-1"></i>Sửa
-                                        </button>
+
                                         <button class="btn btn-sm btn-outline-danger action-btn"
                                                 onclick="deleteTask(${task.taskID})"
                                                 title="Xóa">

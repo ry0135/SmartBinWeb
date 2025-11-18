@@ -18,7 +18,7 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
         @Query("SELECT COUNT(t) FROM Task t WHERE t.bin.binID = :binId AND t.status IN ('OPEN','DOING')")
         int countOpenTasksByBin(@Param("binId") int binId);
 
-        @Query("SELECT COUNT(t) FROM Task t WHERE t.bin.binID = :binId AND t.status IN ('OPEN','DOING','COMPLETED')")
+        @Query("SELECT COUNT(t) FROM Task t WHERE t.bin.binID = :binId AND t.status IN ('OPEN','DOING')")
         int countTasksByBinExclude(@Param("binId") int binId);
         @Query("SELECT t FROM Task t WHERE t.batchId = :batchId ORDER BY t.createdAt DESC")
         List<Task> findByBatchId(@Param("batchId") String batchId);

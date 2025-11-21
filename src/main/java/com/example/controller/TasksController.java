@@ -28,7 +28,7 @@ public class TasksController {
         // Sử dụng repository trực tiếp để lấy bins với status = 1 và currentFill > 60
         List<Bin> highFillBins = binService.getActiveBinsWithHighFill();
 
-        // Lọc bỏ bin đã có task OPEN / DOING / COMPLETED
+        // Lọc bỏ bin đã có task OPEN / DOING
         List<Bin> bins = highFillBins.stream()
                 .filter(bin -> !taskService.hasRestrictedTask(bin.getBinID()))
                 .collect(Collectors.toList());

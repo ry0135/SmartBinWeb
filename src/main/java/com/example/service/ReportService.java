@@ -1,12 +1,9 @@
 
 package com.example.service;
 
-import com.example.dto.ReportResponseDTO;
-import com.example.model.Bin;
 import com.example.model.Report;
 import com.example.model.ReportImage;
 import com.example.model.ReportStatusHistory;
-import com.example.repository.BinRepository;
 import com.example.repository.ReportImageRepository;
 import com.example.repository.ReportRepository;
 import com.example.repository.ReportStatusHistoryRepository;
@@ -24,15 +21,13 @@ import java.util.stream.Collectors;
 
 @Service
 public class ReportService {
-  
-   @Autowired
+
+    @Autowired
     private ReportRepository reportRepository;
 
     @Autowired
-    private BinRepository binRepository;
-    @Autowired
     private ReportImageRepository reportImageRepository;
-    
+
     @Autowired
     private ReportStatusHistoryRepository statusHistoryRepository;
 
@@ -96,15 +91,15 @@ public class ReportService {
         report.setCreatedAt(LocalDateTime.now());
         report.setUpdatedAt(LocalDateTime.now());
         report.setStatus("RECEIVED");
-        
+
         Report savedReport = reportRepository.save(report);
-        
+
         // Tạo lịch sử trạng thái
         createStatusHistory(savedReport.getReportId(), "RECEIVED", "Báo cáo được tạo", report.getAccountId());
-        
+
         return savedReport;
     }
-    
+
     // Cập nhật trạng thái báo cáo
     public Report updateReportStatus(Integer reportId, String newStatus, String notes, Integer updatedBy) {
         Optional<Report> reportOpt = reportRepository.findById(reportId);
@@ -112,48 +107,20 @@ public class ReportService {
             Report report = reportOpt.get();
             report.setStatus(newStatus);
             report.setUpdatedAt(LocalDateTime.now());
-            
+
             if ("DONE".equals(newStatus)) {
                 report.setResolvedAt(LocalDateTime.now());
             }
-            
+
             Report updatedReport = reportRepository.save(report);
-            
+
             // Tạo lịch sử trạng thái
             createStatusHistory(reportId, newStatus, notes, updatedBy);
-            
+
             return updatedReport;
         }
         return null;
     }
-    public ReportResponseDTO convertToDTO(Report report) {
-        ReportResponseDTO dto = new ReportResponseDTO(
-                report.getReportId(),
-                report.getBinId(),
-                report.getAccountId(),
-                report.getReportType(),
-                report.getDescription(),
-                report.getStatus(),
-                report.getCreatedAt(),
-                report.getUpdatedAt(),
-                report.getResolvedAt()
-        );
-
-        // 🔥 Lấy bin trực tiếp từ DB (không dùng Lazy Proxy)
-        Bin bin = binRepository.findById(report.getBinId()).orElse(null);
-
-        if (bin != null) {
-            dto.setBinCode(bin.getBinCode());
-            dto.setBinAddress(
-                    bin.getStreet() + ", " +
-                            bin.getWard().getWardName() + ", " +
-                            bin.getWard().getProvince().getProvinceName()
-            );
-        }
-
-        return dto;
-    }
-
 
     // Tạo lịch sử trạng thái
     private void createStatusHistory(Integer reportId, String status, String notes, Integer updatedBy) {
@@ -165,43 +132,43 @@ public class ReportService {
         history.setCreatedAt(LocalDateTime.now());
         statusHistoryRepository.save(history);
     }
-    
+
     // Lấy báo cáo theo ID
     public Optional<Report> getReportById(Integer reportId) {
         return reportRepository.findById(reportId);
     }
-    
+
     // Lấy báo cáo theo AccountID
     public List<Report> getReportsByAccountId(Integer accountId) {
         return reportRepository.findByAccountIdOrderByCreatedAtDesc(accountId);
     }
-    
+
     // Lấy báo cáo theo trạng thái
     public List<Report> getReportsByStatus(String status) {
         return reportRepository.findByStatusOrderByCreatedAtDesc(status);
     }
-    
+
     // Lấy báo cáo theo BinID
     public List<Report> getReportsByBinId(Integer binId) {
         return reportRepository.findByBinIdOrderByCreatedAtDesc(binId);
     }
-    
+
     // Lấy báo cáo theo AssignedTo
     public List<Report> getReportsByAssignedTo(Integer assignedTo) {
         return reportRepository.findByAssignedToOrderByCreatedAtDesc(assignedTo);
     }
 
-    
+
     // Lấy báo cáo theo khoảng thời gian
     public List<Report> getReportsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return reportRepository.findByDateRange(startDate, endDate);
     }
-    
+
     // Lấy báo cáo theo ReportType
     public List<Report> getReportsByReportType(String reportType) {
         return reportRepository.findByReportTypeOrderByCreatedAtDesc(reportType);
     }
-    
+
     // Thêm hình ảnh vào báo cáo
     public ReportImage addImageToReport(Integer reportId, String imageUrl) {
         ReportImage image = new ReportImage();
@@ -210,37 +177,37 @@ public class ReportService {
         image.setCreatedAt(LocalDateTime.now());
         return reportImageRepository.save(image);
     }
-    
+
     // Lấy hình ảnh của báo cáo
     public List<ReportImage> getReportImages(Integer reportId) {
         return reportImageRepository.findByReportIdOrderByCreatedAtDesc(reportId);
     }
-    
+
     // Lấy lịch sử trạng thái của báo cáo
     public List<ReportStatusHistory> getReportStatusHistory(Integer reportId) {
         return statusHistoryRepository.findByReportIdOrderByCreatedAtDesc(reportId);
     }
-    
+
     // Đếm báo cáo theo trạng thái
     public long countReportsByStatus(String status) {
         return reportRepository.countByStatus(status);
     }
-    
+
     // Đếm báo cáo theo AccountID
     public long countReportsByAccountId(Integer accountId) {
         return reportRepository.countByAccountId(accountId);
     }
-    
+
     // Đếm số hình ảnh theo ReportID
     public long countReportImages(Integer reportId) {
         return reportImageRepository.countByReportId(reportId);
     }
-    
+
     // Xóa báo cáo
     public void deleteReport(Integer reportId) {
         reportRepository.deleteById(reportId);
     }
-    
+
     // Xóa tất cả báo cáo
     public void deleteAllReports() {
         reportRepository.deleteAll();

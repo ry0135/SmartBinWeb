@@ -97,13 +97,13 @@
                                         </c:if>
                                     </td>
                                     <td class="py-3">
-                                            <span class="badge ${batch.value[0].taskType == 'COLLECT' || batch.value[0].taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${batch.value[0].taskType}">
-                                <c:choose>
-                                    <c:when test="${batch.value[0].taskType == 'COLLECT' || batch.value[0].taskType == 'COLLECTION'}">Thu gom</c:when>
-                                    <c:when test="${batch.value[0].taskType == 'MAINTENANCE'}">Bảo trì</c:when>
-                                    <c:otherwise>${batch.value[0].taskType}</c:otherwise>
-                                </c:choose>
-                              </span>
+                                           <span class="badge ${task.taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${task.taskType}">
+        <c:choose>
+            <c:when test="${task.taskType == 'COLLECTION'}">Thu gom</c:when>
+            <c:when test="${task.taskType == 'MAINTENANCE'}">Bảo trì</c:when>
+            <c:otherwise>${task.taskType}</c:otherwise>
+        </c:choose>
+    </span>
                                     </td>
                                     <td class="py-3">
                                             <span class="badge ${task.priority == 1 ? 'bg-danger' : task.priority == 2 ? 'bg-warning text-dark' : 'bg-secondary'} px-3 py-2">
@@ -121,13 +121,22 @@
                                             </span>
                                     </td>
                                     <td class="py-3">
-                                            <span class="badge ${batch.value[0].taskType == 'COLLECT' || batch.value[0].taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${batch.value[0].taskType}">
-                                <c:choose>
-                                    <c:when test="${batch.value[0].taskType == 'COLLECT' || batch.value[0].taskType == 'COLLECTION'}">Thu gom</c:when>
-                                    <c:when test="${batch.value[0].taskType == 'MAINTENANCE'}">Bảo trì</c:when>
-                                    <c:otherwise>${batch.value[0].taskType}</c:otherwise>
-                                </c:choose>
-                              </span>
+                                            <span class="badge ${task.status == 'OPEN' ? 'bg-primary' : task.status == 'DOING' ? 'bg-warning text-dark' : task.status == 'COMPLETED' ? 'bg-success' : 'bg-secondary'} fs-6">
+                                            <c:choose>
+                                                <c:when test="${task.status == 'OPEN'}">
+                                                    <i class="fas fa-folder-open me-1"></i>Mở
+                                                </c:when>
+                                                <c:when test="${task.status == 'DOING'}">
+                                                    <i class="fas fa-spinner me-1"></i>Đang làm
+                                                </c:when>
+                                                <c:when test="${task.status == 'COMPLETED'}">
+                                                    <i class="fas fa-check-circle me-1"></i>Hoàn thành
+                                                </c:when>
+                                                <c:otherwise>
+                                                    ${task.status}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </span>
                                     </td>
                                     <td class="py-3">
                                         <small class="text-muted">

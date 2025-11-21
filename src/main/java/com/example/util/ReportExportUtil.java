@@ -7,7 +7,11 @@ import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import javax.servlet.ServletContext;
 import java.io.OutputStream;
+import java.security.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 public class ReportExportUtil {
@@ -95,31 +99,51 @@ public class ReportExportUtil {
 
     private static String buildHtmlForReports(List<Report> reports) {
         SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         StringBuilder sb = new StringBuilder();
+
         sb.append("<html><head><meta charset='utf-8' />");
         sb.append("<style>body{font-family: Arial, Helvetica, sans-serif;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #ccc;padding:8px;text-align:left;} th{background:#f2f2f2;}</style>");
         sb.append("</head><body>");
         sb.append("<h2>Danh sách báo cáo</h2>");
         sb.append("<table>");
-        sb.append("<thead><tr><th>ID</th><th>BinID</th><th>AccountID</th><th>Loại</th><th>Mô tả</th><th>Trạng thái</th><th>Người xử lý</th><th>Ngày tạo</th><th>Ngày cập nhật</th><th>Ngày hoàn thành</th></tr></thead>");
+        sb.append("<thead><tr><th>ID</th><th>BinCode</th><th>Tên</th><th>Loại</th><th>Mô tả</th><th>Trạng thái</th><th>Người xử lý</th><th>Ngày tạo</th><th>Ngày cập nhật</th><th>Ngày hoàn thành</th></tr></thead>");
         sb.append("<tbody>");
+
         for (Report r : reports) {
             sb.append("<tr>");
             sb.append("<td>").append(r.getReportId()).append("</td>");
-            sb.append("<td>").append(r.getBinId()).append("</td>");
-            sb.append("<td>").append(r.getAccountId()).append("</td>");
+            sb.append("<td>").append(r.getBin().getBinCode()).append("</td>");
+            sb.append("<td>").append(r.getAccount().getFullName()).append("</td>");
             sb.append("<td>").append(escapeHtml(r.getReportType())).append("</td>");
             sb.append("<td>").append(escapeHtml(r.getDescription())).append("</td>");
             sb.append("<td>").append(escapeHtml(r.getStatus())).append("</td>");
             sb.append("<td>").append(r.getAssignedTo() == null ? "" : r.getAssignedTo()).append("</td>");
-            sb.append("<td>").append(r.getCreatedAt() == null ? "" : fmt.format(r.getCreatedAt())).append("</td>");
-            sb.append("<td>").append(r.getUpdatedAt() == null ? "" : fmt.format(r.getUpdatedAt())).append("</td>");
-            sb.append("<td>").append(r.getResolvedAt() == null ? "" : fmt.format(r.getResolvedAt())).append("</td>");
+
+            sb.append("<td>").append(formatDate(r.getCreatedAt(), fmt, dtf)).append("</td>");
+            sb.append("<td>").append(formatDate(r.getUpdatedAt(), fmt, dtf)).append("</td>");
+            sb.append("<td>").append(formatDate(r.getResolvedAt(), fmt, dtf)).append("</td>");
             sb.append("</tr>");
         }
+
         sb.append("</tbody></table></body></html>");
         return sb.toString();
     }
+
+    private static String formatDate(Object dateObj, SimpleDateFormat sdf, DateTimeFormatter dtf) {
+        if (dateObj == null) return "";
+        try {
+            if (dateObj instanceof java.util.Date)
+                return sdf.format((Date) dateObj);
+            else if (dateObj instanceof java.time.LocalDateTime)
+                return ((LocalDateTime) dateObj).format(dtf);
+            else
+                return dateObj.toString(); // fallback nếu là String
+        } catch (Exception e) {
+            return dateObj.toString();
+        }
+    }
+
 
     private static String escapeHtml(String s) {
         if (s == null) return "";

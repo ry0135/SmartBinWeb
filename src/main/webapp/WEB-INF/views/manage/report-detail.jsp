@@ -97,29 +97,35 @@
     <div class="card-header text-white d-flex justify-content-between align-items-center">
       <span>📋 Chi tiết báo cáo #${report.reportId}</span>
       <a href="${pageContext.request.contextPath}/edit/${report.reportId}" class="btn btn-warning btn-modern text-white">
-        Update
+        Giao nhiệm vụ
       </a>
     </div>
 
     <div class="card-body">
       <table class="table table-bordered detail-table">
         <tr><th>ID</th><td>${report.reportId}</td></tr>
-        <tr><th>BinID</th><td>${report.binId}</td></tr>
-        <tr><th>AccountID</th><td>${report.accountId}</td></tr>
+        <tr><th>Bin Code</th><td>${report.bin.binCode}</td></tr>
+        <tr><th>Tên</th><td>${report.account.fullName}</td></tr>
         <tr><th>Loại báo cáo</th><td>${report.reportType}</td></tr>
         <tr><th>Mô tả</th><td>${report.description}</td></tr>
 
         <tr>
           <th>Trạng thái</th>
           <td>
-            <span class="badge badge-status
-              <c:choose>
-                <c:when test="${report.status == 'RESOLVED'}">badge-success</c:when>
-                <c:when test="${report.status == 'IN_PROGRESS'}">badge-warning</c:when>
-                <c:otherwise>badge-secondary</c:otherwise>
-              </c:choose>">
-              ${report.status}
-            </span>
+            <c:choose>
+              <c:when test="${report.status == 'RECEIVED'}">
+                <span class="badge badge-status badge-secondary">Chờ xử lý</span>
+              </c:when>
+              <c:when test="${report.status == 'IN_PROGRESS'}">
+                <span class="badge badge-status badge-warning">Đang xử lý</span>
+              </c:when>
+              <c:when test="${report.status == 'RESOLVED'}">
+                <span class="badge badge-status badge-success">Hoàn thành</span>
+              </c:when>
+              <c:otherwise>
+                <span class="badge badge-status badge-secondary">Không xác định</span>
+              </c:otherwise>
+            </c:choose>
           </td>
         </tr>
 
@@ -227,3 +233,5 @@
 
 </body>
 </html>
+
+

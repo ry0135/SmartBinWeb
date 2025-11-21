@@ -3,9 +3,11 @@ package com.example.service;
 import com.example.dto.TaskSummaryDTO;
 import com.example.model.Account;
 import com.example.model.Bin;
+import com.example.model.Notification;
 import com.example.model.Task;
 import com.example.repository.AccountRepository;
 import com.example.repository.BinRepository;
+import com.example.repository.NotificationRepository;
 import com.example.repository.TasksRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,8 @@ public class TasksService {
     private AccountRepository accountRepository;
 
     @Autowired
+    private NotificationRepository notificationRepository;
+    @Autowired
     private AccountService accountService;
 
 
@@ -39,24 +43,20 @@ public class TasksService {
     // Giao nhiều task cùng lúc
     @Transactional
     public List<Task> assignMultipleTasks(List<Integer> binIds, int workerId,
-                                          String taskType, int priority, String notes) throws Exception {
+                                          String taskType, int priority, String notes,
+                                          int senderId) throws Exception {
 
         Account worker = accountRepository.findById(workerId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy worker với ID = " + workerId));
 
-        // Tạo batch ID duy nhất
         String batchId = "BATCH_" + System.currentTimeMillis() + "_" + new Random().nextInt(1000);
-
         List<Task> assignedTasks = new ArrayList<>();
 
         for (Integer binId : binIds) {
             Bin bin = binRepository.findById(binId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy bin với ID = " + binId));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy bin ID = " + binId));
 
-            // Kiểm tra nếu bin đã có task đang mở
-            if (taskRepository.countOpenTasksByBin(binId) > 0) {
-                continue; // Bỏ qua bin này
-            }
+            if (taskRepository.countOpenTasksByBin(binId) > 0) continue;
 
             Task task = new Task();
             task.setBin(bin);
@@ -70,23 +70,38 @@ public class TasksService {
             assignedTasks.add(taskRepository.save(task));
         }
 
+
         if (!assignedTasks.isEmpty()) {
+
+            int count = assignedTasks.size();
+
+            Notification noti = new Notification();
+            noti.setReceiverId(workerId);
+            noti.setSenderId(senderId);
+            noti.setTitle("Bạn có nhiệm vụ mới");
+            noti.setMessage("Bạn được giao nhiệm vụ:  " + notes );
+            noti.setType("TASK");
+            noti.setRead(false);
+            noti.setCreatedAt(LocalDateTime.now());
+
+            notificationRepository.save(noti);
+
+
             String token = accountService.getFcmTokenByWorkerId(workerId);
             if (token != null && !token.isEmpty()) {
-                String title = "Nhiệm vụ mới được giao";
-                String body = notes;
-
-                fcmService.sendNotification(token, title, body,batchId);
+                String body = "Bạn được giao nhiệm vụ thu gom " + count + " thùng.";
+                fcmService.sendNotification(token, "Nhiệm vụ mới", body, batchId);
             }
         }
 
         return assignedTasks;
     }
 
+
     // Giao task đơn lẻ (giữ lại cho tương thích)
-    public Task assignTask(int binId, int workerId, String taskType, int priority, String notes) throws Exception {
+    public Task assignTask(int binId, int workerId, String taskType, int priority, String notes, int senderID) throws Exception {
         List<Integer> binIds = Collections.singletonList(binId);
-        List<Task> tasks = assignMultipleTasks(binIds, workerId, taskType, priority, notes);
+        List<Task> tasks = assignMultipleTasks(binIds, workerId, taskType, priority, notes,senderID);
         return tasks.isEmpty() ? null : tasks.get(0);
     }
 
@@ -284,7 +299,7 @@ public class TasksService {
     @Autowired
     private FirebaseStorageService firebaseStorageService;
 
-    public String completeTask(Integer taskId, Double lat, Double lng, MultipartFile image) throws IOException {
+    public String completeTask(Integer taskId, Double lat, Double lng, MultipartFile image, double collectedVolume) throws IOException {
         Optional<Task> optionalTask = taskRepository.findById(taskId);
 
         Task task = optionalTask.get();
@@ -297,6 +312,7 @@ public class TasksService {
         task.setCompletedAt(new Date());
         task.setCompletedLat(lat);
         task.setCompletedLng(lng);
+        task.setCollectedVolume(collectedVolume);
         task.setStatus("COMPLETED");
         taskRepository.save(task);
 

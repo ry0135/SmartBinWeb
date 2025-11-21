@@ -1,5 +1,6 @@
 package com.example.controller.app;
 
+import com.example.dto.ReportResponseDTO;
 import com.example.model.Report;
 import com.example.model.ReportImage;
 import com.example.model.ReportStatusHistory;
@@ -65,6 +66,7 @@ public class ReportAppController {
                 json.append("{");
                 json.append("\"reportId\":").append(r.getReportId()).append(",");
                 json.append("\"binId\":").append(r.getBinId()).append(",");
+                json.append("\"binCode\":").append(r.getBin().getBinCode()).append(",");
                 json.append("\"accountId\":").append(r.getAccountId()).append(",");
                 json.append("\"reportType\":\"").append(r.getReportType() != null ? r.getReportType().replace("\"", "\\\"") : "").append("\",");
                 json.append("\"description\":\"").append(r.getDescription() != null ? r.getDescription().replace("\"", "\\\"") : "").append("\",");
@@ -89,21 +91,38 @@ public class ReportAppController {
     }
     
     // Lấy chi tiết báo cáo
+//    @GetMapping("/{reportId}")
+//    public ResponseEntity<ApiResponse<Report>> getReportDetail(@PathVariable Integer reportId) {
+//        try {
+//            Optional<Report> report = reportService.getReportById(reportId);
+//            if (report.isPresent()) {
+//                return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết báo cáo thành công", report.get()));
+//            } else {
+//                return ResponseEntity.notFound().build();
+//            }
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest()
+//                .body(ApiResponse.error("Có lỗi xảy ra: " + e.getMessage()));
+//        }
+//    }
     @GetMapping("/{reportId}")
-    public ResponseEntity<ApiResponse<Report>> getReportDetail(@PathVariable Integer reportId) {
+    public ResponseEntity<ApiResponse<ReportResponseDTO>> getReportDetail(@PathVariable Integer reportId) {
         try {
             Optional<Report> report = reportService.getReportById(reportId);
+
             if (report.isPresent()) {
-                return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết báo cáo thành công", report.get()));
-            } else {
-                return ResponseEntity.notFound().build();
+                ReportResponseDTO dto = reportService.convertToDTO(report.get());
+                return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết báo cáo thành công", dto));
             }
+
+            return ResponseEntity.notFound().build();
+
         } catch (Exception e) {
             return ResponseEntity.badRequest()
-                .body(ApiResponse.error("Có lỗi xảy ra: " + e.getMessage()));
+                    .body(ApiResponse.error("Có lỗi xảy ra: " + e.getMessage()));
         }
     }
-    
+
     // Lấy lịch sử trạng thái báo cáo
     @GetMapping("/{reportId}/status")
     public ResponseEntity<ApiResponse<List<ReportStatusHistory>>> getReportStatusHistory(@PathVariable Integer reportId) {

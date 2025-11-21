@@ -17,7 +17,7 @@ public class Report {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ReportID")
     private Integer reportId;
-    
+
     @Column(name = "BinID", nullable = false)
     private Integer binId;
     
@@ -38,18 +38,18 @@ public class Report {
     
     @Column(name = "TaskID")
     private Integer taskId;
-    @JsonIgnore
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
-    @JsonIgnore
+
     @Column(name = "UpdatedAt")
     private LocalDateTime updatedAt;
-    @JsonIgnore
+
     @Column(name = "ResolvedAt")
     private LocalDateTime resolvedAt;
-    
+
+
     // Relationships
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "BinID", insertable = false, updatable = false)
     private Bin bin;
 

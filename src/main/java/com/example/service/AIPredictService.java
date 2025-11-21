@@ -13,7 +13,7 @@ import java.util.Map;
 public class AIPredictService {
 
     // ✅ Địa chỉ server FastAPI (nếu test local thì dùng http://localhost:8000)
-    private final String AI_URL = "http://13.229.57.106:8000/predict_full_time";
+    private final String AI_URL = "http://13.228.79.109:8000/predict_full_time";
 
     public Map<String, Object> predictFullTime(int binId, double currentFill) {
         try {

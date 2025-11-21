@@ -16,37 +16,38 @@
            http://www.springframework.org/schema/data/jpa
            http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
-    <!-- Cấu hình để Spring có thể tự động phát hiện các repository JPA -->
+    <!-- ====================== SCAN PROJECT ========================= -->
     <context:component-scan base-package="com.example" />
     <jpa:repositories base-package="com.example.repository" />
 
+    <!-- Enable annotation-based MVC -->
     <mvc:annotation-driven />
-<!--    <mvc:resources mapping="/assets/**" location="/assets/" />-->
-    <!-- Cấu hình tài nguyên tĩnh cho thư mục upload (avatar) -->
-<!--    <mvc:resources mapping="/img/**" location="file:/path/to/upload/folder/" />-->
 
+    <!-- Static Resource -->
+    <mvc:resources mapping="/assets/**" location="/assets/" />
+
+    <!-- ====================== JSP VIEW RESOLVER ====================== -->
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/WEB-INF/views/" />
         <property name="suffix" value=".jsp" />
         <property name="contentType" value="text/html; charset=UTF-8" />
     </bean>
 
-    <!-- Cấu hình DataSource -->
-<!--    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">-->
-<!--        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />-->
-<!--        <property name="url" value="jdbc:sqlserver://34.16.112.143:1433;databaseName=SmartBinManagement;encrypt=false;characterEncoding=UTF-8;" />-->
-<!--        <property name="username" value="sa" />-->
-<!--        <property name="password" value="123" />-->
-<!--    </bean>-->
-    <!-- Cấu hình DataSource -->
+<!--     ====================== DATABASE CONFIG (DOCKER) ======================-->
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-        <property name="url" value="jdbc:sqlserver://smartbin-1.cl24qiggcaj5.ap-southeast-1.rds.amazonaws.com:1433;databaseName=SmartBinDB;encrypt=false;characterEncoding=UTF-8;" />
-        <property name="username" value="admin" />
-        <property name="password" value="12345678" />
+        <property name="url" value="jdbc:sqlserver://smartbin-db:1433;databaseName=SmartBinDB;encrypt=false;trustServerCertificate=true;" />
+        <property name="username" value="sa" />
+        <property name="password" value="Admin@123" />
     </bean>
 
-    <!-- Cấu hình EntityManagerFactory -->
+<!--    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">-->
+<!--        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />-->
+<!--        <property name="url" value="jdbc:sqlserver://13.228.79.109:1433;databaseName=SmartBinDB;encrypt=false;trustServerCertificate=true;" />-->
+<!--        <property name="username" value="sa" />-->
+<!--        <property name="password" value="Admin@123" />-->
+<!--    </bean>-->
+    <!-- ====================== JPA CONFIG ====================== -->
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="dataSource" ref="dataSource" />
         <property name="packagesToScan" value="com.example.model" />
@@ -59,14 +60,14 @@
         </property>
     </bean>
 
-    <!-- Cấu hình TransactionManager -->
+    <!-- Transaction manager -->
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
         <property name="entityManagerFactory" ref="entityManagerFactory"/>
     </bean>
 
     <tx:annotation-driven transaction-manager="transactionManager"/>
 
-    <!-- Cấu hình JavaMailSender -->
+    <!-- ====================== MAIL SENDER ====================== -->
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
         <property name="host" value="smtp.gmail.com" />
         <property name="port" value="587" />
@@ -83,15 +84,14 @@
         </property>
     </bean>
 
-
+    <!-- Upload directory cho Docker -->
     <bean id="outputDirectory" class="java.io.File">
-        <constructor-arg value="D:/Image/" />
+        <constructor-arg value="/usr/local/tomcat/uploads/" />
     </bean>
 
-<!--    <bean id="multipartResolver"-->
-<!--          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">-->
-<!--        <property name="maxUploadSize" value="268435456" />-->
-<!--    </bean>-->
-
+    <!-- ====================== MULTIPART UPLOAD ====================== -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="268435456" />
+    </bean>
 
 </beans>

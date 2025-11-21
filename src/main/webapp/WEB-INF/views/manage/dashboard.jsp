@@ -263,7 +263,7 @@
 
 <script>
     // ====================== REALTIME SOCKET ======================
-    var socket = new SockJS('${pageContext.request.contextPath}/ws-bin-sockjs');
+    var socket = new SockJS('/ws-bin-sockjs');
     var stompClient = Stomp.over(socket);
 
     stompClient.connect({}, function (frame) {

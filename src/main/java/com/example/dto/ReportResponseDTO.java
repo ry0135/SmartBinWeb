@@ -1,16 +1,27 @@
 package com.example.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDateTime;
 
 public class ReportResponseDTO {
     private Integer reportId;
     private Integer binId;
+
+    private String binCode;
+
+    private String binAddress;
     private Integer accountId;
     private String reportType;
     private String description;
     private String status;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime resolvedAt;
 
 
@@ -64,4 +75,20 @@ public class ReportResponseDTO {
 
     public LocalDateTime getResolvedAt() { return resolvedAt; }
     public void setResolvedAt(LocalDateTime resolvedAt) { this.resolvedAt = resolvedAt; }
+
+    public String getBinCode() {
+        return binCode;
+    }
+
+    public void setBinCode(String binCode) {
+        this.binCode = binCode;
+    }
+
+    public String getBinAddress() {
+        return binAddress;
+    }
+
+    public void setBinAddress(String binAddress) {
+        this.binAddress = binAddress;
+    }
 }

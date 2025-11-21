@@ -56,6 +56,9 @@ public class Task {
     @Column(name = "AfterImage", length = 500)
     private String afterImage;
 
+    @Column(name = "collectedvolume")
+    private Double collectedVolume;
+
     // Constructors
     public Task() {
         this.createdAt = new Date();
@@ -115,5 +118,21 @@ public class Task {
 
     public void setAfterImage(String afterImage) {
         this.afterImage = afterImage;
+    }
+
+    public void setCompletedLat(Double completedLat) {
+        this.completedLat = completedLat;
+    }
+
+    public void setCompletedLng(Double completedLng) {
+        this.completedLng = completedLng;
+    }
+
+    public Double getCollectedVolume() {
+        return collectedVolume;
+    }
+
+    public void setCollectedVolume(Double collectedVolume) {
+        this.collectedVolume = collectedVolume;
     }
 }

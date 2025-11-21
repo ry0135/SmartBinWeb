@@ -173,11 +173,12 @@ public class TasksController {
             @RequestParam("taskType") String taskType,
             @RequestParam("priority") int priority,
             @RequestParam(value = "notes", required = false) String notes,
+            @RequestParam int senderId,
             Model model) {
 
         try {
             List<Task> assignedTasks = taskService.assignMultipleTasks(
-                    binIds, workerId, taskType, priority, notes
+                    binIds, workerId, taskType, priority, notes,senderId
             );
 
             model.addAttribute("message", "Đã giao " + assignedTasks.size() + " nhiệm vụ thành công");
@@ -197,12 +198,12 @@ public class TasksController {
             @RequestParam("taskType") String taskType,
             @RequestParam("priority") int priority,
             @RequestParam(value = "notes", required = false) String notes,
+            @RequestParam Integer  senderId,
             Model model) {
 
         try {
-            List<Task> assignedTasks = taskService.assignMultipleTasks(
-                    binIds, workerId, taskType, priority, notes
-            );
+            List<Task> assignedTasks = taskService.assignMultipleTasks(binIds, workerId, taskType, priority, notes,
+                    senderId != null ? senderId : 2);
 
             model.addAttribute("message", "Đã giao " + assignedTasks.size() + " nhiệm vụ thành công");
             model.addAttribute("assignedTasks", assignedTasks);

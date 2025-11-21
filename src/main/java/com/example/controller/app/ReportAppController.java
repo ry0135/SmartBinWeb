@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -36,8 +37,6 @@ public class ReportAppController {
             report.setAccountId(request.getAccountId());
             report.setReportType(request.getReportType());
             report.setDescription(request.getDescription());
-            report.setCreatedAt(LocalDateTime.now());
-            report.setUpdatedAt(LocalDateTime.now());
             report.setStatus("RECEIVED");
             
             Report createdReport = reportService.createReport(report);

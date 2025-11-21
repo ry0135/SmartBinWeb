@@ -365,6 +365,7 @@
                 .addTo(map);
 
             newMarker.bin = {
+                id:bin.binID,
                 code: bin.binCode,
                 binID: bin.binID,
                 lat: bin.latitude,
@@ -434,6 +435,7 @@
         }
     }
 
+    // 🌍 Khởi tạo bản đồ VietMap
     var map = new vietmapgl.Map({
         container: "map",
         style: "https://maps.vietmap.vn/maps/styles/tm/style.json?apikey=ecdbd35460b2d399e18592e6264186757aaaddd8755b774c",
@@ -443,38 +445,42 @@
 
     map.addControl(new vietmapgl.NavigationControl());
 
+    // 📦 Dữ liệu thùng rác render từ backend
     var bins = [
         <c:forEach var="bin" items="${bins}" varStatus="loop">
         {
+            id: '${bin.binID}',
             code: '${bin.binCode}',
             lat: ${bin.latitude},
             lng: ${bin.longitude},
             fullness: ${bin.currentFill != null ? bin.currentFill : 0},
             address: '${bin.street}, ${bin.ward.wardName}, ${bin.ward.province.provinceName}',
             updated: '${bin.lastUpdated}',
-            city: '${bin.ward.province.provinceName}',
-            ward: '${bin.ward.wardName}',
-            status: '${bin.status}'
+            status: ${bin.status}
         }<c:if test="${!loop.last}">,</c:if>
         </c:forEach>
     ];
 
     var markers = [];
 
+    // 🧠 Khi bản đồ load xong → thêm markers
     map.on('load', function() {
         bins.forEach(function(bin) {
-            var el = document.createElement("img");
+            const el = document.createElement("img");
             el.src = getBinIcon(bin.fullness, bin.status);
             el.style.width = "32px";
             el.style.height = "32px";
 
-            var popup = new vietmapgl.Popup({ offset: 25 }).setHTML(
+            // 🧱 Popup HTML đơn giản hơn (cộng chuỗi)
+            var popupHtml =
                 "<b>Mã:</b> " + bin.code +
                 "<br><b>Địa chỉ:</b> " + bin.address +
                 "<br><b>Đầy:</b> " + bin.fullness + "%" +
                 "<br><b>Trạng thái:</b> " + (bin.status == 1 ? "Online" : "Offline") +
-                "<br><b>Cập nhật:</b> " + bin.updated
-            );
+                "<br><b>Cập nhật:</b> " + new Date(bin.updated).toLocaleString() +
+                "<br><div id='predict-" + bin.id + "' class='mt-2 text-muted'>⚡ Bấm vào để dự đoán...</div>";
+
+            var popup = new vietmapgl.Popup({ offset: 25 }).setHTML(popupHtml);
 
             var marker = new vietmapgl.Marker({ element: el })
                 .setLngLat([bin.lng, bin.lat])
@@ -483,9 +489,69 @@
 
             marker.bin = bin;
             markers.push(marker);
+
+            // 💡 Khi người dùng click vào marker → popup mở → gọi AI Predict
+            marker.getElement().addEventListener("click", function() {
+                setTimeout(() => {
+                    // Đảm bảo phần tử #predict-x đã render trong popup
+                    const box = document.getElementById("predict-" + bin.id);
+                    if (!box) return;
+                    box.innerHTML = "⏳ Đang dự đoán...";
+                    if (bin.status === 1 && bin.fullness < 100) {
+                        autoPredictBin(bin, marker, el);
+                    } else {
+                        box.innerHTML = "⚠️ Offline hoặc đã đầy";
+                    }
+                }, 300); // chờ popup render
+            });
         });
     });
 
+
+    // 🔮 Hàm gọi AI Predict
+    async function autoPredictBin(bin, marker, iconElement) {
+        const box = document.getElementById("predict-" + bin.id);
+        if (!box) return;
+
+        try {
+            const res = await fetch("<%=request.getContextPath()%>/api/ai/predict?binId=" + bin.id + "&currentFill=" + bin.fullness);
+            const data = await res.json();
+            console.log("📡 AI response:", data);
+
+            if (data.status === "success") {
+                var msg = "🧠 <b>Đầy vào:</b> " + data.predicted_full_time +
+                    "<br>⏰ Còn ~<b>" + data.hours_left.toFixed(1) + "</b> giờ";
+                var color = "text-success";
+                var danger = false;
+
+                if (data.hours_left < 3) {
+                    msg = "⚠️ <b>Sắp đầy trong " + data.hours_left.toFixed(1) + "h!</b><br>🧹 Cần thu gom sớm";
+                    color = "text-danger";
+                    danger = true;
+                }
+
+                box.className = color;
+                box.innerHTML = msg;
+
+                // 💡 Nhấp nháy nếu sắp đầy
+                if (danger) {
+                    let blink = true;
+                    setInterval(() => {
+                        iconElement.style.opacity = blink ? "0.5" : "1";
+                        blink = !blink;
+                    }, 700);
+                }
+
+            } else {
+                box.className = "text-warning";
+                box.innerHTML = "⚠️ " + (data.message || "Không thể dự đoán");
+            }
+        } catch (e) {
+            console.error("❌ AI lỗi:", e);
+            box.className = "text-danger";
+            box.innerHTML = "❌ Không thể kết nối tới AI server";
+        }
+    }
     // ==================== PHÂN TRANG ====================
     var currentPage = 1;
     var itemsPerPage = 25;

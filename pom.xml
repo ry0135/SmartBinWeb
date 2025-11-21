@@ -184,9 +184,9 @@
     </dependency>
     <!-- Ép spring-expression đúng bản (fix NoSuchMethodError) -->
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-expression</artifactId>
-      <version>5.3.12</version>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>1.5</version>
     </dependency>
 
     <!-- Apache POI for Excel (.xls and .xlsx) -->

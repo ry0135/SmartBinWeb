@@ -1,9 +1,12 @@
 
 package com.example.service;
 
+import com.example.dto.ReportResponseDTO;
+import com.example.model.Bin;
 import com.example.model.Report;
 import com.example.model.ReportImage;
 import com.example.model.ReportStatusHistory;
+import com.example.repository.BinRepository;
 import com.example.repository.ReportImageRepository;
 import com.example.repository.ReportRepository;
 import com.example.repository.ReportStatusHistoryRepository;
@@ -25,6 +28,8 @@ public class ReportService {
     @Autowired
     private ReportRepository reportRepository;
 
+    @Autowired
+    private BinRepository binRepository;
     @Autowired
     private ReportImageRepository reportImageRepository;
 
@@ -121,6 +126,34 @@ public class ReportService {
         }
         return null;
     }
+    public ReportResponseDTO convertToDTO(Report report) {
+        ReportResponseDTO dto = new ReportResponseDTO(
+                report.getReportId(),
+                report.getBinId(),
+                report.getAccountId(),
+                report.getReportType(),
+                report.getDescription(),
+                report.getStatus(),
+                report.getCreatedAt(),
+                report.getUpdatedAt(),
+                report.getResolvedAt()
+        );
+
+        // 🔥 Lấy bin trực tiếp từ DB (không dùng Lazy Proxy)
+        Bin bin = binRepository.findById(report.getBinId()).orElse(null);
+
+        if (bin != null) {
+            dto.setBinCode(bin.getBinCode());
+            dto.setBinAddress(
+                    bin.getStreet() + ", " +
+                            bin.getWard().getWardName() + ", " +
+                            bin.getWard().getProvince().getProvinceName()
+            );
+        }
+
+        return dto;
+    }
+
 
     // Tạo lịch sử trạng thái
     private void createStatusHistory(Integer reportId, String status, String notes, Integer updatedBy) {
@@ -212,5 +245,8 @@ public class ReportService {
     public void deleteAllReports() {
         reportRepository.deleteAll();
     }
+
+
+
 }
 

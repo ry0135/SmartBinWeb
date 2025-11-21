@@ -218,9 +218,9 @@
                             <tr class="<c:if test='${f.rating <= 3}'>low-rating</c:if>">
                                 <td>${f.feedbackId}</td>
                                 <td>${f.accountId}</td>
-                                 <td>${f.ward.wardName}</td> <!-- ✅ Hiển thị tên phường -->
+                                <td>${f.ward.wardName}</td> <!-- ✅ Hiển thị tên phường -->
                                 <td>
-                                    ${f.rating} ⭐
+                                        ${f.rating} ⭐
                                     <c:if test="${f.rating <= 2}">
                                         <i class="fa-solid fa-triangle-exclamation warning-icon" title="Phản hồi tiêu cực!"></i>
                                     </c:if>

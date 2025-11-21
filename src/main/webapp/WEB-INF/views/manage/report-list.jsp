@@ -133,9 +133,9 @@
                 <label for="statusFilter"><i class="fa-solid fa-filter"></i> Trạng thái:</label>
                 <select id="statusFilter">
                     <option value="">Tất cả</option>
-                    <option value="RECEIVED">RECEIVED</option>
-                    <option value="IN_PROGRESS">IN_PROGRESS</option>
-                    <option value="RESOLVED">RESOLVED</option>
+                    <option value="RECEIVED">ĐÃ TIẾP NHẬN</option>
+                    <option value="IN_PROGRESS">ĐANG XỬ LÝ</option>
+                    <option value="RESOLVED">ĐÃ HOÀN THÀNH</option>
                 </select>
 
                 <button id="clearFilter" class="btn btn-secondary btn-sm ml-auto">
@@ -164,7 +164,7 @@
                     <c:forEach var="report" items="${reports}">
                         <tr>
                             <td>${report.reportId}</td>
-                            <td>${report.binId}</td>
+                            <td>${report.bin.binCode}</td>
                             <!-- ✅ Hiển thị FullName từ liên kết Account -->
                             <td>
                                 <c:choose>
@@ -179,14 +179,19 @@
                             <td>${report.reportType}</td>
                             <td>${report.description}</td>
                             <td>
-                                <span class="badge
+                                 <span class="badge
                                     <c:choose>
                                         <c:when test='${report.status == "RECEIVED"}'>badge-info</c:when>
                                         <c:when test='${report.status == "IN_PROGRESS"}'>badge-warning</c:when>
                                         <c:when test='${report.status == "RESOLVED"}'>badge-success</c:when>
                                         <c:otherwise>badge-secondary</c:otherwise>
                                     </c:choose>">
-                                    ${report.status}
+                                    <c:choose>
+                                        <c:when test='${report.status == "RECEIVED"}'>ĐÃ TIẾP NHẬN</c:when>
+                                        <c:when test='${report.status == "IN_PROGRESS"}'>ĐANG XỬ LÝ</c:when>
+                                        <c:when test='${report.status == "RESOLVED"}'>ĐÃ HOÀN THÀNH</c:when>
+                                        <c:otherwise>Không xác định</c:otherwise>
+                                    </c:choose>
                                 </span>
                             </td>
                             <td>${report.assignedTo}</td>
@@ -196,7 +201,7 @@
                             <td class="text-center">
                                 <a href="${pageContext.request.contextPath}/detail/${report.reportId}"
                                    class="btn btn-sm btn-info">
-                                   <i class="fa-solid fa-eye"></i> Xem
+                                    <i class="fa-solid fa-eye"></i> Xem
                                 </a>
                             </td>
                         </tr>
@@ -219,6 +224,17 @@
     const table = document.getElementById("reportTable");
     const rows = table.getElementsByTagName("tr");
 
+    // ✅ Ánh xạ trạng thái tiếng Việt sang mã code
+    function mapStatusToCode(vnStatus) {
+        switch (vnStatus) {
+            case "ĐÃ TIẾP NHẬN": return "RECEIVED";
+            case "ĐANG XỬ LÝ": return "IN_PROGRESS";
+            case "ĐÃ HOÀN THÀNH": return "RESOLVED";
+            default: return "";
+        }
+    }
+
+    // ✅ Lọc theo ngày và trạng thái (có hỗ trợ tiếng Việt)
     function filterTable() {
         const startDate = startInput.value ? new Date(startInput.value) : null;
         const endDate = endInput.value ? new Date(endInput.value) : null;
@@ -230,7 +246,8 @@
 
             const createdAtStr = cells[7].textContent.trim().split(" ")[0];
             const reportDate = new Date(createdAtStr);
-            const statusText = cells[5].textContent.trim().toUpperCase();
+            const vnStatus = cells[5].textContent.trim().toUpperCase();
+            const statusText = mapStatusToCode(vnStatus);
 
             let show = true;
             if (startDate && reportDate < startDate) show = false;
@@ -252,6 +269,7 @@
         for (let i = 1; i < rows.length; i++) rows[i].style.display = "";
     });
 
+    // ✅ Giữ nguyên phần export
     function buildQueryParams() {
         const start = startInput.value;
         const end = endInput.value;
@@ -273,5 +291,8 @@
         window.location.href = "${pageContext.request.contextPath}/export/pdf" + params;
     });
 </script>
+
 </body>
 </html>
+
+

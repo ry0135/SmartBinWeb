@@ -344,6 +344,10 @@
             marker.bin.lat = bin.latitude;
             marker.bin.lng = bin.longitude;
             marker.bin.address = bin.street;
+            // 🎯 THÊM CẬP NHẬT CITY VÀ WARD
+            marker.bin.city = bin.ward && bin.ward.province ? bin.ward.province.provinceName : '';
+            marker.bin.ward = bin.ward ? bin.ward.wardName : '';
+
             marker.setLngLat([bin.longitude, bin.latitude]);
             marker.getElement().src = getBinIcon(bin.currentFill, bin.status);
         } else {
@@ -456,7 +460,10 @@
             fullness: ${bin.currentFill != null ? bin.currentFill : 0},
             address: '${bin.street}, ${bin.ward.wardName}, ${bin.ward.province.provinceName}',
             updated: '${bin.lastUpdated}',
-            status: ${bin.status}
+            status: ${bin.status},
+            // 🎯 THÊM 2 DÒNG NÀY
+            city: '${bin.ward.province.provinceName}',
+            ward: '${bin.ward.wardName}'
         }<c:if test="${!loop.last}">,</c:if>
         </c:forEach>
     ];

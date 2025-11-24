@@ -86,11 +86,18 @@
             <version>9.2.0</version>
             <exclusions>
                 <exclusion>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>*</artifactId>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>31.1-jre</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.springframework</groupId>

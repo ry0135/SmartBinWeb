@@ -29,4 +29,7 @@ public interface BinRepository extends JpaRepository<Bin, Integer> {
     @Query("SELECT b FROM Bin b JOIN FETCH b.ward w JOIN FETCH w.province WHERE b.status = 2")
     List<Bin> findOffLineBins();
     boolean existsByBinCode(String binCode);
+
+    @Query("SELECT b FROM Bin b WHERE b.binID IN :ids")
+    List<Bin> findAllByIds(@Param("ids") List<Integer> ids);
 }

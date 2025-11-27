@@ -40,7 +40,7 @@
               </a>
             </li>
             <li>
-              <a href="${pageContext.request.contextPath}/tasks/maintenance-management"
+              <a href="${pageContext.request.contextPath}/tasks/maintenance-management?type=maintain"
                  class="dropdown-item text-dark d-flex align-items-center sidebar-link"
                  data-path="/tasks/maintenance-management">
                 <span class="me-2">🔧</span>

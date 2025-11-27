@@ -34,6 +34,8 @@ public class TasksService {
     @Autowired
     private AccountService accountService;
 
+    @Autowired
+    private WardService wardService;
 
     @Autowired
     private FcmService fcmService;
@@ -137,8 +139,13 @@ public class TasksService {
         return workers;
     }
     public List<Account> getAvailableWorkersMaintenance(int wardID) {
-        List<Account> workers = accountRepository.findWorkersByWardandrole4(wardID);
-
+        int provinceId = wardService.getProvinceId(wardID);
+        List<Account> workers = accountRepository.findWorkersByWardAndProvince(wardID,provinceId);
+        workers.sort((a, b) -> {
+            boolean aMatch = a.getWardID() == wardID;
+            boolean bMatch = b.getWardID() == wardID;
+            return Boolean.compare(!aMatch, !bMatch); // ưu tiên ward ở trên
+        });
         Map<Integer, Integer> workerTaskCount = new HashMap<>();
         for (Account w : workers) {
             int count = taskRepository.countOpenTasksByWorker(w.getAccountId());

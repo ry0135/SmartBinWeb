@@ -46,11 +46,19 @@
             <div class="card-body p-4">
               <!-- Bin Info -->
               <div class="alert alert-info mb-4">
-                <p class="mb-0">
-                  Đang giao nhiệm vụ của thùng rác
-                  <span class="badge bg-primary">#${binId}</span>
-                </p>
+                <p class="mb-0 fw-semibold">Danh sách thùng rác được giao nhiệm vụ:</p>
+
+                <c:forEach var="bin" items="${bins}">
+                  <div class="mt-2 p-2 border rounded bg-light">
+                    <span class="badge bg-primary me-1">#${bin.binID}</span>
+                    <strong>${bin.binCode}</strong><br>
+                    <small class="text-muted">
+                        ${bin.street}, ${bin.ward.wardName}, ${bin.ward.province.provinceName}
+                    </small>
+                  </div>
+                </c:forEach>
               </div>
+              <input type="hidden" name="senderId" value="${sessionScope.currentAccountId}">
 
               <!-- Form Section -->
               <div class="row g-4 mb-4">

@@ -40,4 +40,7 @@ public class WardService {
     public boolean existsByNameAndProvince(String wardName, Integer provinceId) {
         return wardRepository.existsByWardNameIgnoreCaseAndProvince_ProvinceId(wardName.trim(), provinceId);
     }
+    public Integer getProvinceId(int wardId) {
+        return wardRepository.findProvinceIdByWardId(wardId);
+    }
 }

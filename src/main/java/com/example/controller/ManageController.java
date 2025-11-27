@@ -1,8 +1,10 @@
 package com.example.controller;
 
 import com.example.model.Bin;
+import com.example.model.Notification;
 import com.example.model.Ward;
 import com.example.service.BinService;
+import com.example.service.NotificationService;
 import com.example.service.TasksService;
 import com.example.service.WardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,8 +25,11 @@ public class ManageController {
     private TasksService tasksService;
     @Autowired
     private WardService wardService;
+
+    @Autowired
+    private NotificationService notificationService;
     @GetMapping("/manage")
-    public String manage(Model model) {
+    public String manage(Model model, HttpSession session) {
         List<Bin> bins = binService.getAllBins();
 
         model.addAttribute("bins", bins);
@@ -62,6 +68,13 @@ public class ManageController {
                 .distinct()
                 .collect(Collectors.toList());
 
+        Integer currentAccountId = (Integer) session.getAttribute("currentAccountId");
+
+        List<Notification> notifications = notificationService.getNotificationsByReceiverId(currentAccountId);
+
+        model.addAttribute("notifications", notifications);
+        model.addAttribute("count", notifications.size());
+
         model.addAttribute("cities", cities);
         model.addAttribute("wards", wards);
         model.addAttribute("statuses", statuses);
@@ -69,6 +82,63 @@ public class ManageController {
 
         return "manage/dashboard";
     }
+
+    @GetMapping("/test")
+    public String testManage(Model model, HttpSession session) {
+        List<Bin> bins = binService.getAllBins();
+
+        model.addAttribute("bins", bins);
+        model.addAttribute("totalBins", bins.size());
+        model.addAttribute("alertCount", bins.stream()
+                .filter(b -> b.getCurrentFill() >= 80)
+                .count());
+        model.addAttribute("newReports", 0);
+
+        // Lọc các giá trị duy nhất - SỬA LẠI PHẦN NÀY
+        List<String> cities = bins.stream()
+                .map(bin -> bin.getWard() != null && bin.getWard().getProvince() != null ?
+                        bin.getWard().getProvince().getProvinceName() : "")
+                .distinct()
+                .filter(name -> !name.isEmpty())
+                .collect(Collectors.toList());
+
+        List<String> wards = bins.stream()
+                .map(bin -> bin.getWard() != null ? bin.getWard().getWardName() : "")
+                .distinct()
+                .filter(name -> !name.isEmpty())
+                .collect(Collectors.toList());
+
+        List<Integer> statuses = bins.stream()
+                .map(Bin::getStatus)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Integer> currentFills = bins.stream()
+                .map(bin -> {
+                    double fill = bin.getCurrentFill();
+                    if (fill >= 80) return 80;
+                    else if (fill >= 40) return 40;
+                    else return 0;
+                })
+                .distinct()
+                .collect(Collectors.toList());
+
+        Integer currentAccountId = (Integer) session.getAttribute("currentAccountId");
+
+        List<Notification> notifications = notificationService.getNotificationsByReceiverId(currentAccountId);
+
+        model.addAttribute("notifications", notifications);
+        model.addAttribute("count", notifications.size());
+
+        model.addAttribute("cities", cities);
+        model.addAttribute("wards", wards);
+        model.addAttribute("statuses", statuses);
+        model.addAttribute("currentFills", currentFills);
+
+        return "manage/notification-list";
+    }
+
+
     @GetMapping("/bins")
     public String listbins(Model model) {
         List<Bin> bins = binService.getAllBins();

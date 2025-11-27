@@ -15,14 +15,68 @@
         <!-- Header -->
         <div class="bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
             <h1 class="h4 mb-0 text-dark">Dashboard Quản lý Thùng Rác</h1>
-            <div class="d-flex align-items-center">
-                <button class="btn btn-outline-secondary position-relative">
+            <div class="d-flex align-items-center position-relative">
+
+                <!-- Nút chuông -->
+                <button id="btnNotification" class="btn btn-outline-secondary position-relative">
                     🔔
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        3
-                    </span>
+                    <c:if test="${count > 0}">
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    ${count}
+            </span>
+                    </c:if>
                 </button>
+
+                <!-- DROPDOWN THÔNG BÁO -->
+                <div id="notificationDropdown"
+                     class="position-absolute bg-white shadow rounded p-3"
+                     style="top: 50px; right: 0; width: 360px; display: none; z-index: 999;">
+
+                    <!-- Tabs -->
+                    <div class="d-flex border-bottom mb-2">
+                        <button id="tab-all" class="btn btn-link px-2 me-2 active" onclick="showTab('all')">Tất cả</button>
+                        <button id="tab-unread" class="btn btn-link px-2" onclick="showTab('unread')">Chưa đọc</button>
+                        <button id="tab-read" class="btn btn-link px-2" onclick="showTab('read')">Đã đọc</button>
+                    </div>
+
+                    <!-- Danh sách thông báo -->
+                    <div id="notificationList">
+                        <c:forEach var="noti" items="${notifications}">
+                            <div class="d-flex align-items-start py-2 border-bottom noti-item"
+                                 data-read="${noti.read}">
+
+                                <!-- Icon loại -->
+                                <div class="me-2">
+                                    <c:choose>
+                                        <c:when test="${noti.type == 'INFO'}">
+                                            <span class="badge bg-primary">i</span>
+                                        </c:when>
+                                        <c:when test="${noti.type == 'WARNING'}">
+                                            <span class="badge bg-warning text-dark">!</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge bg-secondary">*</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+
+                                <!-- Nội dung -->
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">${noti.title}</div>
+                                    <div class="text-muted small">${noti.message}</div>
+                                    <div class="text-muted small">${noti.createdAt}</div>
+                                </div>
+
+                                <!-- Chấm xanh -->
+                                <c:if test="${noti.read == false}">
+                                    <span class="ms-2" style="color:#0d6efd;">●</span>
+                                </c:if>
+                            </div>
+                        </c:forEach>
+                    </div>
+                </div>
             </div>
+
         </div>
 
         <div class="p-4">
@@ -770,6 +824,82 @@
                 zoom: 12
             });
         }
+    }
+</script>
+
+<script>
+    document.getElementById("btnNotification").addEventListener("click", function () {
+        const dropdown = document.getElementById("notificationDropdown");
+        dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+    });
+
+    // Ẩn dropdown khi click ra ngoài
+    document.addEventListener("click", function(e) {
+        const btn = document.getElementById("btnNotification");
+        const dropdown = document.getElementById("notificationDropdown");
+
+        if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = "none";
+        }
+    });
+
+</script>
+<script>
+    window.showTab = function(tab) {
+        const items = document.querySelectorAll(".noti-item");
+        items.forEach(item => {
+            const readAttr = item.getAttribute("data-read");
+            const isRead = readAttr === "true"; // chuyển string sang boolean
+            if (tab === 'all') {
+                item.style.display = 'flex';
+            } else if (tab === 'unread') {
+                item.style.display = !isRead ? 'flex' : 'none';
+            }
+        });
+
+        // Cập nhật active button
+        const buttons = document.querySelectorAll("#notificationDropdown .btn-link");
+        buttons.forEach(b => b.classList.remove("active"));
+        if(tab === 'all') buttons[0].classList.add("active");
+        else buttons[1].classList.add("active");
+    }
+</script>
+<script>
+    function showTab(tab) {
+        console.log("TAB CLICKED:", tab);
+
+        const items = document.querySelectorAll(".noti-item");
+
+        // Xóa inline CSS trước (để tránh lỗi hiển thị)
+        items.forEach(function(item) {
+            console.log("BEFORE:", item.style.display);  // ← Log này bạn đang cần
+            item.style.display = "";
+        });
+
+        // Lọc theo trạng thái
+        items.forEach(function(item) {
+            let readValue = (item.getAttribute("data-read") || "")
+                .trim().toLowerCase();
+
+            const isRead = (readValue === "true" || readValue === "1");
+
+            if (tab === "all") {
+                item.style.display = "flex";
+            } else if (tab === "unread") {
+                item.style.display = isRead ? "none" : "flex";
+            } else if (tab === "read") {
+                item.style.display = isRead ? "flex" : "none";
+            }
+
+            console.log("AFTER:", tab, "| read =", readValue, "| isRead =", isRead, "| final display =", item.style.display);
+        });
+
+        // Active nút tab
+        document.querySelectorAll("#notificationDropdown .btn-link")
+            .forEach(btn => btn.classList.remove("active"));
+
+        const activeBtn = document.querySelector("#tab-" + tab);
+        if (activeBtn) activeBtn.classList.add("active");
     }
 </script>
 </body>

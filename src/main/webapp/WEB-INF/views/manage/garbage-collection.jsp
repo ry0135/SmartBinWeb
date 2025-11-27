@@ -29,7 +29,7 @@
             <i class="fas fa-trash-alt me-1"></i> Thu gom
           </a>
           <a href="${pageContext.request.contextPath}/tasks/maintenance-management?type=maintain"
-             class="btn ${param.type == 'maintain' ? 'btn-primary' : 'btn-outline-primary'}">
+             class="btn ${type == 'maintain' ? 'btn-primary' : 'btn-outline-primary'}">
             <i class="fas fa-tools me-1"></i> Bảo trì
           </a>
         </div>

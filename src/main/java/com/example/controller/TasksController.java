@@ -5,6 +5,7 @@ import com.example.model.Bin;
 import com.example.model.Task;
 import com.example.service.BinService;
 import com.example.service.TasksService;
+import com.example.service.WardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,6 +23,8 @@ public class TasksController {
     private TasksService taskService;
     @Autowired
     private BinService binService;
+    @Autowired
+    private WardService wardService;
 
     @GetMapping("/task-management")
     public String manage(Model model) {
@@ -66,7 +69,8 @@ public class TasksController {
         return "manage/garbage-collection";
     }
     @GetMapping("/maintenance-management")
-    public String maintenance(Model model) {
+    public String maintenance( @RequestParam(value = "type", required = false) String type,
+                               Model model) {
         List<Bin> allBins = binService.getOffLineBins();
 
         // Lọc bỏ bin đã có task OPEN / DOING / COMPLETED và chỉ lấy bin có status == 2
@@ -89,7 +93,7 @@ public class TasksController {
                 .distinct()
                 .filter(name -> !name.isEmpty())
                 .collect(Collectors.toList());
-
+        model.addAttribute("type", type);
         List<Integer> statuses = bins.stream()
                 .map(Bin::getStatus)
                 .distinct()
@@ -152,10 +156,12 @@ public class TasksController {
                 return "redirect:/manage?error=Không có thùng rác nào được chọn";
             }
 
+            List<Bin> bins = binService.findAllByIds(binIds);
             List<Account> workers = taskService.getAvailableWorkersMaintenance(wardId);
 
             model.addAttribute("workers", workers);
             model.addAttribute("binIds", binIds);
+            model.addAttribute("bins", bins);
             model.addAttribute("wardId", wardId);
             model.addAttribute("wardName", "Phường " + wardId); // Thay bằng service thực tế
 

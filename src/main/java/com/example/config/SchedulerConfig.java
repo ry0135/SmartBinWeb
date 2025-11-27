@@ -45,6 +45,7 @@ public class SchedulerConfig {
                 double currentFill = bin.getCurrentFill();
                 boolean shouldSave = false;
 
+
                 if (lastLog == null) {
                     //  Nếu chưa có log nào → lưu luôn lần đầu
                     shouldSave = true;

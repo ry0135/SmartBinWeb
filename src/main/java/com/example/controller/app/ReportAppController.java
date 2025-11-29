@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/app/reports")
+    @RequestMapping("/api/app/reports")
 @CrossOrigin(origins = "*")
 public class ReportAppController {
     

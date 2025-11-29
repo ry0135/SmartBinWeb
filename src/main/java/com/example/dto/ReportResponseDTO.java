@@ -15,6 +15,17 @@ public class ReportResponseDTO {
     private String reportType;
     private String description;
     private String status;
+
+    private boolean isReviewed;
+
+    // Getter và Setter
+    public boolean isReviewed() {
+        return isReviewed;
+    }
+
+    public void setReviewed(boolean reviewed) {
+        isReviewed = reviewed;
+    }
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 

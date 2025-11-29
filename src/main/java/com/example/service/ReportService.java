@@ -6,10 +6,7 @@ import com.example.model.Bin;
 import com.example.model.Report;
 import com.example.model.ReportImage;
 import com.example.model.ReportStatusHistory;
-import com.example.repository.BinRepository;
-import com.example.repository.ReportImageRepository;
-import com.example.repository.ReportRepository;
-import com.example.repository.ReportStatusHistoryRepository;
+import com.example.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +27,8 @@ public class ReportService {
 
     @Autowired
     private BinRepository binRepository;
+    @Autowired
+    private FeedbackRepository feedbackRepository;
     @Autowired
     private ReportImageRepository reportImageRepository;
 
@@ -127,6 +126,7 @@ public class ReportService {
         return null;
     }
     public ReportResponseDTO convertToDTO(Report report) {
+        // 1. Tạo DTO với các dữ liệu cơ bản từ Report (Code cũ của bạn)
         ReportResponseDTO dto = new ReportResponseDTO(
                 report.getReportId(),
                 report.getBinId(),
@@ -139,6 +139,7 @@ public class ReportService {
                 report.getResolvedAt()
         );
 
+        // 2. Logic lấy Bin (Code cũ của bạn - giữ nguyên)
         // 🔥 Lấy bin trực tiếp từ DB (không dùng Lazy Proxy)
         Bin bin = binRepository.findById(report.getBinId()).orElse(null);
 
@@ -150,6 +151,13 @@ public class ReportService {
                             bin.getWard().getProvince().getProvinceName()
             );
         }
+
+        // 3. 🔥 LOGIC MỚI: Kiểm tra xem Report này đã có Feedback chưa
+        // Hàm này sẽ chạy câu lệnh SQL kiểm tra trong bảng Feedback
+        boolean isReviewed = feedbackRepository.existsByReportId(report.getReportId());
+
+        // Gán kết quả vào DTO
+        dto.setReviewed(isReviewed);
 
         return dto;
     }

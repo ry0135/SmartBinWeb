@@ -10,6 +10,9 @@ import java.util.List;
 
 @Repository
 public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
+
+    boolean existsByAccountIdAndReportId(Integer accountId, Integer reportId);
+
     @Query("SELECT f FROM Feedback f JOIN FETCH f.account")
     List<Feedback> findAllWithAccount();
 
@@ -40,4 +43,6 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
     @Query("SELECT f FROM Feedback f WHERE f.rating BETWEEN :minRating AND :maxRating ORDER BY f.createdAt DESC")
     List<Feedback> findByRatingBetweenOrderByCreatedAtDesc(@Param("minRating") Integer minRating,
                                                            @Param("maxRating") Integer maxRating);
+
+    boolean existsByReportId(Integer reportId);
 }

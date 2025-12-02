@@ -86,9 +86,6 @@
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Danh sách thùng rác</h5>
-                <button class="btn btn-success btn-sm">
-                    <i class="fas fa-file-export me-1"></i> Xuất báo cáo
-                </button>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -146,9 +143,6 @@
                                     <div class="btn-group" role="group">
                                         <button type="button" class="btn btn-outline-primary btn-sm" onclick="editBin(${bin.binID})">
                                             <i class="fas fa-edit me-1"></i> Sửa
-                                        </button>
-                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteBin(${bin.binID})">
-                                            <i class="fas fa-trash me-1"></i> Xóa
                                         </button>
                                     </div>
                                 </td>

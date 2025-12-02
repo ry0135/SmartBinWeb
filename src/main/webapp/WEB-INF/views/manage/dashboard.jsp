@@ -202,9 +202,7 @@
 
                             <!-- Quick Actions -->
                             <div class="d-grid gap-2">
-                                <button class="btn btn-success btn-sm" onclick="exportReport()">
-                                    📊 Xuất báo cáo
-                                </button>
+
                                 <button class="btn btn-outline-primary btn-sm" onclick="focusOnResults()">
                                     📍 Xem bản đồ
                                 </button>

@@ -202,9 +202,7 @@
 
                             <!-- Quick Actions -->
                             <div class="d-grid gap-2">
-                                <button class="btn btn-success btn-sm" onclick="exportReport()">
-                                    📊 Xuất báo cáo
-                                </button>
+
                                 <button class="btn btn-outline-primary btn-sm" onclick="focusOnResults()">
                                     📍 Xem bản đồ
                                 </button>
@@ -317,7 +315,7 @@
 
 <script>
     // ====================== REALTIME SOCKET ======================
-    var socket = new SockJS('/ws-bin-sockjs');
+    var socket = new SockJS('https://smartbin-vn.duckdns.org/ws-bin-sockjs');
     var stompClient = Stomp.over(socket);
 
     stompClient.connect({}, function (frame) {
@@ -337,6 +335,7 @@
             removeBinMarker(bin.binID);
         });
     });
+
 
     // ======= Cập nhật trong bảng =======
     function updateBinRow(bin) {
@@ -388,6 +387,7 @@
     }
 
     // ======= Cập nhật marker bản đồ =======
+    // ======= Cập nhật marker bản đồ =======
     function updateBinMarker(bin) {
         if (!markers || markers.length === 0) return;
 
@@ -404,18 +404,34 @@
 
             marker.setLngLat([bin.longitude, bin.latitude]);
             marker.getElement().src = getBinIcon(bin.currentFill, bin.status);
+
+            // 🎯 QUAN TRỌNG: Cập nhật nội dung popup
+            var popupHtml =
+                "<b>Mã:</b> " + bin.binCode +
+                "<br><b>Địa chỉ:</b> " + bin.street +
+                "<br><b>Đầy:</b> " + bin.currentFill + "%" +
+                "<br><b>Trạng thái:</b> " + (bin.status == 1 ? "Online" : "Offline") +
+                "<br><b>Cập nhật:</b> " + new Date().toLocaleString() +
+                "<br><div id='predict-" + bin.binID + "' class='mt-2 text-muted'>⚡ Bấm vào để dự đoán...</div>";
+
+            marker.setPopup(new vietmapgl.Popup({ offset: 25 }).setHTML(popupHtml));
+
         } else {
+            // Code thêm marker mới (giữ nguyên)
             var el = document.createElement("img");
             el.src = getBinIcon(bin.currentFill, bin.status);
             el.style.width = "32px";
             el.style.height = "32px";
 
-            var popup = new vietmapgl.Popup({ offset: 25 }).setHTML(
+            var popupHtml =
                 "<b>Mã:</b> " + bin.binCode +
                 "<br><b>Địa chỉ:</b> " + bin.street +
                 "<br><b>Đầy:</b> " + bin.currentFill + "%" +
-                "<br><b>Trạng thái:</b> " + (bin.status == 1 ? "Online" : "Offline")
-            );
+                "<br><b>Trạng thái:</b> " + (bin.status == 1 ? "Online" : "Offline") +
+                "<br><b>Cập nhật:</b> " + new Date().toLocaleString() +
+                "<br><div id='predict-" + bin.binID + "' class='mt-2 text-muted'>⚡ Bấm vào để dự đoán...</div>";
+
+            var popup = new vietmapgl.Popup({ offset: 25 }).setHTML(popupHtml);
 
             var newMarker = new vietmapgl.Marker({ element: el })
                 .setLngLat([bin.longitude, bin.latitude])
@@ -423,7 +439,7 @@
                 .addTo(map);
 
             newMarker.bin = {
-                id:bin.binID,
+                id: bin.binID,
                 code: bin.binCode,
                 binID: bin.binID,
                 lat: bin.latitude,

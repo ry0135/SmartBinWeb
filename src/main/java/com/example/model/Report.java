@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
+@EntityListeners(com.example.listener.ReportEntityListener.class)
 @Entity
 @Table(name = "Reports")
 public class Report {
@@ -56,6 +56,9 @@ public class Report {
     @JoinColumn(name = "AccountID", insertable = false, updatable = false)
     private Account account;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "AssignedTo", referencedColumnName = "AccountID", insertable = false, updatable = false)
+    private Account assignedAccount;
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ReportImage> reportImages;
 
@@ -120,6 +123,14 @@ public class Report {
 
     public List<ReportStatusHistory> getStatusHistory() { return statusHistory; }
     public void setStatusHistory(List<ReportStatusHistory> statusHistory) { this.statusHistory = statusHistory; }
+
+    public Account getAssignedAccount() {
+        return assignedAccount;
+    }
+
+    public void setAssignedAccount(Account assignedAccount) {
+        this.assignedAccount = assignedAccount;
+    }
 }
 
 

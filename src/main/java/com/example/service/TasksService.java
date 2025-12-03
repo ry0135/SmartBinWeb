@@ -1,14 +1,8 @@
 package com.example.service;
 
 import com.example.dto.TaskSummaryDTO;
-import com.example.model.Account;
-import com.example.model.Bin;
-import com.example.model.Notification;
-import com.example.model.Task;
-import com.example.repository.AccountRepository;
-import com.example.repository.BinRepository;
-import com.example.repository.NotificationRepository;
-import com.example.repository.TasksRepository;
+import com.example.model.*;
+import com.example.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +36,9 @@ public class TasksService {
     @Autowired
     private BinRepository binRepository;
 
+    @Autowired
+    private ReportRepository reportRepository;
+
     // Giao nhiều task cùng lúc
     @Transactional
     public List<Task> assignMultipleTasks(List<Integer> binIds, int workerId,
@@ -50,7 +47,16 @@ public class TasksService {
 
         Account worker = accountRepository.findById(workerId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy worker với ID = " + workerId));
+        List<Report> reports = reportRepository.findFullOrOverloadReports(binIds);
 
+        if (!reports.isEmpty()) {
+            List<Integer> reportIds = reports.stream()
+                    .map(Report::getReportId)
+                    .collect(Collectors.toList());
+
+            // 2) chuyển sang IN_PROGRESS
+            reportRepository.updateReportsToInProgress(reportIds,workerId);
+        }
         String batchId = "BATCH_" + System.currentTimeMillis() + "_" + new Random().nextInt(1000);
         List<Task> assignedTasks = new ArrayList<>();
 
@@ -310,6 +316,7 @@ public class TasksService {
         Optional<Task> optionalTask = taskRepository.findById(taskId);
 
         Task task = optionalTask.get();
+        int binId = task.getBin().getBinID();
 
         //  Upload ảnh lên Firebase
         String imageUrl = firebaseStorageService.uploadFile(image, "/task/collect");
@@ -322,6 +329,13 @@ public class TasksService {
         task.setCollectedVolume(collectedVolume);
         task.setStatus("COMPLETED");
         taskRepository.save(task);
+
+
+        reportRepository.resolveReportsByBin(
+                task.getBin().getBinID(),
+                task.getAssignedTo().getAccountId(),
+                task.getTaskID()
+        );
 
         return " Hoàn thành nhiệm vụ thành công!";
     }

@@ -187,7 +187,7 @@
                                         <c:otherwise>badge-secondary</c:otherwise>
                                     </c:choose>">
                                     <c:choose>
-                                        <c:when test='${report.status == "RECEIVED"}'>ĐÃ TIẾP NHẬN</c:when>
+                                        <c:when test='${report.status == "RECEIVED"}'>CHỜ XỬ LÝ</c:when>
                                         <c:when test='${report.status == "IN_PROGRESS"}'>ĐANG XỬ LÝ</c:when>
                                         <c:when test='${report.status == "RESOLVED"}'>ĐÃ HOÀN THÀNH</c:when>
                                         <c:otherwise>Không xác định</c:otherwise>

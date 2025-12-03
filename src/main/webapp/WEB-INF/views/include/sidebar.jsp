@@ -86,7 +86,7 @@
         </a>
       </li>
 
-<<<<<<< phuna
+
       <li class="nav-item mb-2">
         <a href="${pageContext.request.contextPath}/settings"
            class="nav-link text-dark d-flex align-items-center py-3 px-3 rounded sidebar-link"
@@ -105,8 +105,6 @@
         </a>
       </li>
 
-=======
->>>>>>> main
     </ul>
   </nav>
 

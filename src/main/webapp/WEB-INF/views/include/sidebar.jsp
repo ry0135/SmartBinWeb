@@ -85,16 +85,6 @@
           <span class="fw-semibold">Phản Hồi</span>
         </a>
       </li>
-
-<<<<<<< phuna
-      <li class="nav-item mb-2">
-        <a href="${pageContext.request.contextPath}/settings"
-           class="nav-link text-dark d-flex align-items-center py-3 px-3 rounded sidebar-link"
-           data-path="/settings">
-          <span class="me-3 fs-5">⚙️</span>
-          <span class="fw-semibold">Cài đặt</span>
-        </a>
-      </li>
       <!-- Menu Chat với Admin -->
       <li class="nav-item mb-2">
         <a href="${pageContext.request.contextPath}/chat/manager"
@@ -105,8 +95,6 @@
         </a>
       </li>
 
-=======
->>>>>>> main
     </ul>
   </nav>
 

@@ -34,10 +34,7 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     // Tìm báo cáo theo AssignedTo
     List<Report> findByAssignedToOrderByCreatedAtDesc(Integer assignedTo);
 
-    // Tìm báo cáo theo khoảng thời gian (danh sách)
-    @Query("SELECT r FROM Report r " +
-            "WHERE r.createdAt BETWEEN :startDate AND :endDate " +
-            "ORDER BY r.createdAt DESC")
+  
     // Tìm báo cáo theo khoảng thời gian
     @Query("SELECT r FROM Report r WHERE r.createdAt BETWEEN :startDate AND :endDate ORDER BY r.createdAt DESC")
     List<Report> findByDateRange(@Param("startDate") LocalDateTime startDate,
@@ -139,7 +136,6 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
             nativeQuery = true
     )
     List<Object[]> topReportedBins();
-}
 
     @Query("SELECT r FROM Report r WHERE r.bin.binID = :binId " +
             "AND r.reportType IN ('FULL','OVERLOAD') " +

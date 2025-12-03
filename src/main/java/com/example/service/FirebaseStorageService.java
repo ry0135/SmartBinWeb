@@ -1,18 +1,13 @@
 package com.example.service;
 
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.StorageClient;
 import com.google.cloud.storage.Blob;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.UUID;
 
 @Service
 public class FirebaseStorageService {

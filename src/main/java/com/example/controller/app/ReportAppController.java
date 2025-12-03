@@ -1,9 +1,7 @@
 package com.example.controller.app;
 
-import com.example.model.Report;
-import com.example.model.ReportImage;
-import com.example.model.ReportStatusHistory;
-import com.example.model.ApiResponse;
+import com.example.dto.ReportResponseDTO;
+import com.example.model.*;
 import com.example.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,18 +12,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/app/reports")
+    @RequestMapping("/api/app/reports")
 @CrossOrigin(origins = "*")
 public class ReportAppController {
     
     @Autowired
     private ReportService reportService;
+
+
     
     // Tạo báo cáo mới từ app
     @PostMapping
@@ -36,12 +37,11 @@ public class ReportAppController {
             report.setAccountId(request.getAccountId());
             report.setReportType(request.getReportType());
             report.setDescription(request.getDescription());
-            report.setCreatedAt(LocalDateTime.now());
-            report.setUpdatedAt(LocalDateTime.now());
             report.setStatus("RECEIVED");
-            
-            Report createdReport = reportService.createReport(report);
-            
+
+            Report createdReport = reportService.createReport(report, request.getImages());
+
+
             return ResponseEntity.ok(ApiResponse.success("Báo cáo đã được tạo thành công", createdReport));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
@@ -66,6 +66,7 @@ public class ReportAppController {
                 json.append("{");
                 json.append("\"reportId\":").append(r.getReportId()).append(",");
                 json.append("\"binId\":").append(r.getBinId()).append(",");
+                json.append("\"binCode\":").append(r.getBin().getBinCode()).append(",");
                 json.append("\"accountId\":").append(r.getAccountId()).append(",");
                 json.append("\"reportType\":\"").append(r.getReportType() != null ? r.getReportType().replace("\"", "\\\"") : "").append("\",");
                 json.append("\"description\":\"").append(r.getDescription() != null ? r.getDescription().replace("\"", "\\\"") : "").append("\",");
@@ -90,21 +91,38 @@ public class ReportAppController {
     }
     
     // Lấy chi tiết báo cáo
+//    @GetMapping("/{reportId}")
+//    public ResponseEntity<ApiResponse<Report>> getReportDetail(@PathVariable Integer reportId) {
+//        try {
+//            Optional<Report> report = reportService.getReportById(reportId);
+//            if (report.isPresent()) {
+//                return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết báo cáo thành công", report.get()));
+//            } else {
+//                return ResponseEntity.notFound().build();
+//            }
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest()
+//                .body(ApiResponse.error("Có lỗi xảy ra: " + e.getMessage()));
+//        }
+//    }
     @GetMapping("/{reportId}")
-    public ResponseEntity<ApiResponse<Report>> getReportDetail(@PathVariable Integer reportId) {
+    public ResponseEntity<ApiResponse<ReportResponseDTO>> getReportDetail(@PathVariable Integer reportId) {
         try {
             Optional<Report> report = reportService.getReportById(reportId);
+
             if (report.isPresent()) {
-                return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết báo cáo thành công", report.get()));
-            } else {
-                return ResponseEntity.notFound().build();
+                ReportResponseDTO dto = reportService.convertToDTO(report.get());
+                return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết báo cáo thành công", dto));
             }
+
+            return ResponseEntity.notFound().build();
+
         } catch (Exception e) {
             return ResponseEntity.badRequest()
-                .body(ApiResponse.error("Có lỗi xảy ra: " + e.getMessage()));
+                    .body(ApiResponse.error("Có lỗi xảy ra: " + e.getMessage()));
         }
     }
-    
+
     // Lấy lịch sử trạng thái báo cáo
     @GetMapping("/{reportId}/status")
     public ResponseEntity<ApiResponse<List<ReportStatusHistory>>> getReportStatusHistory(@PathVariable Integer reportId) {
@@ -190,32 +208,5 @@ public class ReportAppController {
         }
     }
     
-    // Inner class cho request
-    public static class ReportRequest {
-        private Integer binId;
-        private Integer accountId;
-        private String reportType;
-        private String description;
-        private Double latitude;
-        private Double longitude;
-        
-        // Getters and setters
-        public Integer getBinId() { return binId; }
-        public void setBinId(Integer binId) { this.binId = binId; }
-        
-        public Integer getAccountId() { return accountId; }
-        public void setAccountId(Integer accountId) { this.accountId = accountId; }
-        
-        public String getReportType() { return reportType; }
-        public void setReportType(String reportType) { this.reportType = reportType; }
-        
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-        
-        public Double getLatitude() { return latitude; }
-        public void setLatitude(Double latitude) { this.latitude = latitude; }
-        
-        public Double getLongitude() { return longitude; }
-        public void setLongitude(Double longitude) { this.longitude = longitude; }
-    }
+
 }

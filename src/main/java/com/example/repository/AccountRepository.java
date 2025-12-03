@@ -36,9 +36,18 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     String findFcmTokenByAccountId(@Param("id") int id);
 
 
-    @Query("SELECT a FROM Account a LEFT JOIN FETCH a.ward WHERE a.role = 4 AND a.wardID = :wardID")
-    List<Account> findWorkersByWardandrole4(@Param("wardID") int wardID);
+//    @Query("SELECT a FROM Account a LEFT JOIN FETCH a.ward WHERE a.role = 5 AND a.wardID = :wardID")
+//    List<Account> findWorkersByWardandrole5(@Param("wardID") int wardID);
 
+    @Query("SELECT DISTINCT a FROM Account a " +
+            "LEFT JOIN FETCH a.ward w " +
+            "LEFT JOIN FETCH w.province p " +
+            "WHERE a.role = 5 " +
+            "AND (a.wardID = :wardID OR p.provinceId = :provinceId)")
+    List<Account> findWorkersByWardAndProvince(
+            @Param("wardID") int wardID,
+            @Param("provinceId") int provinceId
+    );
     // ========== BỔ SUNG HÀM PHÂN TRANG / TÌM KIẾM ==========
 
     // List theo role (phân trang/sort)

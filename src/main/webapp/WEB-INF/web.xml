@@ -4,31 +4,17 @@
          http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
 
-  <!-- ✅ Cho phép load class @Configuration -->
-  <context-param>
-    <param-name>contextClass</param-name>
-    <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
-  </context-param>
-
-  <!-- ✅ Load cả applicationContext.xml và WebSocketConfig (Java Config) -->
+  <!-- Spring Context -->
   <context-param>
     <param-name>contextConfigLocation</param-name>
-    <param-value>
-      /WEB-INF/applicationContext.xml,
-      com.example.config.WebSocketConfig
-    </param-value>
-  </context-param>
-
-  <context-param>
-    <param-name>gcp.credentials.location</param-name>
-    <param-value>${GOOGLE_APPLICATION_CREDENTIALS}</param-value>
+    <param-value>/WEB-INF/applicationContext.xml</param-value>
   </context-param>
 
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
 
-  <!-- DispatcherServlet -->
+  <!-- Dispatcher Servlet -->
   <servlet>
     <servlet-name>dispatcher</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -37,11 +23,6 @@
       <param-value>/WEB-INF/dispatcher-servlet.xml</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
-    <multipart-config>
-      <max-file-size>268435456</max-file-size>
-      <max-request-size>536870912</max-request-size>
-      <file-size-threshold>0</file-size-threshold>
-    </multipart-config>
   </servlet>
 
   <servlet-mapping>
@@ -49,6 +30,7 @@
     <url-pattern>/</url-pattern>
   </servlet-mapping>
 
+  <!-- UTF-8 Filter -->
   <filter>
     <filter-name>characterEncodingFilter</filter-name>
     <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>

@@ -30,6 +30,8 @@
             <c:forEach var="binId" items="${binIds}">
               <input type="hidden" name="binIds" value="${binId}">
             </c:forEach>
+            <!-- ✅ Gửi thêm senderId (lấy từ session) -->
+            <input type="hidden" name="senderId" value="${sessionScope.currentAccountId}">
 
             <!-- Main Card -->
             <div class="card border-0 shadow-sm">

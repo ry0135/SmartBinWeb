@@ -5,16 +5,14 @@ import com.example.model.Bin;
 import com.example.model.Task;
 import com.example.service.BinService;
 import com.example.service.TasksService;
+import com.example.service.WardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -25,13 +23,17 @@ public class TasksController {
     private TasksService taskService;
     @Autowired
     private BinService binService;
+    @Autowired
+    private WardService wardService;
 
     @GetMapping("/task-management")
-    public String manage(Model model) {
+    public String manage(@RequestParam("binId") Integer binId,
+                         @RequestParam("reportId") Integer reportId,
+                         Model model) {
         // Sử dụng repository trực tiếp để lấy bins với status = 1 và currentFill > 60
         List<Bin> highFillBins = binService.getActiveBinsWithHighFill();
 
-        // Lọc bỏ bin đã có task OPEN / DOING / COMPLETED
+        // Lọc bỏ bin đã có task OPEN / DOING
         List<Bin> bins = highFillBins.stream()
                 .filter(bin -> !taskService.hasRestrictedTask(bin.getBinID()))
                 .collect(Collectors.toList());
@@ -66,10 +68,13 @@ public class TasksController {
         model.addAttribute("wards", wards);
         model.addAttribute("currentFills", currentFills);
 
+        model.addAttribute("binId", binId);
+        model.addAttribute("reportId", reportId);
         return "manage/garbage-collection";
     }
     @GetMapping("/maintenance-management")
-    public String maintenance(Model model) {
+    public String maintenance( @RequestParam(value = "type", required = false) String type,
+                               Model model) {
         List<Bin> allBins = binService.getOffLineBins();
 
         // Lọc bỏ bin đã có task OPEN / DOING / COMPLETED và chỉ lấy bin có status == 2
@@ -92,7 +97,7 @@ public class TasksController {
                 .distinct()
                 .filter(name -> !name.isEmpty())
                 .collect(Collectors.toList());
-
+        model.addAttribute("type", type);
         List<Integer> statuses = bins.stream()
                 .map(Bin::getStatus)
                 .distinct()
@@ -155,10 +160,12 @@ public class TasksController {
                 return "redirect:/manage?error=Không có thùng rác nào được chọn";
             }
 
+            List<Bin> bins = binService.findAllByIds(binIds);
             List<Account> workers = taskService.getAvailableWorkersMaintenance(wardId);
 
             model.addAttribute("workers", workers);
             model.addAttribute("binIds", binIds);
+            model.addAttribute("bins", bins);
             model.addAttribute("wardId", wardId);
             model.addAttribute("wardName", "Phường " + wardId); // Thay bằng service thực tế
 
@@ -176,11 +183,12 @@ public class TasksController {
             @RequestParam("taskType") String taskType,
             @RequestParam("priority") int priority,
             @RequestParam(value = "notes", required = false) String notes,
+            @RequestParam int senderId,
             Model model) {
 
         try {
             List<Task> assignedTasks = taskService.assignMultipleTasks(
-                    binIds, workerId, taskType, priority, notes
+                    binIds, workerId, taskType, priority, notes,senderId
             );
 
             model.addAttribute("message", "Đã giao " + assignedTasks.size() + " nhiệm vụ thành công");
@@ -200,12 +208,12 @@ public class TasksController {
             @RequestParam("taskType") String taskType,
             @RequestParam("priority") int priority,
             @RequestParam(value = "notes", required = false) String notes,
+            @RequestParam Integer  senderId,
             Model model) {
 
         try {
-            List<Task> assignedTasks = taskService.assignMultipleTasks(
-                    binIds, workerId, taskType, priority, notes
-            );
+            List<Task> assignedTasks = taskService.assignMultipleTasks(binIds, workerId, taskType, priority, notes,
+                    senderId != null ? senderId : 2);
 
             model.addAttribute("message", "Đã giao " + assignedTasks.size() + " nhiệm vụ thành công");
             model.addAttribute("assignedTasks", assignedTasks);
@@ -226,37 +234,54 @@ public class TasksController {
             @RequestParam(value = "priority", required = false) Integer priority,
             Model model) {
 
-        List<Task> allTasks = taskService.getCancelTasks();
+        try {
+            List<Task> tasksCancel = taskService.getCancelTasks();
 
-        List<Task> filteredTasks = allTasks.stream()
-                .filter(task -> status == null || status.isEmpty() || task.getStatus().equals(status))
-                .filter(task -> taskType == null || taskType.isEmpty() || task.getTaskType().equals(taskType))
-                .filter(task -> priority == null || task.getPriority() == priority)
-                .collect(Collectors.toList());
+            // Áp dụng filter nếu có
+            List<Task> filteredTasks = tasksCancel.stream()
+                    .filter(task -> status == null || status.isEmpty() || task.getStatus().equals(status))
+                    .filter(task -> taskType == null || taskType.isEmpty() || task.getTaskType().equals(taskType))
+                    .filter(task -> priority == null || task.getPriority() == priority)
+                    .collect(Collectors.toList());
 
-        // Nhóm task theo batchId
-        Map<String, List<Task>> tasksByBatch = filteredTasks.stream()
-                .filter(task -> task.getBatchId() != null && !task.getBatchId().isEmpty())
-                .collect(Collectors.groupingBy(Task::getBatchId));
+            // Nhóm task theo batchId và chỉ lấy batch có trạng thái CANCEL
+            Map<String, List<Task>> tasksByBatch = new HashMap<>();
+            for (Task task : filteredTasks) {
+                if (task.getBatchId() != null && !task.getBatchId().isEmpty()) {
+                    String batchStatus = taskService.getBatchStatus(task.getBatchId());
+                    if ("CANCEL".equals(batchStatus)) {
+                        tasksByBatch.computeIfAbsent(task.getBatchId(), k -> new ArrayList<>()).add(task);
+                    }
+                }
+            }
 
-        // Task không có batch (đơn lẻ)
-        List<Task> singleTasks = filteredTasks.stream()
-                .filter(task -> task.getBatchId() == null || task.getBatchId().isEmpty())
-                .collect(Collectors.toList());
+            // Task không có batch (đơn lẻ)
+            List<Task> singleTasks = filteredTasks.stream()
+                    .filter(task -> task.getBatchId() == null || task.getBatchId().isEmpty())
+                    .collect(Collectors.toList());
 
-        model.addAttribute("tasksByBatch", tasksByBatch);
-        model.addAttribute("singleTasks", singleTasks);
-        model.addAttribute("statusFilter", status);
-        model.addAttribute("typeFilter", taskType);
-        model.addAttribute("priorityFilter", priority);
+            // Thống kê theo BATCH
+            Map<String, Long> batchStats = taskService.getBatchStats();
 
-        // Thống kê
-        model.addAttribute("totalTasks", allTasks.size());
-        model.addAttribute("openTasks", allTasks.stream().filter(t -> t.getStatus().equals("OPEN")).count());
-        model.addAttribute("doingTasks", allTasks.stream().filter(t -> t.getStatus().equals("DOING")).count());
-        model.addAttribute("completedTasks", allTasks.stream().filter(t -> t.getStatus().equals("COMPLETED")).count());
+            model.addAttribute("canceltasksByBatch", tasksByBatch);
+            model.addAttribute("singleTasks", singleTasks);
+            model.addAttribute("statusFilter", status);
+            model.addAttribute("typeFilter", taskType);
+            model.addAttribute("priorityFilter", priority);
 
-        return "manage/batch-cancel";
+            // CHỈ THÊM THỐNG KÊ THEO BATCH
+            model.addAttribute("totalBatches", batchStats.get("totalBatches"));
+            model.addAttribute("openBatches", batchStats.get("openBatches"));
+            model.addAttribute("doingBatches", batchStats.get("doingBatches"));
+            model.addAttribute("completedBatches", batchStats.get("completedBatches"));
+            model.addAttribute("cancelBatches", batchStats.get("cancelBatches"));
+
+            return "manage/batch-cancel";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Lỗi khi lấy danh sách task đã hủy: " + e.getMessage());
+            return "error";
+        }
     }
     @GetMapping("/doing")
     public String getDoingTasks(
@@ -276,32 +301,46 @@ public class TasksController {
                     .filter(task -> workerId == null || (task.getAssignedTo() != null && task.getAssignedTo().getAccountId() == workerId))
                     .collect(Collectors.toList());
 
-            // Nhóm task theo batch
-            Map<String, List<Task>> doingTasksByBatch = filteredDoingTasks.stream()
+            // Lấy tất cả batch ID từ các task đang DOING
+            Set<String> batchIdsFromDoingTasks = filteredDoingTasks.stream()
                     .filter(task -> task.getBatchId() != null && !task.getBatchId().isEmpty())
-                    .collect(Collectors.groupingBy(Task::getBatchId));
+                    .map(Task::getBatchId)
+                    .collect(Collectors.toSet());
+
+            // Nhóm task theo batch - lấy tất cả task trong batch (cả DOING và COMPLETED)
+            Map<String, List<Task>> doingTasksByBatch = new HashMap<>();
+            for (String batchId : batchIdsFromDoingTasks) {
+                List<Task> allTasksInBatch = taskService.getTasksByBatch(batchId);
+
+                // Chỉ thêm batch nếu có ít nhất 1 task DOING và KHÔNG phải tất cả task đều COMPLETED
+                boolean hasDoingTask = allTasksInBatch.stream().anyMatch(task -> "DOING".equals(task.getStatus()));
+                boolean allCompleted = allTasksInBatch.stream().allMatch(task -> "COMPLETED".equals(task.getStatus()));
+
+                if (hasDoingTask && !allCompleted) {
+                    doingTasksByBatch.put(batchId, allTasksInBatch);
+                }
+            }
 
             // Task đơn lẻ đang DOING
             List<Task> singleDoingTasks = filteredDoingTasks.stream()
                     .filter(task -> task.getBatchId() == null || task.getBatchId().isEmpty())
                     .collect(Collectors.toList());
 
-            // Thống kê CHI TIẾT - giống như trong taskManagement
-            List<Task> allTasks = taskService.getAllTasks(); // Lấy tất cả task để thống kê
+            // Thống kê theo BATCH
+            Map<String, Long> batchStats = taskService.getBatchStats();
 
             model.addAttribute("doingTasksByBatch", doingTasksByBatch);
             model.addAttribute("singleDoingTasks", singleDoingTasks);
-            model.addAttribute("doingStats", taskService.getDoingTasksStats());
-            model.addAttribute("totalDoingTasks", doingTasks.size());
             model.addAttribute("typeFilter", taskType);
             model.addAttribute("priorityFilter", priority);
             model.addAttribute("workerFilter", workerId);
 
-            // THÊM CÁC THỐNG KÊ GIỐNG NHƯ TRONG TASK MANAGEMENT
-            model.addAttribute("totalTasks", allTasks.size());
-            model.addAttribute("openTasks", allTasks.stream().filter(t -> t.getStatus().equals("OPEN")).count());
-            model.addAttribute("doingTasks", allTasks.stream().filter(t -> t.getStatus().equals("DOING")).count());
-            model.addAttribute("completedTasks", allTasks.stream().filter(t -> t.getStatus().equals("COMPLETED")).count());
+            // CHỈ THÊM THỐNG KÊ THEO BATCH
+            model.addAttribute("totalBatches", batchStats.get("totalBatches"));
+            model.addAttribute("openBatches", batchStats.get("openBatches"));
+            model.addAttribute("doingBatches", batchStats.get("doingBatches"));
+            model.addAttribute("completedBatches", batchStats.get("completedBatches"));
+            model.addAttribute("cancelBatches", batchStats.get("cancelBatches"));
 
             return "manage/batch-doing";
 
@@ -318,7 +357,7 @@ public class TasksController {
             Model model) {
 
         try {
-            // Lấy tất cả task đang DOING
+            // Lấy tất cả task đang OPEN
             List<Task> openTasks = taskService.getOpenTasks();
 
             // Áp dụng filter nếu có
@@ -328,41 +367,45 @@ public class TasksController {
                     .filter(task -> workerId == null || (task.getAssignedTo() != null && task.getAssignedTo().getAccountId() == workerId))
                     .collect(Collectors.toList());
 
-            // Nhóm task theo batch
-            Map<String, List<Task>> openTasksByBatch = filteredOpenTasks.stream()
-                    .filter(task -> task.getBatchId() != null && !task.getBatchId().isEmpty())
-                    .collect(Collectors.groupingBy(Task::getBatchId));
+            // Nhóm task theo batch và chỉ lấy batch có trạng thái OPEN
+            Map<String, List<Task>> openTasksByBatch = new HashMap<>();
+            for (Task task : filteredOpenTasks) {
+                if (task.getBatchId() != null && !task.getBatchId().isEmpty()) {
+                    String batchStatus = taskService.getBatchStatus(task.getBatchId());
+                    if ("OPEN".equals(batchStatus)) {
+                        openTasksByBatch.computeIfAbsent(task.getBatchId(), k -> new ArrayList<>()).add(task);
+                    }
+                }
+            }
 
-            // Task đơn lẻ đang DOING
-            List<Task> singleDoingTasks = filteredOpenTasks.stream()
+            // Task đơn lẻ đang OPEN
+            List<Task> singleOpenTasks = filteredOpenTasks.stream()
                     .filter(task -> task.getBatchId() == null || task.getBatchId().isEmpty())
                     .collect(Collectors.toList());
 
-            // Thống kê CHI TIẾT - giống như trong taskManagement
-            List<Task> allTasks = taskService.getAllTasks(); // Lấy tất cả task để thống kê
+            // Thống kê theo BATCH
+            Map<String, Long> batchStats = taskService.getBatchStats();
 
-            model.addAttribute("doingTasksByBatch", openTasksByBatch);
-            model.addAttribute("singleDoingTasks", singleDoingTasks);
-            model.addAttribute("doingStats", taskService.getDoingTasksStats());
-            model.addAttribute("totalDoingTasks", openTasks.size());
+            model.addAttribute("openTasksByBatch", openTasksByBatch);
+            model.addAttribute("singleOpenTasks", singleOpenTasks);
             model.addAttribute("typeFilter", taskType);
             model.addAttribute("priorityFilter", priority);
             model.addAttribute("workerFilter", workerId);
 
-            // THÊM CÁC THỐNG KÊ GIỐNG NHƯ TRONG TASK MANAGEMENT
-            model.addAttribute("totalTasks", allTasks.size());
-            model.addAttribute("openTasks", allTasks.stream().filter(t -> t.getStatus().equals("OPEN")).count());
-            model.addAttribute("doingTasks", allTasks.stream().filter(t -> t.getStatus().equals("DOING")).count());
-            model.addAttribute("completedTasks", allTasks.stream().filter(t -> t.getStatus().equals("COMPLETED")).count());
+            // CHỈ THÊM THỐNG KÊ THEO BATCH
+            model.addAttribute("totalBatches", batchStats.get("totalBatches"));
+            model.addAttribute("openBatches", batchStats.get("openBatches"));
+            model.addAttribute("doingBatches", batchStats.get("doingBatches"));
+            model.addAttribute("completedBatches", batchStats.get("completedBatches"));
+            model.addAttribute("cancelBatches", batchStats.get("cancelBatches"));
 
             return "manage/batch-open";
 
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi khi lấy danh sách task đang thực hiện: " + e.getMessage());
+            model.addAttribute("error", "Lỗi khi lấy danh sách task đang mở: " + e.getMessage());
             return "error";
         }
     }
-
 
     @GetMapping("/completed")
     public String getCompeleTasks(
@@ -372,7 +415,7 @@ public class TasksController {
             Model model) {
 
         try {
-            // Lấy tất cả task đang DOING
+            // Lấy tất cả task đã COMPLETED
             List<Task> completedTasks = taskService.getCompletedTasks();
 
             // Áp dụng filter nếu có
@@ -382,37 +425,42 @@ public class TasksController {
                     .filter(task -> workerId == null || (task.getAssignedTo() != null && task.getAssignedTo().getAccountId() == workerId))
                     .collect(Collectors.toList());
 
-            // Nhóm task theo batch
-            Map<String, List<Task>> completedTasksByBatch = filteredCompletedTasks.stream()
-                    .filter(task -> task.getBatchId() != null && !task.getBatchId().isEmpty())
-                    .collect(Collectors.groupingBy(Task::getBatchId));
+            // Nhóm task theo batch và chỉ lấy batch có trạng thái COMPLETED
+            Map<String, List<Task>> completedTasksByBatch = new HashMap<>();
+            for (Task task : filteredCompletedTasks) {
+                if (task.getBatchId() != null && !task.getBatchId().isEmpty()) {
+                    String batchStatus = taskService.getBatchStatus(task.getBatchId());
+                    if ("COMPLETED".equals(batchStatus)) {
+                        completedTasksByBatch.computeIfAbsent(task.getBatchId(), k -> new ArrayList<>()).add(task);
+                    }
+                }
+            }
 
-            // Task đơn lẻ đang DOING
-            List<Task> singleDoingTasks = filteredCompletedTasks.stream()
+            // Task đơn lẻ đã COMPLETED
+            List<Task> singleCompletedTasks = filteredCompletedTasks.stream()
                     .filter(task -> task.getBatchId() == null || task.getBatchId().isEmpty())
                     .collect(Collectors.toList());
 
-            // Thống kê CHI TIẾT - giống như trong taskManagement
-            List<Task> allTasks = taskService.getAllTasks(); // Lấy tất cả task để thống kê
+            // Thống kê theo BATCH
+            Map<String, Long> batchStats = taskService.getBatchStats();
 
-            model.addAttribute("doingTasksByBatch", completedTasksByBatch);
-            model.addAttribute("singleDoingTasks", singleDoingTasks);
-            model.addAttribute("doingStats", taskService.getDoingTasksStats());
-            model.addAttribute("totalDoingTasks", completedTasks.size());
+            model.addAttribute("completedTasksByBatch", completedTasksByBatch);
+            model.addAttribute("singleCompletedTasks", singleCompletedTasks);
             model.addAttribute("typeFilter", taskType);
             model.addAttribute("priorityFilter", priority);
             model.addAttribute("workerFilter", workerId);
 
-            // THÊM CÁC THỐNG KÊ GIỐNG NHƯ TRONG TASK MANAGEMENT
-            model.addAttribute("totalTasks", allTasks.size());
-            model.addAttribute("openTasks", allTasks.stream().filter(t -> t.getStatus().equals("OPEN")).count());
-            model.addAttribute("doingTasks", allTasks.stream().filter(t -> t.getStatus().equals("DOING")).count());
-            model.addAttribute("completedTasks", allTasks.stream().filter(t -> t.getStatus().equals("COMPLETED")).count());
+            // CHỈ THÊM THỐNG KÊ THEO BATCH
+            model.addAttribute("totalBatches", batchStats.get("totalBatches"));
+            model.addAttribute("openBatches", batchStats.get("openBatches"));
+            model.addAttribute("doingBatches", batchStats.get("doingBatches"));
+            model.addAttribute("completedBatches", batchStats.get("completedBatches"));
+            model.addAttribute("cancelBatches", batchStats.get("cancelBatches"));
 
             return "manage/batch-completed";
 
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi khi lấy danh sách task đang thực hiện: " + e.getMessage());
+            model.addAttribute("error", "Lỗi khi lấy danh sách task đã hoàn thành: " + e.getMessage());
             return "error";
         }
     }
@@ -445,7 +493,14 @@ public class TasksController {
         model.addAttribute("batchId", batchId);
         return "manage/task-completed";
     }
-    // Xóa batch
+    @GetMapping("/batchCancel/{batchId}")
+    public String viewBatchDetailCancel(@PathVariable String batchId, Model model) {
+        List<Task> batchTasks = taskService.getTasksByBatchCancel(batchId);
+        model.addAttribute("batchTasks", batchTasks);
+        model.addAttribute("batchId", batchId);
+        return "manage/task-cancel";
+    }
+
 
     // Xóa batch
     @DeleteMapping("/batch/{batchId}")

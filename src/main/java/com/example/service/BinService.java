@@ -198,6 +198,11 @@ public class BinService {
         return R * c;
     }
 
+    public List<Bin> findAllByIds(List<Integer> ids) {
+        return binRepository.findAllByIds(ids);
+    }
+
+
 //    @Scheduled(fixedRate = 60000)
 //    public void checkInactiveBins() {
 //        List<Bin> allBins = binRepository.findAll();

@@ -1,5 +1,7 @@
 package com.example.model;
 
+import java.util.List;
+
 public class ReportRequest {
     private Integer userId;
     private Integer binId;
@@ -10,7 +12,9 @@ public class ReportRequest {
     private Double latitude;
     private Double longitude;
     private String status;
-    
+
+    private List<String> images;
+
     // Constructors
     public ReportRequest() {}
     
@@ -35,7 +39,15 @@ public class ReportRequest {
     public void setUserId(Integer userId) {
         this.userId = userId;
     }
-    
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
+
     public Integer getBinId() {
         return binId;
     }
@@ -115,6 +127,10 @@ public class ReportRequest {
                 '}';
     }
 }
+
+
+
+
 
 
 

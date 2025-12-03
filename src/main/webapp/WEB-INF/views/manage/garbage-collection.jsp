@@ -29,7 +29,7 @@
             <i class="fas fa-trash-alt me-1"></i> Thu gom
           </a>
           <a href="${pageContext.request.contextPath}/tasks/maintenance-management?type=maintain"
-             class="btn ${param.type == 'maintain' ? 'btn-primary' : 'btn-outline-primary'}">
+             class="btn ${type == 'maintain' ? 'btn-primary' : 'btn-outline-primary'}">
             <i class="fas fa-tools me-1"></i> Bảo trì
           </a>
         </div>
@@ -832,6 +832,28 @@
     filteredRows = Array.from(allRows);
     updateStatistics();
     displayPage();
+    // ⭐ Auto-select binId nếu có
+    const preBinId = "${binId}";
+    setTimeout(() => {
+      if (preBinId && preBinId !== "null" && preBinId !== "") {
+        const cb = document.querySelector('.bin-checkbox[value="' + preBinId + '"]');
+        if (cb) {
+          cb.checked = true;
+
+          // highlight row
+          cb.closest("tr").classList.add("row-selected");
+
+          // highlight marker
+          highlightMarkerForBin(preBinId, true);
+
+          // update UI (hiện selection bar & badge)
+          updateSelectionUI();
+
+          // scroll đến dòng
+          cb.closest("tr").scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    }, 500);
   });
 </script>
 

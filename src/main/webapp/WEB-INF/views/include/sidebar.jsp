@@ -40,7 +40,7 @@
               </a>
             </li>
             <li>
-              <a href="${pageContext.request.contextPath}/tasks/maintenance-management"
+              <a href="${pageContext.request.contextPath}/tasks/maintenance-management?type=maintain"
                  class="dropdown-item text-dark d-flex align-items-center sidebar-link"
                  data-path="/tasks/maintenance-management">
                 <span class="me-2">🔧</span>
@@ -72,20 +72,21 @@
         <a href="${pageContext.request.contextPath}/reports"
            class="nav-link text-dark d-flex align-items-center py-3 px-3 rounded sidebar-link"
            data-path="/reports">
-          <span class="me-3 fs-5">📈</span>
+          <span class="me-3 fs-5">📑</span>
           <span class="fw-semibold">Báo cáo</span>
         </a>
       </li>
 
       <li class="nav-item mb-2">
-        <a href="${pageContext.request.contextPath}/users"
-           class="nav-link text-dark d-flex align-items-center py-3 px-3 rounded sidebar-link"
-           data-path="/users">
-          <span class="me-3 fs-5">👥</span>
-          <span class="fw-semibold">Người dùng</span>
+        <a href="${pageContext.request.contextPath}/feedbacks"
+           class="nav-link text-white d-flex align-items-center py-3 px-3 rounded sidebar-link"
+           data-path="/feedbacks">
+          <span class="me-3 fs-5">🗂️</span>
+          <span class="fw-semibold">Phản Hồi</span>
         </a>
       </li>
 
+<<<<<<< phuna
       <li class="nav-item mb-2">
         <a href="${pageContext.request.contextPath}/settings"
            class="nav-link text-dark d-flex align-items-center py-3 px-3 rounded sidebar-link"
@@ -104,6 +105,8 @@
         </a>
       </li>
 
+=======
+>>>>>>> main
     </ul>
   </nav>
 

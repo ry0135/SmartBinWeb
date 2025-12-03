@@ -139,7 +139,7 @@
                 <div class="card-body">
                     <!-- Hiển thị Batch đã hủy -->
                     <div id="batchTasksSection">
-                        <c:forEach var="batch" items="${tasksByBatch}">
+                        <c:forEach var="batch" items="${canceltasksByBatch}">
                             <div class="card mb-3 batch-card" data-batch-card>
                                 <div class="card-body">
                                     <div class="row">
@@ -313,7 +313,7 @@
                     </c:if>
 
                     <!-- Hiển thị khi không có task nào -->
-                    <c:if test="${empty tasksByBatch and empty singleTasks}">
+                    <c:if test="${empty canceltasksByBatch and empty singleTasks}">
                         <div class="text-center py-5" id="emptyState">
                             <i class="fas fa-times-circle fa-3x text-muted mb-3"></i>
                             <h5 class="text-muted">Không có task nào đã hủy</h5>
@@ -626,7 +626,7 @@
 
     // ==================== CÁC HÀM TIỆN ÍCH ====================
     function viewBatchDetail(batchId) {
-        window.location.href = '${pageContext.request.contextPath}/tasks/batch/' + batchId;
+        window.location.href = '${pageContext.request.contextPath}/tasks/batchCancel/' + batchId;
     }
 
     function viewTaskDetail(taskId) {

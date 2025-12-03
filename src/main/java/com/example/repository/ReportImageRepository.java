@@ -11,7 +11,8 @@ public interface ReportImageRepository extends JpaRepository<ReportImage, Intege
     
     // Tìm hình ảnh theo ReportID
     List<ReportImage> findByReportIdOrderByCreatedAtDesc(Integer reportId);
-    
+
+    List<ReportImage> findByReportId(Integer reportId);
     // Đếm số hình ảnh theo ReportID
     long countByReportId(Integer reportId);
 }

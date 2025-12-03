@@ -17,14 +17,68 @@
         <!-- Header -->
         <div class="bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
             <h1 class="h4 mb-0 text-dark">Dashboard Quản lý Thùng Rác</h1>
-            <div class="d-flex align-items-center">
-                <button class="btn btn-outline-secondary position-relative">
+            <div class="d-flex align-items-center position-relative">
+
+                <!-- Nút chuông -->
+                <button id="btnNotification" class="btn btn-outline-secondary position-relative">
                     🔔
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        3
-                    </span>
+                    <c:if test="${count > 0}">
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    ${count}
+            </span>
+                    </c:if>
                 </button>
+
+                <!-- DROPDOWN THÔNG BÁO -->
+                <div id="notificationDropdown"
+                     class="position-absolute bg-white shadow rounded p-3"
+                     style="top: 50px; right: 0; width: 360px; display: none; z-index: 999;">
+
+                    <!-- Tabs -->
+                    <div class="d-flex border-bottom mb-2">
+                        <button id="tab-all" class="btn btn-link px-2 me-2 active" onclick="showTab('all')">Tất cả</button>
+                        <button id="tab-unread" class="btn btn-link px-2" onclick="showTab('unread')">Chưa đọc</button>
+                        <button id="tab-read" class="btn btn-link px-2" onclick="showTab('read')">Đã đọc</button>
+                    </div>
+
+                    <!-- Danh sách thông báo -->
+                    <div id="notificationList">
+                        <c:forEach var="noti" items="${notifications}">
+                            <div class="d-flex align-items-start py-2 border-bottom noti-item"
+                                 data-read="${noti.read}">
+
+                                <!-- Icon loại -->
+                                <div class="me-2">
+                                    <c:choose>
+                                        <c:when test="${noti.type == 'INFO'}">
+                                            <span class="badge bg-primary">i</span>
+                                        </c:when>
+                                        <c:when test="${noti.type == 'WARNING'}">
+                                            <span class="badge bg-warning text-dark">!</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge bg-secondary">*</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+
+                                <!-- Nội dung -->
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">${noti.title}</div>
+                                    <div class="text-muted small">${noti.message}</div>
+                                    <div class="text-muted small">${noti.createdAt}</div>
+                                </div>
+
+                                <!-- Chấm xanh -->
+                                <c:if test="${noti.read == false}">
+                                    <span class="ms-2" style="color:#0d6efd;">●</span>
+                                </c:if>
+                            </div>
+                        </c:forEach>
+                    </div>
+                </div>
             </div>
+
         </div>
 
         <div class="p-4">
@@ -150,9 +204,7 @@
 
                             <!-- Quick Actions -->
                             <div class="d-grid gap-2">
-                                <button class="btn btn-success btn-sm" onclick="exportReport()">
-                                    📊 Xuất báo cáo
-                                </button>
+
                                 <button class="btn btn-outline-primary btn-sm" onclick="focusOnResults()">
                                     📍 Xem bản đồ
                                 </button>
@@ -265,7 +317,7 @@
 
 <script>
     // ====================== REALTIME SOCKET ======================
-    var socket = new SockJS('${pageContext.request.contextPath}/ws-bin-sockjs');
+    var socket = new SockJS('https://smartbin-vn.duckdns.org/ws-bin-sockjs');
     var stompClient = Stomp.over(socket);
 
     stompClient.connect({}, function (frame) {
@@ -285,6 +337,7 @@
             removeBinMarker(bin.binID);
         });
     });
+
 
     // ======= Cập nhật trong bảng =======
     function updateBinRow(bin) {
@@ -336,6 +389,7 @@
     }
 
     // ======= Cập nhật marker bản đồ =======
+    // ======= Cập nhật marker bản đồ =======
     function updateBinMarker(bin) {
         if (!markers || markers.length === 0) return;
 
@@ -346,20 +400,40 @@
             marker.bin.lat = bin.latitude;
             marker.bin.lng = bin.longitude;
             marker.bin.address = bin.street;
+            // 🎯 THÊM CẬP NHẬT CITY VÀ WARD
+            marker.bin.city = bin.ward && bin.ward.province ? bin.ward.province.provinceName : '';
+            marker.bin.ward = bin.ward ? bin.ward.wardName : '';
+
             marker.setLngLat([bin.longitude, bin.latitude]);
             marker.getElement().src = getBinIcon(bin.currentFill, bin.status);
+
+            // 🎯 QUAN TRỌNG: Cập nhật nội dung popup
+            var popupHtml =
+                "<b>Mã:</b> " + bin.binCode +
+                "<br><b>Địa chỉ:</b> " + bin.street +
+                "<br><b>Đầy:</b> " + bin.currentFill + "%" +
+                "<br><b>Trạng thái:</b> " + (bin.status == 1 ? "Online" : "Offline") +
+                "<br><b>Cập nhật:</b> " + new Date().toLocaleString() +
+                "<br><div id='predict-" + bin.binID + "' class='mt-2 text-muted'>⚡ Bấm vào để dự đoán...</div>";
+
+            marker.setPopup(new vietmapgl.Popup({ offset: 25 }).setHTML(popupHtml));
+
         } else {
+            // Code thêm marker mới (giữ nguyên)
             var el = document.createElement("img");
             el.src = getBinIcon(bin.currentFill, bin.status);
             el.style.width = "32px";
             el.style.height = "32px";
 
-            var popup = new vietmapgl.Popup({ offset: 25 }).setHTML(
+            var popupHtml =
                 "<b>Mã:</b> " + bin.binCode +
                 "<br><b>Địa chỉ:</b> " + bin.street +
                 "<br><b>Đầy:</b> " + bin.currentFill + "%" +
-                "<br><b>Trạng thái:</b> " + (bin.status == 1 ? "Online" : "Offline")
-            );
+                "<br><b>Trạng thái:</b> " + (bin.status == 1 ? "Online" : "Offline") +
+                "<br><b>Cập nhật:</b> " + new Date().toLocaleString() +
+                "<br><div id='predict-" + bin.binID + "' class='mt-2 text-muted'>⚡ Bấm vào để dự đoán...</div>";
+
+            var popup = new vietmapgl.Popup({ offset: 25 }).setHTML(popupHtml);
 
             var newMarker = new vietmapgl.Marker({ element: el })
                 .setLngLat([bin.longitude, bin.latitude])
@@ -367,6 +441,7 @@
                 .addTo(map);
 
             newMarker.bin = {
+                id: bin.binID,
                 code: bin.binCode,
                 binID: bin.binID,
                 lat: bin.latitude,
@@ -436,6 +511,7 @@
         }
     }
 
+    // 🌍 Khởi tạo bản đồ VietMap
     var map = new vietmapgl.Map({
         container: "map",
         style: "https://maps.vietmap.vn/maps/styles/tm/style.json?apikey=ecdbd35460b2d399e18592e6264186757aaaddd8755b774c",
@@ -445,38 +521,45 @@
 
     map.addControl(new vietmapgl.NavigationControl());
 
+    // 📦 Dữ liệu thùng rác render từ backend
     var bins = [
         <c:forEach var="bin" items="${bins}" varStatus="loop">
         {
+            id: '${bin.binID}',
             code: '${bin.binCode}',
             lat: ${bin.latitude},
             lng: ${bin.longitude},
             fullness: ${bin.currentFill != null ? bin.currentFill : 0},
             address: '${bin.street}, ${bin.ward.wardName}, ${bin.ward.province.provinceName}',
             updated: '${bin.lastUpdated}',
+            status: ${bin.status},
+            // 🎯 THÊM 2 DÒNG NÀY
             city: '${bin.ward.province.provinceName}',
-            ward: '${bin.ward.wardName}',
-            status: '${bin.status}'
+            ward: '${bin.ward.wardName}'
         }<c:if test="${!loop.last}">,</c:if>
         </c:forEach>
     ];
 
     var markers = [];
 
+    // 🧠 Khi bản đồ load xong → thêm markers
     map.on('load', function() {
         bins.forEach(function(bin) {
-            var el = document.createElement("img");
+            const el = document.createElement("img");
             el.src = getBinIcon(bin.fullness, bin.status);
             el.style.width = "32px";
             el.style.height = "32px";
 
-            var popup = new vietmapgl.Popup({ offset: 25 }).setHTML(
+            // 🧱 Popup HTML đơn giản hơn (cộng chuỗi)
+            var popupHtml =
                 "<b>Mã:</b> " + bin.code +
                 "<br><b>Địa chỉ:</b> " + bin.address +
                 "<br><b>Đầy:</b> " + bin.fullness + "%" +
                 "<br><b>Trạng thái:</b> " + (bin.status == 1 ? "Online" : "Offline") +
-                "<br><b>Cập nhật:</b> " + bin.updated
-            );
+                "<br><b>Cập nhật:</b> " + new Date(bin.updated).toLocaleString() +
+                "<br><div id='predict-" + bin.id + "' class='mt-2 text-muted'>⚡ Bấm vào để dự đoán...</div>";
+
+            var popup = new vietmapgl.Popup({ offset: 25 }).setHTML(popupHtml);
 
             var marker = new vietmapgl.Marker({ element: el })
                 .setLngLat([bin.lng, bin.lat])
@@ -485,9 +568,69 @@
 
             marker.bin = bin;
             markers.push(marker);
+
+            // 💡 Khi người dùng click vào marker → popup mở → gọi AI Predict
+            marker.getElement().addEventListener("click", function() {
+                setTimeout(() => {
+                    // Đảm bảo phần tử #predict-x đã render trong popup
+                    const box = document.getElementById("predict-" + bin.id);
+                    if (!box) return;
+                    box.innerHTML = "⏳ Đang dự đoán...";
+                    if (bin.status === 1 && bin.fullness < 100) {
+                        autoPredictBin(bin, marker, el);
+                    } else {
+                        box.innerHTML = "⚠️ Offline hoặc đã đầy";
+                    }
+                }, 300); // chờ popup render
+            });
         });
     });
 
+
+    // 🔮 Hàm gọi AI Predict
+    async function autoPredictBin(bin, marker, iconElement) {
+        const box = document.getElementById("predict-" + bin.id);
+        if (!box) return;
+
+        try {
+            const res = await fetch("<%=request.getContextPath()%>/api/ai/predict?binId=" + bin.id + "&currentFill=" + bin.fullness);
+            const data = await res.json();
+            console.log("📡 AI response:", data);
+
+            if (data.status === "success") {
+                var msg = "🧠 <b>Đầy vào:</b> " + data.predicted_full_time +
+                    "<br>⏰ Còn ~<b>" + data.hours_left.toFixed(1) + "</b> giờ";
+                var color = "text-success";
+                var danger = false;
+
+                if (data.hours_left < 3) {
+                    msg = "⚠️ <b>Sắp đầy trong " + data.hours_left.toFixed(1) + "h!</b><br>🧹 Cần thu gom sớm";
+                    color = "text-danger";
+                    danger = true;
+                }
+
+                box.className = color;
+                box.innerHTML = msg;
+
+                // 💡 Nhấp nháy nếu sắp đầy
+                if (danger) {
+                    let blink = true;
+                    setInterval(() => {
+                        iconElement.style.opacity = blink ? "0.5" : "1";
+                        blink = !blink;
+                    }, 700);
+                }
+
+            } else {
+                box.className = "text-warning";
+                box.innerHTML = "⚠️ " + (data.message || "Không thể dự đoán");
+            }
+        } catch (e) {
+            console.error("❌ AI lỗi:", e);
+            box.className = "text-danger";
+            box.innerHTML = "❌ Không thể kết nối tới AI server";
+        }
+    }
     // ==================== PHÂN TRANG ====================
     var currentPage = 1;
     var itemsPerPage = 25;
@@ -701,5 +844,132 @@
         }
     }
 </script>
+
+<script>
+    document.getElementById("btnNotification").addEventListener("click", function () {
+        const dropdown = document.getElementById("notificationDropdown");
+        dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+    });
+
+    // Ẩn dropdown khi click ra ngoài
+    document.addEventListener("click", function(e) {
+        const btn = document.getElementById("btnNotification");
+        const dropdown = document.getElementById("notificationDropdown");
+
+        if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = "none";
+        }
+    });
+
+</script>
+<script>
+    window.showTab = function(tab) {
+        const items = document.querySelectorAll(".noti-item");
+        items.forEach(item => {
+            const readAttr = item.getAttribute("data-read");
+            const isRead = readAttr === "true"; // chuyển string sang boolean
+            if (tab === 'all') {
+                item.style.display = 'flex';
+            } else if (tab === 'unread') {
+                item.style.display = !isRead ? 'flex' : 'none';
+            }
+        });
+
+        // Cập nhật active button
+        const buttons = document.querySelectorAll("#notificationDropdown .btn-link");
+        buttons.forEach(b => b.classList.remove("active"));
+        if(tab === 'all') buttons[0].classList.add("active");
+        else buttons[1].classList.add("active");
+    }
+</script>
+<script>
+    function showTab(tab) {
+        console.log("TAB CLICKED:", tab);
+
+        const items = document.querySelectorAll(".noti-item");
+
+        // Xóa inline CSS trước (để tránh lỗi hiển thị)
+        items.forEach(function(item) {
+            console.log("BEFORE:", item.style.display);  // ← Log này bạn đang cần
+            item.style.display = "";
+        });
+
+        // Lọc theo trạng thái
+        items.forEach(function(item) {
+            let readValue = (item.getAttribute("data-read") || "")
+                .trim().toLowerCase();
+
+            const isRead = (readValue === "true" || readValue === "1");
+
+            if (tab === "all") {
+                item.style.display = "flex";
+            } else if (tab === "unread") {
+                item.style.display = isRead ? "none" : "flex";
+            } else if (tab === "read") {
+                item.style.display = isRead ? "flex" : "none";
+            }
+
+            console.log("AFTER:", tab, "| read =", readValue, "| isRead =", isRead, "| final display =", item.style.display);
+        });
+
+        // Active nút tab
+        document.querySelectorAll("#notificationDropdown .btn-link")
+            .forEach(btn => btn.classList.remove("active"));
+
+        const activeBtn = document.querySelector("#tab-" + tab);
+        if (activeBtn) activeBtn.classList.add("active");
+    }
+</script>
+
+<script>
+    stompClient.subscribe('/topic/report-updates', function(message) {
+        var report = JSON.parse(message.body);
+        console.log("🔔 Báo cáo mới:", report);
+
+        showRealtimeToast("📢 Báo cáo mới",
+            "Mã thùng: " + report.binId + " — Nội dung: " + report.description);
+    });
+
+
+    function showRealtimeToast(title, message) {
+        const container = document.getElementById("realtime-toast-container");
+
+        const toast = document.createElement("div");
+        toast.style = `
+        background: #323232;
+        color: white;
+        padding: 12px 18px;
+        margin-top: 10px;
+        border-radius: 8px;
+        box-shadow: 0px 3px 8px rgba(0,0,0,0.3);
+        font-family: Arial;
+        min-width: 260px;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    `;
+
+        toast.innerHTML = `
+        <strong>${title}</strong><br>
+        <span style="font-size: 14px;">${message}</span>
+    `;
+
+        container.appendChild(toast);
+
+        // Hiệu ứng fade in
+        setTimeout(() => {
+            toast.style.opacity = "1";
+        }, 50);
+
+        // Tự biến mất sau 4 giây
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            setTimeout(() => toast.remove(), 400);
+        }, 4000);
+    }
+
+</script>
+
+<div id="realtime-toast-container"
+     style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 </body>
 </html>

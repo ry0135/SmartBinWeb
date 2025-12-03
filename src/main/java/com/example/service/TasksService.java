@@ -1,12 +1,8 @@
 package com.example.service;
 
 import com.example.dto.TaskSummaryDTO;
-import com.example.model.Account;
-import com.example.model.Bin;
-import com.example.model.Task;
-import com.example.repository.AccountRepository;
-import com.example.repository.BinRepository;
-import com.example.repository.TasksRepository;
+import com.example.model.*;
+import com.example.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,35 +24,47 @@ public class TasksService {
     private AccountRepository accountRepository;
 
     @Autowired
+    private NotificationRepository notificationRepository;
+    @Autowired
     private AccountService accountService;
 
+    @Autowired
+    private WardService wardService;
 
     @Autowired
     private FcmService fcmService;
     @Autowired
     private BinRepository binRepository;
 
+    @Autowired
+    private ReportRepository reportRepository;
+
     // Giao nhiều task cùng lúc
     @Transactional
     public List<Task> assignMultipleTasks(List<Integer> binIds, int workerId,
-                                          String taskType, int priority, String notes) throws Exception {
+                                          String taskType, int priority, String notes,
+                                          int senderId) throws Exception {
 
         Account worker = accountRepository.findById(workerId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy worker với ID = " + workerId));
+        List<Report> reports = reportRepository.findFullOrOverloadReports(binIds);
 
-        // Tạo batch ID duy nhất
+        if (!reports.isEmpty()) {
+            List<Integer> reportIds = reports.stream()
+                    .map(Report::getReportId)
+                    .collect(Collectors.toList());
+
+            // 2) chuyển sang IN_PROGRESS
+            reportRepository.updateReportsToInProgress(reportIds,workerId);
+        }
         String batchId = "BATCH_" + System.currentTimeMillis() + "_" + new Random().nextInt(1000);
-
         List<Task> assignedTasks = new ArrayList<>();
 
         for (Integer binId : binIds) {
             Bin bin = binRepository.findById(binId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy bin với ID = " + binId));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy bin ID = " + binId));
 
-            // Kiểm tra nếu bin đã có task đang mở
-            if (taskRepository.countOpenTasksByBin(binId) > 0) {
-                continue; // Bỏ qua bin này
-            }
+            if (taskRepository.countOpenTasksByBin(binId) > 0) continue;
 
             Task task = new Task();
             task.setBin(bin);
@@ -70,23 +78,38 @@ public class TasksService {
             assignedTasks.add(taskRepository.save(task));
         }
 
+
         if (!assignedTasks.isEmpty()) {
+
+            int count = assignedTasks.size();
+
+            Notification noti = new Notification();
+            noti.setReceiverId(workerId);
+            noti.setSenderId(senderId);
+            noti.setTitle("Bạn có nhiệm vụ mới");
+            noti.setMessage("Bạn được giao nhiệm vụ:  " + notes );
+            noti.setType("TASK");
+            noti.setRead(false);
+            noti.setCreatedAt(LocalDateTime.now());
+
+            notificationRepository.save(noti);
+
+
             String token = accountService.getFcmTokenByWorkerId(workerId);
             if (token != null && !token.isEmpty()) {
-                String title = "Nhiệm vụ mới được giao";
-                String body = notes;
-
-                fcmService.sendNotification(token, title, body,batchId);
+                String body = "Bạn được giao nhiệm vụ thu gom " + count + " thùng.";
+                fcmService.sendNotification(token, "Nhiệm vụ mới", body, batchId);
             }
         }
 
         return assignedTasks;
     }
 
+
     // Giao task đơn lẻ (giữ lại cho tương thích)
-    public Task assignTask(int binId, int workerId, String taskType, int priority, String notes) throws Exception {
+    public Task assignTask(int binId, int workerId, String taskType, int priority, String notes, int senderID) throws Exception {
         List<Integer> binIds = Collections.singletonList(binId);
-        List<Task> tasks = assignMultipleTasks(binIds, workerId, taskType, priority, notes);
+        List<Task> tasks = assignMultipleTasks(binIds, workerId, taskType, priority, notes,senderID);
         return tasks.isEmpty() ? null : tasks.get(0);
     }
 
@@ -102,6 +125,9 @@ public class TasksService {
     }
     public List<Task> getTasksByBatchComplete(String batchId) {
         return taskRepository.findByBatchIdCompeleted(batchId);
+    }
+    public List<Task> getTasksByBatchCancel(String batchId) {
+        return taskRepository.findByBatchIdCancel(batchId);
     }
 
     // Lấy danh sách nhân viên có thể giao task
@@ -119,8 +145,13 @@ public class TasksService {
         return workers;
     }
     public List<Account> getAvailableWorkersMaintenance(int wardID) {
-        List<Account> workers = accountRepository.findWorkersByWardandrole4(wardID);
-
+        int provinceId = wardService.getProvinceId(wardID);
+        List<Account> workers = accountRepository.findWorkersByWardAndProvince(wardID,provinceId);
+        workers.sort((a, b) -> {
+            boolean aMatch = a.getWardID() == wardID;
+            boolean bMatch = b.getWardID() == wardID;
+            return Boolean.compare(!aMatch, !bMatch); // ưu tiên ward ở trên
+        });
         Map<Integer, Integer> workerTaskCount = new HashMap<>();
         for (Account w : workers) {
             int count = taskRepository.countOpenTasksByWorker(w.getAccountId());
@@ -281,10 +312,11 @@ public class TasksService {
     @Autowired
     private FirebaseStorageService firebaseStorageService;
 
-    public String completeTask(Integer taskId, Double lat, Double lng, MultipartFile image) throws IOException {
+    public String completeTask(Integer taskId, Double lat, Double lng, MultipartFile image, double collectedVolume) throws IOException {
         Optional<Task> optionalTask = taskRepository.findById(taskId);
 
         Task task = optionalTask.get();
+        int binId = task.getBin().getBinID();
 
         //  Upload ảnh lên Firebase
         String imageUrl = firebaseStorageService.uploadFile(image, "/task/collect");
@@ -294,8 +326,16 @@ public class TasksService {
         task.setCompletedAt(new Date());
         task.setCompletedLat(lat);
         task.setCompletedLng(lng);
+        task.setCollectedVolume(collectedVolume);
         task.setStatus("COMPLETED");
         taskRepository.save(task);
+
+
+        reportRepository.resolveReportsByBin(
+                task.getBin().getBinID(),
+                task.getAssignedTo().getAccountId(),
+                task.getTaskID()
+        );
 
         return " Hoàn thành nhiệm vụ thành công!";
     }
@@ -326,6 +366,90 @@ public class TasksService {
             String title = "Batch được cập nhật";
             String body = "Batch " + batchId + " đã được cập nhật thông tin";
             fcmService.sendNotification(token, title, body, batchId);
+        }
+    }
+    // Thêm vào TasksService.java
+    public Map<String, Long> getBatchStats() {
+        List<Task> allTasks = taskRepository.findAll();
+
+        Map<String, Long> batchStats = new HashMap<>();
+
+        // Lấy tất cả batch ID duy nhất
+        List<String> allBatchIds = allTasks.stream()
+                .filter(task -> task.getBatchId() != null && !task.getBatchId().isEmpty())
+                .map(Task::getBatchId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // Tổng số batch
+        batchStats.put("totalBatches", (long) allBatchIds.size());
+
+        // Đếm batch theo từng trạng thái
+        long openBatches = 0;
+        long doingBatches = 0;
+        long completedBatches = 0;
+        long cancelBatches = 0;
+
+        for (String batchId : allBatchIds) {
+            List<Task> batchTasks = taskRepository.findByBatchId(batchId);
+            if (!batchTasks.isEmpty()) {
+                // Đếm số lượng task theo từng trạng thái trong batch
+                long openCount = batchTasks.stream().filter(t -> "OPEN".equals(t.getStatus())).count();
+                long doingCount = batchTasks.stream().filter(t -> "DOING".equals(t.getStatus())).count();
+                long completedCount = batchTasks.stream().filter(t -> "COMPLETED".equals(t.getStatus())).count();
+                long cancelCount = batchTasks.stream().filter(t -> "CANCEL".equals(t.getStatus())).count();
+                long totalTasks = batchTasks.size();
+
+                // Logic xác định trạng thái batch
+                if (cancelCount > 0) {
+                    // Nếu có task bị cancel, batch là CANCEL
+                    cancelBatches++;
+                } else if (doingCount > 0) {
+                    // Nếu có ít nhất 1 task đang DOING, batch là DOING (ưu tiên cao nhất)
+                    doingBatches++;
+                } else if (completedCount == totalTasks) {
+                    // Chỉ khi TẤT CẢ task đều COMPLETED, batch mới là COMPLETED
+                    completedBatches++;
+                } else if (openCount > 0) {
+                    // Nếu có task OPEN và không có task nào DOING/CANCEL
+                    openBatches++;
+                }
+            }
+        }
+
+        batchStats.put("openBatches", openBatches);
+        batchStats.put("doingBatches", doingBatches);
+        batchStats.put("completedBatches", completedBatches);
+        batchStats.put("cancelBatches", cancelBatches);
+
+        return batchStats;
+    }
+
+    // Thêm phương thức để lấy trạng thái của một batch cụ thể
+    public String getBatchStatus(String batchId) {
+        List<Task> batchTasks = taskRepository.findByBatchId(batchId);
+        if (batchTasks.isEmpty()) {
+            return "UNKNOWN";
+        }
+
+        // Đếm số lượng task theo từng trạng thái
+        long openCount = batchTasks.stream().filter(t -> "OPEN".equals(t.getStatus())).count();
+        long doingCount = batchTasks.stream().filter(t -> "DOING".equals(t.getStatus())).count();
+        long completedCount = batchTasks.stream().filter(t -> "COMPLETED".equals(t.getStatus())).count();
+        long cancelCount = batchTasks.stream().filter(t -> "CANCEL".equals(t.getStatus())).count();
+        long totalTasks = batchTasks.size();
+
+        // Logic xác định trạng thái batch
+        if (cancelCount > 0) {
+            return "CANCEL";
+        } else if (doingCount > 0) {
+            return "DOING";
+        } else if (completedCount == totalTasks) {
+            return "COMPLETED";
+        } else if (openCount > 0) {
+            return "OPEN";
+        } else {
+            return "UNKNOWN";
         }
     }
 }

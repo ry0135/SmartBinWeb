@@ -86,4 +86,7 @@ public interface BinRepository extends JpaRepository<Bin, Integer> {
 
 
 
+
+    @Query("SELECT b FROM Bin b WHERE b.binID IN :ids")
+    List<Bin> findAllByIds(@Param("ids") List<Integer> ids);
 }

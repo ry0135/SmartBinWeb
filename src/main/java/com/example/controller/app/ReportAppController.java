@@ -1,10 +1,7 @@
 package com.example.controller.app;
 
 import com.example.dto.ReportResponseDTO;
-import com.example.model.Report;
-import com.example.model.ReportImage;
-import com.example.model.ReportStatusHistory;
-import com.example.model.ApiResponse;
+import com.example.model.*;
 import com.example.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +25,8 @@ public class ReportAppController {
     
     @Autowired
     private ReportService reportService;
+
+
     
     // Tạo báo cáo mới từ app
     @PostMapping
@@ -39,9 +38,10 @@ public class ReportAppController {
             report.setReportType(request.getReportType());
             report.setDescription(request.getDescription());
             report.setStatus("RECEIVED");
-            
-            Report createdReport = reportService.createReport(report);
-            
+
+            Report createdReport = reportService.createReport(report, request.getImages());
+
+
             return ResponseEntity.ok(ApiResponse.success("Báo cáo đã được tạo thành công", createdReport));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
@@ -208,32 +208,5 @@ public class ReportAppController {
         }
     }
     
-    // Inner class cho request
-    public static class ReportRequest {
-        private Integer binId;
-        private Integer accountId;
-        private String reportType;
-        private String description;
-        private Double latitude;
-        private Double longitude;
-        
-        // Getters and setters
-        public Integer getBinId() { return binId; }
-        public void setBinId(Integer binId) { this.binId = binId; }
-        
-        public Integer getAccountId() { return accountId; }
-        public void setAccountId(Integer accountId) { this.accountId = accountId; }
-        
-        public String getReportType() { return reportType; }
-        public void setReportType(String reportType) { this.reportType = reportType; }
-        
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-        
-        public Double getLatitude() { return latitude; }
-        public void setLatitude(Double latitude) { this.latitude = latitude; }
-        
-        public Double getLongitude() { return longitude; }
-        public void setLongitude(Double longitude) { this.longitude = longitude; }
-    }
+
 }

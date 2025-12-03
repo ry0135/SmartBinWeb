@@ -96,9 +96,15 @@
   <div class="card shadow detail-card">
     <div class="card-header text-white d-flex justify-content-between align-items-center">
       <span>📋 Chi tiết báo cáo #${report.reportId}</span>
-      <a href="${pageContext.request.contextPath}/edit/${report.reportId}" class="btn btn-warning btn-modern text-white">
-        Giao nhiệm vụ
-      </a>
+<%--      <a href="${pageContext.request.contextPath}/edit/${report.reportId}" class="btn btn-warning btn-modern text-white">--%>
+<%--        Giao nhiệm vụ--%>
+<%--      </a>--%>
+      <c:if test="${report.status == 'RECEIVED'}">
+        <a href="${pageContext.request.contextPath}/tasks/task-management?reportId=${report.reportId}&binId=${report.bin.binID}"
+           class="btn btn-warning btn-modern text-white">
+          Giao nhiệm vụ
+        </a>
+      </c:if>
     </div>
 
     <div class="card-body">
@@ -114,13 +120,13 @@
           <td>
             <c:choose>
               <c:when test="${report.status == 'RECEIVED'}">
-                <span class="badge badge-status badge-secondary">Chờ xử lý</span>
+                <span class="badge badge-status badge-secondary">CHỜ XỬ LÝ</span>
               </c:when>
               <c:when test="${report.status == 'IN_PROGRESS'}">
-                <span class="badge badge-status badge-warning">Đang xử lý</span>
+                <span class="badge badge-status badge-warning">ĐANG XỬ LÝ</span>
               </c:when>
               <c:when test="${report.status == 'RESOLVED'}">
-                <span class="badge badge-status badge-success">Hoàn thành</span>
+                <span class="badge badge-status badge-success">Đã HOÀN THÀNH</span>
               </c:when>
               <c:otherwise>
                 <span class="badge badge-status badge-secondary">Không xác định</span>
@@ -129,7 +135,7 @@
           </td>
         </tr>
 
-        <tr><th>Người xử lý</th><td>${report.assignedTo}</td></tr>
+        <tr><th>Người xử lý</th><td>${report.assignedAccount.fullName}</td></tr>
         <tr><th>Ngày tạo</th><td>${report.createdAt}</td></tr>
         <tr><th>Ngày cập nhật</th><td>${report.updatedAt}</td></tr>
         <tr><th>Ngày hoàn thành</th><td>${report.resolvedAt}</td></tr>

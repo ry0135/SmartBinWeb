@@ -91,13 +91,18 @@ public class ReportService {
 
 
     // Tạo báo cáo mới
-    public Report createReport(Report report) {
+    public Report createReport(Report report, List<String> imageUrls) {
         report.setCreatedAt(LocalDateTime.now());
         report.setUpdatedAt(LocalDateTime.now());
         report.setStatus("RECEIVED");
 
         Report savedReport = reportRepository.save(report);
-
+        if (imageUrls != null) {
+            for (String url : imageUrls) {
+                ReportImage image = new ReportImage(savedReport.getReportId(), url);
+                reportImageRepository.save(image);
+            }
+        }
         // Tạo lịch sử trạng thái
         createStatusHistory(savedReport.getReportId(), "RECEIVED", "Báo cáo được tạo", report.getAccountId());
 
@@ -126,7 +131,8 @@ public class ReportService {
         return null;
     }
     public ReportResponseDTO convertToDTO(Report report) {
-        // 1. Tạo DTO với các dữ liệu cơ bản từ Report (Code cũ của bạn)
+
+        // 1. Mapping thông tin cơ bản
         ReportResponseDTO dto = new ReportResponseDTO(
                 report.getReportId(),
                 report.getBinId(),
@@ -139,10 +145,8 @@ public class ReportService {
                 report.getResolvedAt()
         );
 
-        // 2. Logic lấy Bin (Code cũ của bạn - giữ nguyên)
-        // 🔥 Lấy bin trực tiếp từ DB (không dùng Lazy Proxy)
+        // 2. Lấy bin
         Bin bin = binRepository.findById(report.getBinId()).orElse(null);
-
         if (bin != null) {
             dto.setBinCode(bin.getBinCode());
             dto.setBinAddress(
@@ -152,15 +156,22 @@ public class ReportService {
             );
         }
 
-        // 3. 🔥 LOGIC MỚI: Kiểm tra xem Report này đã có Feedback chưa
-        // Hàm này sẽ chạy câu lệnh SQL kiểm tra trong bảng Feedback
+        // 3. Kiểm tra feedback
         boolean isReviewed = feedbackRepository.existsByReportId(report.getReportId());
-
-        // Gán kết quả vào DTO
         dto.setReviewed(isReviewed);
+
+        // 4. ⭐ LẤY HÌNH ẢNH CỦA REPORT
+        List<ReportImage> images = reportImageRepository.findByReportId(report.getReportId());
+
+        dto.setImages(
+                images.stream()
+                        .map(ReportImage::getImageUrl)
+                        .toList()
+        );
 
         return dto;
     }
+
 
 
     // Tạo lịch sử trạng thái
@@ -255,6 +266,8 @@ public class ReportService {
     }
 
 
-
+    public Report getLatestReportByBinId(int binId) {
+        return reportRepository.findLatestFullOrOverload(binId);
+    }
 }
 

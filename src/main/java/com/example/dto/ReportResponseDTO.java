@@ -2,8 +2,9 @@ package com.example.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import javax.persistence.EntityListeners;
 import java.time.LocalDateTime;
-
+import java.util.List;
 public class ReportResponseDTO {
     private Integer reportId;
     private Integer binId;
@@ -17,6 +18,8 @@ public class ReportResponseDTO {
     private String status;
 
     private boolean isReviewed;
+
+    private List<String> images;
 
     // Getter và Setter
     public boolean isReviewed() {
@@ -50,7 +53,13 @@ public class ReportResponseDTO {
         this.updatedAt = updatedAt;
         this.resolvedAt = resolvedAt;
     }
+    public List<String> getImages() {
+        return images;
+    }
 
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
     public ReportResponseDTO(Integer reportId, Integer binId, Integer accountId,
                              String reportType, String description, String status,
                              LocalDateTime createdAt) {

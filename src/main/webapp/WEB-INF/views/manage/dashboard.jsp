@@ -9,6 +9,8 @@
 <div class="d-flex">
     <!-- Sidebar -->
     <%@include file="../include/sidebar.jsp"%>
+    <%@include file="../admin/ai_chat_box.jsp"%>
+
 
     <!-- Main Content -->
     <div class="flex-grow-1" style="margin-left: 250px;">

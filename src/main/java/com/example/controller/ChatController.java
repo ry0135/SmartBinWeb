@@ -5,7 +5,7 @@ import com.example.model.AccountConst;
 import com.example.model.Chat;
 import com.example.service.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;   // <-- phát socket
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,66 +23,78 @@ public class ChatController {
     private ChatService chatService;
 
     @Autowired
-    private SimpMessagingTemplate messagingTemplate;  // để publish ra /topic/...
+    private SimpMessagingTemplate messagingTemplate;
 
-    // ========== 1️⃣ Màn hình cho Admin: chọn Manager để chat ==========
+    // ========== 1️⃣ ADMIN: Danh sách Manager để chọn chat ==========
     @GetMapping("/admin")
     public String adminChatList(HttpSession session, Model model) {
         Account current = (Account) session.getAttribute("currentUser");
         if (current == null || current.getRole() != AccountConst.Roles.ADMIN) {
             return "redirect:/login";
         }
-        model.addAttribute("managerChats", chatService.listManagersForAdmin(current.getAccountId()));
-        return "admin/admin_chat_list"; // JSP: danh sách managers
+
+        model.addAttribute("managerChats",
+                chatService.listManagersForAdmin(current.getAccountId()));
+        return "admin/admin_chat_list"; // danh sách manager
     }
 
-    // ========== 2️⃣ Mở khung chat giữa Admin và 1 Manager ==========
+    // ========== 2️⃣ ADMIN: Mở phòng chat với 1 Manager ==========
     @GetMapping("/admin/{managerId}")
-    public String adminChatRoom(@PathVariable int managerId, HttpSession session, Model model) {
+    public String adminChatRoom(@PathVariable int managerId,
+                                HttpSession session,
+                                Model model) {
         Account current = (Account) session.getAttribute("currentUser");
         if (current == null || current.getRole() != AccountConst.Roles.ADMIN) {
             return "redirect:/login";
         }
 
-        List<Chat> conversation = chatService.getConversation(current.getAccountId(), managerId);
+        List<Chat> conversation =
+                chatService.getConversation(current.getAccountId(), managerId);
         chatService.markConversationRead(current.getAccountId(), managerId);
 
         model.addAttribute("conversation", conversation);
         model.addAttribute("receiverId", managerId);
-        return "admin/chat_room"; // JSP: khung chat chung
+        model.addAttribute("meId", current.getAccountId());
+
+
+        // 🟢 Gọi đúng file JSP riêng cho Admin
+        return "admin/chat_admin_room";
     }
 
-    // ========== 3️⃣ Manager chat với Admin ==========
+    // ========== 3️⃣ MANAGER: Mở phòng chat với Admin ==========
     @GetMapping("/manager")
-    public String managerChat(HttpSession session, Model model) {
+    public String managerChatRoom(HttpSession session, Model model) {
         Account current = (Account) session.getAttribute("currentUser");
         if (current == null || current.getRole() != AccountConst.Roles.MANAGER) {
             return "redirect:/login";
         }
 
-        int adminId = 1; // TODO: nếu nhiều admin, query admin phù hợp
-        List<Chat> conversation = chatService.getConversation(current.getAccountId(), adminId);
+        int adminId = 1; // 🔸 nếu có nhiều admin, sau này có thể lấy theo logic riêng
+        List<Chat> conversation =
+                chatService.getConversation(current.getAccountId(), adminId);
         chatService.markConversationRead(current.getAccountId(), adminId);
 
         model.addAttribute("conversation", conversation);
         model.addAttribute("receiverId", adminId);
-        return "admin/chat_room";
+        model.addAttribute("meId", current.getAccountId());
+
+
+        // 🟢 Gọi đúng file JSP riêng cho Manager
+        return "manage/chat_manager_room";
     }
 
-    // ========== 4️⃣ Gửi tin nhắn (lưu DB + broadcast realtime) ==========
+    // ========== 4️⃣ Gửi tin nhắn ==========
     @PostMapping("/send")
-    public String sendMessage(
-            @RequestParam int receiverId,
-            @RequestParam String message,
-            HttpSession session
-    ) {
+    public String sendMessage(@RequestParam int receiverId,
+                              @RequestParam String message,
+                              HttpSession session) {
         Account current = (Account) session.getAttribute("currentUser");
         if (current == null) return "redirect:/login";
 
-        // 1) Lưu DB
+        // 1️⃣ Lưu DB
         Chat saved = chatService.sendMessage(current.getAccountId(), receiverId, message);
 
-        // 2) Broadcast realtime tới topic hội thoại chung
+        // 2️⃣ Gửi realtime qua STOMP
         String topic = toTopic(current.getAccountId(), receiverId);
 
         Map<String, Object> payload = new HashMap<>();
@@ -95,7 +107,7 @@ public class ChatController {
 
         messagingTemplate.convertAndSend(topic, payload);
 
-        // 3) Quay lại đúng phòng chat
+        // 3️⃣ Redirect về đúng phòng chat
         if (current.getRole() == AccountConst.Roles.ADMIN) {
             return "redirect:/chat/admin/" + receiverId;
         } else {
@@ -103,7 +115,7 @@ public class ChatController {
         }
     }
 
-    // ===== Helper: sinh topic chung cho 2 user (thứ tự không quan trọng) =====
+    // ===== Helper =====
     private String toTopic(int aId, int bId) {
         int min = Math.min(aId, bId);
         int max = Math.max(aId, bId);

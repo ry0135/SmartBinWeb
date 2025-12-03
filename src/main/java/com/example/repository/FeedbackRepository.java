@@ -37,6 +37,9 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
     @Query("SELECT f FROM Feedback f WHERE f.rating BETWEEN :minRating AND :maxRating ORDER BY f.createdAt DESC")
     List<Feedback> findByRatingBetweenOrderByCreatedAtDesc(@Param("minRating") Integer minRating, 
                                                           @Param("maxRating") Integer maxRating);
+
+    @Query("SELECT AVG(CAST(f.rating AS double)) FROM Feedback f")
+    Double avgRating();
 }
 
 

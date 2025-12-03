@@ -82,48 +82,58 @@
         <div class="p-4">
             <!-- Stats Cards -->
             <div class="row g-4 mb-4">
+                <!-- Total Bins Card -->
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body d-flex align-items-center">
-                            <div class="bg-primary text-white rounded-3 p-3 me-3">
-                                <span class="fs-4">🗑️</span>
-                            </div>
-                            <div>
-                                <h3 class="h4 mb-1">${totalBins}</h3>
-                                <p class="text-muted mb-0">Tổng số thùng</p>
+                    <a href="${pageContext.request.contextPath}/bins" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm h-100 hover-card">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="bg-primary text-white rounded-3 p-3 me-3">
+                                    <span class="fs-4">🗑️</span>
+                                </div>
+                                <div>
+                                    <h3 class="h4 mb-1">${totalBins}</h3>
+                                    <p class="text-muted mb-0">Tổng số thùng</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
 
+                <!-- Alerts Card -->
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body d-flex align-items-center">
-                            <div class="bg-warning text-white rounded-3 p-3 me-3">
-                                <span class="fs-4">⚠️</span>
-                            </div>
-                            <div>
-                                <h3 class="h4 mb-1">${alertCount}</h3>
-                                <p class="text-muted mb-0">Cảnh báo</p>
+                    <a href="${pageContext.request.contextPath}/tasks/task-management" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm h-100 hover-card">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="bg-warning text-white rounded-3 p-3 me-3">
+                                    <span class="fs-4">⚠️</span>
+                                </div>
+                                <div>
+                                    <h3 class="h4 mb-1">${alertCount}</h3>
+                                    <p class="text-muted mb-0">Thùng Đầy</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
 
+                <!-- Reports Card -->
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body d-flex align-items-center">
-                            <div class="bg-success text-white rounded-3 p-3 me-3">
-                                <span class="fs-4">📄</span>
-                            </div>
-                            <div>
-                                <h3 class="h4 mb-1">${newReports}</h3>
-                                <p class="text-muted mb-0">Báo cáo mới</p>
+                    <a href="${pageContext.request.contextPath}/reports" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm h-100 hover-card">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="bg-success text-white rounded-3 p-3 me-3">
+                                    <span class="fs-4">📄</span>
+                                </div>
+                                <div>
+                                    <h3 class="h4 mb-1">${newReports}</h3>
+                                    <p class="text-muted mb-0">Báo cáo mới</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
+        </div>
 
             <!-- Main Layout: Filter Left, Map Right -->
             <div class="row g-4 mb-4">

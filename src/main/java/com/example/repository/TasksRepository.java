@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,6 +78,89 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
         // Lấy doing tasks theo batch
         @Query("SELECT t FROM Task t WHERE t.status = 'DOING' AND t.batchId = :batchId ORDER BY t.createdAt DESC")
         List<Task> findDoingTasksByBatch(@Param("batchId") String batchId);
+        // Đếm theo trạng thái
+        @Query("SELECT t.status, COUNT(t) FROM Task t GROUP BY t.status")
+        List<Object[]> countTasksByStatus();
+
+        // Đếm theo Priority
+        @Query("SELECT CAST(t.priority AS string), COUNT(t) FROM Task t GROUP BY t.priority")
+        List<Object[]> countTasksByPriority();
+
+        // Số task đang mở (OPEN + IN_PROGRESS)
+        @Query("SELECT COUNT(t) FROM Task t WHERE t.status IN ('OPEN','IN_PROGRESS')")
+        long countOpenTasks();
+
+        // Task tạo mới theo ngày
+        @Query(
+                value = "SELECT CAST(CreatedAt AS date) AS CreatedDate, COUNT(*) AS Total " +
+                        "FROM Tasks " +
+                        "WHERE CreatedAt BETWEEN :start AND :end " +
+                        "GROUP BY CAST(CreatedAt AS date) " +
+                        "ORDER BY CreatedDate",
+                nativeQuery = true
+        )
+        List<Object[]> countTasksCreatedByDate(@Param("start") Date start,
+                                               @Param("end") Date end);
+
+        // Task hoàn thành theo ngày
+        @Query(
+                value = "SELECT CAST(CompletedAt AS date) AS CompletedDate, COUNT(*) AS Total " +
+                        "FROM Tasks " +
+                        "WHERE CompletedAt IS NOT NULL " +
+                        "  AND CompletedAt BETWEEN :start AND :end " +
+                        "GROUP BY CAST(CompletedAt AS date) " +
+                        "ORDER BY CompletedDate",
+                nativeQuery = true
+        )
+        List<Object[]> countTasksCompletedByDate(@Param("start") Date start,
+                                                 @Param("end") Date end);
+
+        // Hiệu suất xử lý theo nhân viên
+        @Query(
+                value = "SELECT a.FullName, COUNT(*) AS Total " +
+                        "FROM Tasks t " +
+                        "JOIN Accounts a ON t.AssignedTo = a.AccountID " +
+                        "WHERE t.Status = 'COMPLETED' " +
+                        "GROUP BY a.FullName " +
+                        "ORDER BY Total DESC",
+                nativeQuery = true
+        )
+        List<Object[]> taskPerformanceByUser();
+
+        // Task trễ theo nhân viên
+        @Query(
+                value = "SELECT a.FullName, COUNT(*) AS LateTotal " +
+                        "FROM Tasks t " +
+                        "JOIN Accounts a ON t.AssignedTo = a.AccountID " +
+                        "WHERE t.dueAt IS NOT NULL " +
+                        "  AND t.CompletedAt IS NOT NULL " +
+                        "  AND t.CompletedAt > t.dueAt " +
+                        "GROUP BY a.FullName " +
+                        "ORDER BY LateTotal DESC",
+                nativeQuery = true
+        )
+        List<Object[]> lateTasksByUser();
+
+        // Đếm task trễ hạn
+        @Query(
+                value = "SELECT COUNT(*) " +
+                        "FROM Tasks " +
+                        "WHERE dueAt IS NOT NULL " +
+                        "  AND CompletedAt IS NOT NULL " +
+                        "  AND CompletedAt > dueAt",
+                nativeQuery = true
+        )
+        long countOverdueTasks();
+
+        // SLA task: on-time vs total
+        @Query(
+                value = "SELECT " +
+                        "  SUM(CASE WHEN dueAt IS NOT NULL AND CompletedAt IS NOT NULL AND CompletedAt <= dueAt THEN 1 ELSE 0 END) AS OnTime, " +
+                        "  SUM(CASE WHEN dueAt IS NOT NULL AND CompletedAt IS NOT NULL THEN 1 ELSE 0 END) AS TotalWithDue " +
+                        "FROM Tasks",
+                nativeQuery = true
+        )
+        Object[] countOnTimeVsTotal();
 
         @Query("SELECT t FROM Task t WHERE t.batchId = :batchId")
         List<Task> findTaskByBatchId(@Param("batchId") String batchId);

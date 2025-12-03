@@ -46,7 +46,7 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
 
     @Query("SELECT AVG(CAST(f.rating AS double)) FROM Feedback f")
     Double avgRating();
-}
+
 
     List<Feedback> findByRatingBetweenOrderByCreatedAtDesc(@Param("minRating") Integer minRating,
                                                            @Param("maxRating") Integer maxRating);

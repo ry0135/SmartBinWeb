@@ -48,8 +48,6 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
     Double avgRating();
 
 
-    List<Feedback> findByRatingBetweenOrderByCreatedAtDesc(@Param("minRating") Integer minRating,
-                                                           @Param("maxRating") Integer maxRating);
 
     boolean existsByReportId(Integer reportId);
 }

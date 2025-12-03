@@ -14,9 +14,9 @@
   <nav class="flex-grow-1 py-3">
     <ul class="nav nav-pills flex-column px-3" id="sidebar-menu">
       <li class="nav-item mb-2">
-        <a href="${pageContext.request.contextPath}/admin/dashboard"
+        <a href="${pageContext.request.contextPath}/admin/analytics"
            class="nav-link text-dark d-flex align-items-center py-3 px-3 rounded sidebar-link"
-           data-path="/admin/areas">
+           data-path="/admin/analytics">
           <span class="me-3 fs-5">📊</span>
           <span class="fw-semibold">Dashboard</span>
         </a>
@@ -26,7 +26,7 @@
            class="nav-link text-dark d-flex align-items-center py-3 px-3 rounded sidebar-link"
            data-path="/admin/overview">
           <span class="me-3 fs-5">📍</span>
-          <span class="fw-semibold">Khu vực</span>
+          <span class="fw-semibold">Quản Lí Thùng Rác Theo Khu vực</span>
 
         </a>
       </li>
@@ -36,7 +36,7 @@
            class="nav-link text-dark d-flex align-items-center py-3 px-3 rounded sidebar-link"
            data-path="/admin/locations">
           <span class="me-3 fs-5">🗺️</span>
-          <span class="fw-semibold">Địa điểm</span>
+          <span class="fw-semibold">Quản Lí Địa điểm</span>
         </a>
       </li>
 
@@ -46,9 +46,11 @@
            class="nav-link text-dark d-flex align-items-center py-3 px-3 rounded sidebar-link"
            data-path="/admin/accounts">
           <span class="me-3 fs-5">🧑‍💼</span>
-          <span class="fw-semibold">Tài khoản</span>
+          <span class="fw-semibold">Quản Lí Tài khoản</span>
         </a>
       </li>
+
+
 
 
 
@@ -61,14 +63,7 @@
         </a>
       </li>
 
-      <li class="nav-item mb-2">
-        <a href="${pageContext.request.contextPath}/admin/reports"
-           class="nav-link text-dark d-flex align-items-center py-3 px-3 rounded sidebar-link"
-           data-path="/admin/reports">
-          <span class="me-3 fs-5">📈</span>
-          <span class="fw-semibold">Báo cáo</span>
-        </a>
-      </li>
+
 
       <li class="nav-item mb-2">
         <a href="${pageContext.request.contextPath}/chat/admin"

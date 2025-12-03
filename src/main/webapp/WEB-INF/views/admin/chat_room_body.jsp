@@ -289,7 +289,6 @@
     </style>
 </head>
 <body>
-<jsp:include page="/WEB-INF/views/admin/header_admin.jsp"/>
 
 <div class="chat-container">
     <div class="chat-card">
@@ -385,7 +384,7 @@
 
     // ===== Realtime subscribe qua STOMP =====
     (function(){
-        var meId = ${meId};
+        var meId = ${sessionScope.currentUser != null ? sessionScope.currentUser.accountId : 0};
         var receiverId = ${receiverId};
 
         var a = Math.min(meId, receiverId);
@@ -393,7 +392,7 @@
         var topic = "/topic/chat." + a + "." + b;
 
         var ctx = "${pageContext.request.contextPath}";
-        var sock = new SockJS(ctx + "/ws");
+        var sock = new SockJS(ctx + "/ws-bin-sockjs");
         var stomp = Stomp.over(sock);
         stomp.debug = null;
 

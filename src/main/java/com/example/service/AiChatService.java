@@ -14,8 +14,7 @@ import java.util.Map;
 @Service
 public class AiChatService {
 
-    @Value("${openai.api.key}")
-    private String openAiApiKey;
+    @Value("${openai.api.key}")    private String openAiApiKey;
 
     @Value("${openai.model:gpt-4o-mini}")
     private String openAiModel;

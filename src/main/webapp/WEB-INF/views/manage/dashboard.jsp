@@ -928,5 +928,56 @@
         if (activeBtn) activeBtn.classList.add("active");
     }
 </script>
+
+<script>
+    stompClient.subscribe('/topic/report-updates', function(message) {
+        var report = JSON.parse(message.body);
+        console.log("🔔 Báo cáo mới:", report);
+
+        showRealtimeToast("📢 Báo cáo mới",
+            "Mã thùng: " + report.binId + " — Nội dung: " + report.description);
+    });
+
+
+    function showRealtimeToast(title, message) {
+        const container = document.getElementById("realtime-toast-container");
+
+        const toast = document.createElement("div");
+        toast.style = `
+        background: #323232;
+        color: white;
+        padding: 12px 18px;
+        margin-top: 10px;
+        border-radius: 8px;
+        box-shadow: 0px 3px 8px rgba(0,0,0,0.3);
+        font-family: Arial;
+        min-width: 260px;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    `;
+
+        toast.innerHTML = `
+        <strong>${title}</strong><br>
+        <span style="font-size: 14px;">${message}</span>
+    `;
+
+        container.appendChild(toast);
+
+        // Hiệu ứng fade in
+        setTimeout(() => {
+            toast.style.opacity = "1";
+        }, 50);
+
+        // Tự biến mất sau 4 giây
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            setTimeout(() => toast.remove(), 400);
+        }, 4000);
+    }
+
+</script>
+
+<div id="realtime-toast-container"
+     style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 </body>
 </html>

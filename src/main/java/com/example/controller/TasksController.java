@@ -27,7 +27,9 @@ public class TasksController {
     private WardService wardService;
 
     @GetMapping("/task-management")
-    public String manage(Model model) {
+    public String manage(@RequestParam("binId") Integer binId,
+                         @RequestParam("reportId") Integer reportId,
+                         Model model) {
         // Sử dụng repository trực tiếp để lấy bins với status = 1 và currentFill > 60
         List<Bin> highFillBins = binService.getActiveBinsWithHighFill();
 
@@ -66,6 +68,8 @@ public class TasksController {
         model.addAttribute("wards", wards);
         model.addAttribute("currentFills", currentFills);
 
+        model.addAttribute("binId", binId);
+        model.addAttribute("reportId", reportId);
         return "manage/garbage-collection";
     }
     @GetMapping("/maintenance-management")

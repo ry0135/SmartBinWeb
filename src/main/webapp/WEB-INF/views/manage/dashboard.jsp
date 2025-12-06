@@ -293,14 +293,16 @@
                         </table>
                     </div>
 
+
                     <!-- Pagination -->
                     <div class="d-flex justify-content-between align-items-center p-3 border-top">
                         <div class="text-muted small">
                             Hiển thị <span id="showingFrom">1</span> đến <span id="showingTo">25</span>
                             trong tổng số <span id="totalItems">0</span> mục
                         </div>
-                        <nav>
-                            <ul class="pagination pagination-sm mb-0" id="pagination">
+                        <nav class="w-100">
+                            <!-- 🎯 THÊM CLASS d-flex justify-content-center Ở ĐÂY -->
+                            <ul class="pagination pagination-sm mb-0 d-flex justify-content-center" id="pagination">
                                 <!-- Pagination sẽ được tạo bởi JavaScript -->
                             </ul>
                         </nav>
@@ -633,7 +635,7 @@
     }
     // ==================== PHÂN TRANG ====================
     var currentPage = 1;
-    var itemsPerPage = 25;
+    var itemsPerPage = 10;
     var allRows = [];
 
     document.addEventListener('DOMContentLoaded', function() {

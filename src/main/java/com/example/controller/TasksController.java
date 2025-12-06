@@ -127,12 +127,13 @@ public class TasksController {
             if (binIds.isEmpty()) {
                 return "redirect:/manage?error=Không có thùng rác nào được chọn";
             }
-
+            List<Bin> bins = binService.findAllByIds(binIds);
             List<Account> workers = taskService.getAvailableWorkers(wardId);
 
             model.addAttribute("workers", workers);
             model.addAttribute("binIds", binIds);
             model.addAttribute("wardId", wardId);
+            model.addAttribute("bins", bins);
             model.addAttribute("wardName", "Phường " + wardId); // Thay bằng service thực tế
 
             return "manage/assign-task";

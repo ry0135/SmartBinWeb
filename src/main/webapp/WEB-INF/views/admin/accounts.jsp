@@ -27,96 +27,100 @@
 <body>
 <jsp:include page="header_admin.jsp"/>
 
-<div class="container my-4" style="max-width:1200px;">
-  <h3 class="mb-2"><i class="fa-solid fa-users-gear text-success me-2"></i>Quản trị tài khoản</h3>
+<!-- ✅ Đẩy toàn bộ nội dung sang phải 250px để không bị sidebar đè -->
+<div style="margin-left: 250px;">
 
+  <div class="container my-4" style="max-width:1200px;">
+    <h3 class="mb-2"><i class="fa-solid fa-users-gear text-success me-2"></i>Quản trị tài khoản</h3>
 
-  <!-- Flash -->
-  <c:if test="${not empty success}">
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-      <i class="fa-solid fa-check-circle me-2"></i>${success}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  </c:if>
-  <c:if test="${not empty error}">
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-      <i class="fa-solid fa-circle-exclamation me-2"></i>${error}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  </c:if>
-
-  <!-- Filter -->
-  <form class="row g-2 mb-3" method="get" action="${pageContext.request.contextPath}/admin/accounts">
-    <div class="col-12 col-md-3">
-      <label class="form-label">Trạng thái</label>
-      <select class="form-select" name="status">
-        <option value=""  <c:if test="${status == null}">selected</c:if>>All</option>
-        <option value="1" <c:if test="${status == 1}">selected</c:if>>Active</option>
-        <option value="0" <c:if test="${status == 0}">selected</c:if>>Banned</option>
-      </select>
-    </div>
-    <div class="col-12 col-md-6">
-      <label class="form-label">Tìm (Email/Tên)</label>
-      <input class="form-control" name="q" value="${fn:escapeXml(q)}" placeholder="Nhập email hoặc tên người dùng..."/>
-    </div>
-    <div class="col-12 col-md-3 d-flex align-items-end gap-2">
-      <button class="btn btn-apply w-50" type="submit"><i class="fa-solid fa-filter me-1"></i>Apply</button>
-      <a class="btn btn-outline-success w-50" href="${pageContext.request.contextPath}/admin/accounts">
-        <i class="fa-solid fa-rotate-left me-1"></i>Reset
-      </a>
-    </div>
-  </form>
-
-  <!-- 3 khung xếp DỌC -->
-  <div class="role-stack">
-
-    <!-- MANAGERS -->
-    <div class="sb-card" id="managers">
-      <div class="card-header d-flex justify-content-between align-items-center px-3 py-2">
-        <strong><i class="fa-solid fa-user-tie me-2"></i>Managers</strong>
-        <span class="text-muted">Tổng: ${managers.totalElements}</span>
+    <!-- Flash -->
+    <c:if test="${not empty success}">
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-check-circle me-2"></i>${success}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
-      <div class="card-body p-0">
-        <jsp:include page="accounts-role-table.jsp">
-          <jsp:param name="baseUrl" value="${pageContext.request.contextPath}/admin/accounts/managers"/>
-          <jsp:param name="pageObj" value="managers"/>
-          <jsp:param name="anchor"  value="managers"/>
-        </jsp:include>
+    </c:if>
+    <c:if test="${not empty error}">
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-2"></i>${error}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
-    </div>
+    </c:if>
 
-    <!-- WORKERS -->
-    <div class="sb-card" id="workers">
-      <div class="card-header d-flex justify-content-between align-items-center px-3 py-2">
-        <strong><i class="fa-solid fa-people-group me-2"></i>Workers</strong>
-        <span class="text-muted">Tổng: ${workers.totalElements}</span>
+    <!-- Filter -->
+    <form class="row g-2 mb-3" method="get" action="${pageContext.request.contextPath}/admin/accounts">
+      <div class="col-12 col-md-3">
+        <label class="form-label">Trạng thái</label>
+        <select class="form-select" name="status">
+          <option value=""  <c:if test="${status == null}">selected</c:if>>All</option>
+          <option value="1" <c:if test="${status == 1}">selected</c:if>>Active</option>
+          <option value="0" <c:if test="${status == 0}">selected</c:if>>Banned</option>
+        </select>
       </div>
-      <div class="card-body p-0">
-        <jsp:include page="accounts-role-table.jsp">
-          <jsp:param name="baseUrl" value="${pageContext.request.contextPath}/admin/accounts/workers"/>
-          <jsp:param name="pageObj" value="workers"/>
-          <jsp:param name="anchor"  value="workers"/>
-        </jsp:include>
+      <div class="col-12 col-md-6">
+        <label class="form-label">Tìm (Email/Tên)</label>
+        <input class="form-control" name="q" value="${fn:escapeXml(q)}" placeholder="Nhập email hoặc tên người dùng..."/>
       </div>
-    </div>
+      <div class="col-12 col-md-3 d-flex align-items-end gap-2">
+        <button class="btn btn-apply w-50" type="submit"><i class="fa-solid fa-filter me-1"></i>Apply</button>
+        <a class="btn btn-outline-success w-50" href="${pageContext.request.contextPath}/admin/accounts">
+          <i class="fa-solid fa-rotate-left me-1"></i>Reset
+        </a>
+      </div>
+    </form>
 
-    <!-- USERS -->
-    <div class="sb-card" id="users">
-      <div class="card-header d-flex justify-content-between align-items-center px-3 py-2">
-        <strong><i class="fa-solid fa-user me-2"></i>Users</strong>
-        <span class="text-muted">Tổng: ${users.totalElements}</span>
-      </div>
-      <div class="card-body p-0">
-        <jsp:include page="accounts-role-table.jsp">
-          <jsp:param name="baseUrl" value="${pageContext.request.contextPath}/admin/accounts/users"/>
-          <jsp:param name="pageObj" value="users"/>
-          <jsp:param name="anchor"  value="users"/>
-        </jsp:include>
-      </div>
-    </div>
+    <!-- 3 khung xếp DỌC -->
+    <div class="role-stack">
 
+      <!-- MANAGERS -->
+      <div class="sb-card" id="managers">
+        <div class="card-header d-flex justify-content-between align-items-center px-3 py-2">
+          <strong><i class="fa-solid fa-user-tie me-2"></i>Managers</strong>
+          <span class="text-muted">Tổng: ${managers.totalElements}</span>
+        </div>
+        <div class="card-body p-0">
+          <jsp:include page="accounts-role-table.jsp">
+            <jsp:param name="baseUrl" value="${pageContext.request.contextPath}/admin/accounts/managers"/>
+            <jsp:param name="pageObj" value="managers"/>
+            <jsp:param name="anchor"  value="managers"/>
+          </jsp:include>
+        </div>
+      </div>
+
+      <!-- WORKERS -->
+      <div class="sb-card" id="workers">
+        <div class="card-header d-flex justify-content-between align-items-center px-3 py-2">
+          <strong><i class="fa-solid fa-people-group me-2"></i>Workers</strong>
+          <span class="text-muted">Tổng: ${workers.totalElements}</span>
+        </div>
+        <div class="card-body p-0">
+          <jsp:include page="accounts-role-table.jsp">
+            <jsp:param name="baseUrl" value="${pageContext.request.contextPath}/admin/accounts/workers"/>
+            <jsp:param name="pageObj" value="workers"/>
+            <jsp:param name="anchor"  value="workers"/>
+          </jsp:include>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="sb-card" id="users">
+        <div class="card-header d-flex justify-content-between align-items-center px-3 py-2">
+          <strong><i class="fa-solid fa-user me-2"></i>Users</strong>
+          <span class="text-muted">Tổng: ${users.totalElements}</span>
+        </div>
+        <div class="card-body p-0">
+          <jsp:include page="accounts-role-table.jsp">
+            <jsp:param name="baseUrl" value="${pageContext.request.contextPath}/admin/accounts/users"/>
+            <jsp:param name="pageObj" value="users"/>
+            <jsp:param name="anchor"  value="users"/>
+          </jsp:include>
+        </div>
+      </div>
+
+    </div>
   </div>
-</div>
+
+</div> <!-- end main-content margin-left:250px -->
 
 <!-- ===== Modal BAN dùng CHUNG (chỉ 1 cái) ===== -->
 <div class="modal fade" id="banModal" tabindex="-1" aria-hidden="true">

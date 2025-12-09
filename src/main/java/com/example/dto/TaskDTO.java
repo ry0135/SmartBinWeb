@@ -1,5 +1,6 @@
 package com.example.dto;
 
+import javax.persistence.Column;
 import java.util.Date;
 
 public class TaskDTO {
@@ -13,6 +14,35 @@ public class TaskDTO {
     private Date createdAt;
     private Date completedAt;
 
+    private Double completedLat;
+
+
+    private Double completedLng;
+
+
+    private String afterImage;
+
+
+    private Double collectedVolume;
+
+    private int assignedToId;
+    private String assignedToName;
+
+    public int getAssignedToId() {
+        return assignedToId;
+    }
+
+    public void setAssignedToId(int assignedToId) {
+        this.assignedToId = assignedToId;
+    }
+
+    public String getAssignedToName() {
+        return assignedToName;
+    }
+
+    public void setAssignedToName(String assignedToName) {
+        this.assignedToName = assignedToName;
+    }
     public int getTaskID() {
         return taskID;
     }
@@ -83,5 +113,37 @@ public class TaskDTO {
 
     public void setCompletedAt(Date completedAt) {
         this.completedAt = completedAt;
+    }
+
+    public Double getCompletedLat() {
+        return completedLat;
+    }
+
+    public void setCompletedLat(Double completedLat) {
+        this.completedLat = completedLat;
+    }
+
+    public Double getCompletedLng() {
+        return completedLng;
+    }
+
+    public void setCompletedLng(Double completedLng) {
+        this.completedLng = completedLng;
+    }
+
+    public String getAfterImage() {
+        return afterImage;
+    }
+
+    public void setAfterImage(String afterImage) {
+        this.afterImage = afterImage;
+    }
+
+    public Double getCollectedVolume() {
+        return collectedVolume;
+    }
+
+    public void setCollectedVolume(Double collectedVolume) {
+        this.collectedVolume = collectedVolume;
     }
 }

@@ -2,17 +2,16 @@
 package com.example.service;
 
 import com.example.dto.ReportResponseDTO;
-import com.example.model.Bin;
-import com.example.model.Report;
-import com.example.model.ReportImage;
-import com.example.model.ReportStatusHistory;
+import com.example.model.*;
 import com.example.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
@@ -20,6 +19,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
+
 public class ReportService {
 
     @Autowired
@@ -32,6 +33,11 @@ public class ReportService {
     @Autowired
     private ReportImageRepository reportImageRepository;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
     @Autowired
     private ReportStatusHistoryRepository statusHistoryRepository;
 
@@ -91,23 +97,61 @@ public class ReportService {
 
 
     // Tạo báo cáo mới
+    @Transactional
     public Report createReport(Report report, List<String> imageUrls) {
-        report.setCreatedAt(LocalDateTime.now());
-        report.setUpdatedAt(LocalDateTime.now());
+        LocalDateTime vnNow = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")).toLocalDateTime();
+
+        report.setCreatedAt(vnNow);
+        report.setUpdatedAt(vnNow);
         report.setStatus("RECEIVED");
 
+
+        Bin bin = binRepository.findById(report.getBinId())
+                .orElseThrow(() -> new RuntimeException("Bin không tồn tại"));
+
+        report.setBin(bin);
+
         Report savedReport = reportRepository.save(report);
+
+        // Lưu ảnh
         if (imageUrls != null) {
             for (String url : imageUrls) {
-                ReportImage image = new ReportImage(savedReport.getReportId(), url);
-                reportImageRepository.save(image);
+                reportImageRepository.save(new ReportImage(savedReport.getReportId(), url));
             }
         }
-        // Tạo lịch sử trạng thái
-        createStatusHistory(savedReport.getReportId(), "RECEIVED", "Báo cáo được tạo", report.getAccountId());
+
+        // Lịch sử trạng thái
+        createStatusHistory(savedReport.getReportId(),
+                "RECEIVED", "Báo cáo được tạo", report.getAccountId());
+
+
+        List<Account> account = accountRepository.findManagersSameProvinceByBin(report.getBinId());
+
+        for (Account a : account) {
+            try {
+                System.out.println(">>> Creating notification for workerId = " + a.getAccountId());
+
+                Notification noti = new Notification();
+                noti.setReceiverId(a.getAccountId());
+                noti.setSenderId(report.getAccountId());
+                noti.setTitle("Bạn có thông báo mới");
+                noti.setMessage("Có báo cáo mới: " + report.getBin().getBinCode() + ": " + report.getDescription());
+                noti.setType("REPORT");
+                noti.setRead(false);
+                noti.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")).toLocalDateTime());
+
+                Notification saved = notificationRepository.save(noti);
+
+                System.out.println(">>> Notification SAVED id = " + saved.getNotificationID());
+            } catch (Exception e) {
+                System.out.println("❌ LỖI LƯU THÔNG BÁO: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
 
         return savedReport;
     }
+
 
     // Cập nhật trạng thái báo cáo
     public Report updateReportStatus(Integer reportId, String newStatus, String notes, Integer updatedBy) {

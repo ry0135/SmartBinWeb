@@ -6,9 +6,32 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @WebFilter("/*")
 public class AuthFilter implements Filter {
+
+    private static final List<String> EXCLUDED_PATHS = Arrays.asList(
+            "/login",
+            "/login.jsp",
+            "/auth",
+            "/api",
+            "/api/",
+            "/ws-bin",
+            "/ws-bin/",
+            "/uploads",
+            "/assets",
+            "/css",
+            "/js",
+            "/fonts"
+    );
+
+    private boolean isStaticResource(String path) {
+        return path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".jpeg")
+                || path.endsWith(".gif") || path.endsWith(".svg") || path.endsWith(".pbf")
+                || path.endsWith(".css") || path.endsWith(".js");
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -17,31 +40,34 @@ public class AuthFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
 
-        HttpSession session = req.getSession(false);
+        String context = req.getContextPath();          // /SmartBinWeb_war
+        String uri = req.getRequestURI();               // /SmartBinWeb_war/login
+        String path = uri.substring(context.length());  // /login
 
-        String path = req.getRequestURI();
+        System.out.println("👉 FILTER PATH: " + path);
 
-        // Các trang KHÔNG cần login
-        boolean isPublic =
-                path.endsWith("login.jsp") ||
-                        path.contains("/login") ||
-                        path.contains("/auth") ||
-                        path.contains("/assets") ||
-                        path.contains("/css") ||
-                        path.contains("/js");
-
-        if (isPublic) {
+        // 1️⃣ Static files → cho qua
+        if (isStaticResource(path)) {
             chain.doFilter(request, response);
             return;
         }
 
-        // Nếu chưa login → redirect về login
+        // 2️⃣ Kiểm tra path public (login, api…)
+        for (String p : EXCLUDED_PATHS) {
+            if (path.startsWith(p)) {
+                chain.doFilter(request, response);
+                return;
+            }
+        }
+
+        // 3️⃣ Kiểm tra session
+        HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("account") == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
+            resp.sendRedirect(context + "/login");
             return;
         }
 
-        // Nếu đã login → cho đi tiếp
+        // 4️⃣ OK → cho qua
         chain.doFilter(request, response);
     }
 }

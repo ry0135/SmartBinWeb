@@ -1,5 +1,6 @@
 package com.example.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
@@ -35,10 +36,16 @@ public class Task {
     private String notes;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     @Column(name = "CreatedAt")
     private Date createdAt;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    @Column(name = "UpdatedAt")
+    private Date updatedAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     @Column(name = "CompletedAt")
     private Date completedAt;
 
@@ -96,15 +103,23 @@ public class Task {
     public String getBatchId() { return batchId; }
     public void setBatchId(String batchId) { this.batchId = batchId; }
 
-    public double getCompletedLat() {
-        return completedLat;
+    public Date getUpdateAt() {
+        return updatedAt;
+    }
+
+    public void setUpdateAt(Date updateAt) {
+        this.updatedAt = updateAt;
     }
 
     public void setCompletedLat(double completedLat) {
         this.completedLat = completedLat;
     }
 
-    public double getCompletedLng() {
+    public Double getCompletedLat() {
+        return completedLat;
+    }
+
+    public Double getCompletedLng() {
         return completedLng;
     }
 

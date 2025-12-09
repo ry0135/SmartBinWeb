@@ -319,7 +319,7 @@ public class TasksService {
         int binId = task.getBin().getBinID();
 
         //  Upload ảnh lên Firebase
-        String imageUrl = firebaseStorageService.uploadFile(image, "/task/collect");
+        String imageUrl = firebaseStorageService.uploadFile(image, "task/collect");
 
         //  Cập nhật thông tin task
         task.setAfterImage(imageUrl);

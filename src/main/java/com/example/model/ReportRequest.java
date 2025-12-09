@@ -3,42 +3,27 @@ package com.example.model;
 import java.util.List;
 
 public class ReportRequest {
-    private Integer userId;
+
     private Integer binId;
     private Integer accountId;
     private String reportType;
     private String description;
-    private String location;
-    private Double latitude;
-    private Double longitude;
-    private String status;
-
     private List<String> images;
 
     // Constructors
     public ReportRequest() {}
-    
-    public ReportRequest(Integer userId, Integer binId, Integer accountId, String reportType, 
-                        String description, String location, Double latitude, Double longitude, String status) {
-        this.userId = userId;
+
+    public ReportRequest(Integer binId, Integer accountId, String reportType,
+                         String description, List<String> images) {
         this.binId = binId;
         this.accountId = accountId;
         this.reportType = reportType;
         this.description = description;
-        this.location = location;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.status = status;
+        this.images = images;
     }
     
     // Getters and Setters
-    public Integer getUserId() {
-        return userId;
-    }
-    
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
+
 
     public List<String> getImages() {
         return images;
@@ -79,51 +64,15 @@ public class ReportRequest {
     public void setDescription(String description) {
         this.description = description;
     }
-    
-    public String getLocation() {
-        return location;
-    }
-    
-    public void setLocation(String location) {
-        this.location = location;
-    }
-    
-    public Double getLatitude() {
-        return latitude;
-    }
-    
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-    
-    public Double getLongitude() {
-        return longitude;
-    }
-    
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-    
-    public String getStatus() {
-        return status;
-    }
-    
-    public void setStatus(String status) {
-        this.status = status;
-    }
-    
+
     @Override
     public String toString() {
         return "ReportRequest{" +
-                "userId=" + userId +
+
                 ", binId=" + binId +
                 ", accountId=" + accountId +
                 ", reportType='" + reportType + '\'' +
                 ", description='" + description + '\'' +
-                ", location='" + location + '\'' +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
-                ", status='" + status + '\'' +
                 '}';
     }
 }

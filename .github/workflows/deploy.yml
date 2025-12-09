@@ -1,0 +1,28 @@
+name: Deploy SmartBin
+
+on:
+  push:
+    branches: [ "main" ]   # Bạn push lên nhánh main sẽ deploy tự động
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout source code
+        uses: actions/checkout@v3
+
+      - name: 🔑 Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: 🚀 Deploy to Server via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
+          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} \
+          "cd ~/smartbin-deploy && git pull && chmod +x deploy.sh && ./deploy.sh"
+
+      - name: 🎉 Done
+        run: echo "Deploy SmartBin completed!"

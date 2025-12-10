@@ -15,16 +15,10 @@ public class TaskDTO {
     private Date completedAt;
 
     private Double completedLat;
-
-
     private Double completedLng;
-
-
     private String afterImage;
-
-
     private Double collectedVolume;
-
+    private String issueReason;
     private int assignedToId;
     private String assignedToName;
 
@@ -43,6 +37,15 @@ public class TaskDTO {
     public void setAssignedToName(String assignedToName) {
         this.assignedToName = assignedToName;
     }
+
+    public String getIssueReason() {
+        return issueReason;
+    }
+
+    public void setIssueReason(String issueReason) {
+        this.issueReason = issueReason;
+    }
+
     public int getTaskID() {
         return taskID;
     }

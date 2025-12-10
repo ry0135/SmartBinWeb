@@ -1,6 +1,10 @@
 console.log("Opening Web Socket from websocket.js...");
 
-var socket = new SockJS('https://smartbinx.duckdns.org/ws-bin-sockjs');
+var wsUrl = window.location.hostname === "localhost"
+    ? "http://localhost:8080/SmartBinWeb_war/ws-bin-sockjs"
+    : "https://smartbinx.duckdns.org/ws-bin-sockjs";
+
+var socket = new SockJS(wsUrl);
 let stompClient = Stomp.over(socket);
 
 // ================= CONNECT ==================

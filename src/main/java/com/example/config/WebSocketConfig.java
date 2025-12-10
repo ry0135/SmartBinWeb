@@ -25,17 +25,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
 
-        // Web Browser (SockJS)
-        registry.addEndpoint("/ws-bin-sockjs")
-                .setAllowedOrigins("https://smartbinx.duckdns.org")
-                .withSockJS();
-
-        // Android (native WebSocket)
+        // Android (WebSocket chuẩn)
         registry.addEndpoint("/ws-bin")
-                .setAllowedOrigins("https://smartbinx.duckdns.org");
+                .setAllowedOriginPatterns("*");
+
+        // Web/SockJS
+        registry.addEndpoint("/ws-bin-sockjs")
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
     }
 
-    @Override
+        @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
 
         registry.enableSimpleBroker("/topic")

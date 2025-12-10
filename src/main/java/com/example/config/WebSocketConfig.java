@@ -24,14 +24,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Android (WebSocket chuẩn)
-        registry.addEndpoint("/ws-bin")
-                .setAllowedOriginPatterns("*");
 
-        // Web/SockJS
+        // Web Browser (SockJS)
         registry.addEndpoint("/ws-bin-sockjs")
-                .setAllowedOriginPatterns("*")
+                .setAllowedOrigins("https://smartbinx.duckdns.org")
                 .withSockJS();
+
+        // Android (native WebSocket)
+        registry.addEndpoint("/ws-bin")
+                .setAllowedOrigins("https://smartbinx.duckdns.org");
     }
 
     @Override

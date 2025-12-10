@@ -68,4 +68,15 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     // Search theo status + tên
     Page<Account> findByRoleAndStatusAndFullNameContainingIgnoreCase(int role, int status, String nameKeyword, Pageable pageable);
 
+    @Query("SELECT a FROM Account a " +
+            "JOIN a.ward w " +
+            "JOIN w.province p " +
+            "WHERE a.role = 2 " +
+            "AND p.provinceId = (" +
+            "   SELECT p2.provinceId FROM Bin b2 " +
+            "   JOIN b2.ward w2 " +
+            "   JOIN w2.province p2 " +
+            "   WHERE b2.binID = :binId )")
+    List<Account> findManagersSameProvinceByBin(@Param("binId") int binId);
+
 }

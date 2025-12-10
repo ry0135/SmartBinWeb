@@ -2,6 +2,7 @@ package com.example.controller.app;
 
 import com.example.dto.ReportResponseDTO;
 import com.example.model.*;
+import com.example.repository.AccountRepository;
 import com.example.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +20,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-    @RequestMapping("/api/app/reports")
+@RequestMapping("/api/app/reports")
 @CrossOrigin(origins = "*")
 public class ReportAppController {
     
     @Autowired
     private ReportService reportService;
-
+    @Autowired
+    private AccountRepository accountRepository;
 
     
     // Tạo báo cáo mới từ app
@@ -40,6 +42,8 @@ public class ReportAppController {
             report.setStatus("RECEIVED");
 
             Report createdReport = reportService.createReport(report, request.getImages());
+
+
 
 
             return ResponseEntity.ok(ApiResponse.success("Báo cáo đã được tạo thành công", createdReport));

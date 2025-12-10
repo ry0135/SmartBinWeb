@@ -10,8 +10,6 @@
     <!-- Sidebar -->
     <%@include file="../include/sidebar.jsp"%>
     <%@include file="../admin/ai_chat_box.jsp"%>
-
-
     <!-- Main Content -->
     <div class="flex-grow-1" style="margin-left: 250px;">
         <!-- Header -->
@@ -80,7 +78,28 @@
             </div>
 
         </div>
+        <style>
+            /* ✅ CSS để ẩn/hiện notification items */
+            .noti-item {
+                display: flex !important;
+            }
 
+            .noti-item.noti-hidden {
+                display: none !important;
+            }
+
+            /* Style cho tabs */
+            #notificationDropdown .btn-link {
+                text-decoration: none;
+                color: #6c757d;
+            }
+
+            #notificationDropdown .btn-link.active {
+                color: #0d6efd;
+                font-weight: 600;
+                border-bottom: 2px solid #0d6efd;
+            }
+        </style>
         <div class="p-4">
             <!-- Stats Cards -->
             <div class="row g-4 mb-4">
@@ -325,34 +344,8 @@
     </div>
 </div>
 
-<!-- ====================== LIBRARIES ====================== -->
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 
 <script>
-    // ====================== REALTIME SOCKET ======================
-    var socket = new SockJS('https://smartbin-vn.duckdns.org/ws-bin-sockjs');
-    var stompClient = Stomp.over(socket);
-
-    stompClient.connect({}, function (frame) {
-        console.log("✅ WebSocket connected: " + frame);
-
-        stompClient.subscribe('/topic/binUpdates', function (message) {
-            var bin = JSON.parse(message.body);
-            console.log("📡 Cập nhật mới:", bin);
-            updateBinRow(bin);
-            updateBinMarker(bin);
-        });
-
-        stompClient.subscribe('/topic/binRemoved', function (message) {
-            var bin = JSON.parse(message.body);
-            console.log("🗑 Bin bị xóa:", bin.binID);
-            removeBinRow(bin.binID);
-            removeBinMarker(bin.binID);
-        });
-    });
-
-
     // ======= Cập nhật trong bảng =======
     function updateBinRow(bin) {
         const rows = document.querySelectorAll("#binTableBody tr");
@@ -860,127 +853,79 @@
 </script>
 
 <script>
-    document.getElementById("btnNotification").addEventListener("click", function () {
-        const dropdown = document.getElementById("notificationDropdown");
-        dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
-    });
 
-    // Ẩn dropdown khi click ra ngoài
-    document.addEventListener("click", function(e) {
-        const btn = document.getElementById("btnNotification");
-        const dropdown = document.getElementById("notificationDropdown");
 
-        if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
-            dropdown.style.display = "none";
-        }
-    });
-
-</script>
-<script>
-    window.showTab = function(tab) {
-        const items = document.querySelectorAll(".noti-item");
-        items.forEach(item => {
-            const readAttr = item.getAttribute("data-read");
-            const isRead = readAttr === "true"; // chuyển string sang boolean
-            if (tab === 'all') {
-                item.style.display = 'flex';
-            } else if (tab === 'unread') {
-                item.style.display = !isRead ? 'flex' : 'none';
-            }
-        });
-
-        // Cập nhật active button
-        const buttons = document.querySelectorAll("#notificationDropdown .btn-link");
-        buttons.forEach(b => b.classList.remove("active"));
-        if(tab === 'all') buttons[0].classList.add("active");
-        else buttons[1].classList.add("active");
-    }
-</script>
-<script>
     function showTab(tab) {
-        console.log("TAB CLICKED:", tab);
+        console.log("📌 TAB CLICKED:", tab);
 
         const items = document.querySelectorAll(".noti-item");
+        console.log("📊 Total items:", items.length);
 
-        // Xóa inline CSS trước (để tránh lỗi hiển thị)
-        items.forEach(function(item) {
-            console.log("BEFORE:", item.style.display);  // ← Log này bạn đang cần
-            item.style.display = "";
-        });
+        let shownCount = 0;
+        let hiddenCount = 0;
 
         // Lọc theo trạng thái
         items.forEach(function(item) {
-            let readValue = (item.getAttribute("data-read") || "")
-                .trim().toLowerCase();
+            // Lấy giá trị data-read
+            let readValue = item.getAttribute("data-read");
+            readValue = (readValue || "").trim().toLowerCase();
+            const isRead = (readValue === "true");
 
-            const isRead = (readValue === "true" || readValue === "1");
-
+            // ✅ DÙNG CLASS thay vì inline style
             if (tab === "all") {
-                item.style.display = "flex";
+                item.classList.remove("noti-hidden");
+                shownCount++;
             } else if (tab === "unread") {
-                item.style.display = isRead ? "none" : "flex";
+                if (isRead) {
+                    item.classList.add("noti-hidden");
+                    hiddenCount++;
+                } else {
+                    item.classList.remove("noti-hidden");
+                    shownCount++;
+                }
             } else if (tab === "read") {
-                item.style.display = isRead ? "flex" : "none";
+                if (isRead) {
+                    item.classList.remove("noti-hidden");
+                    shownCount++;
+                } else {
+                    item.classList.add("noti-hidden");
+                    hiddenCount++;
+                }
             }
 
-            console.log("AFTER:", tab, "| read =", readValue, "| isRead =", isRead, "| final display =", item.style.display);
+            console.log("  → isRead:", isRead, "| hidden:", item.classList.contains("noti-hidden"));
         });
+
+        console.log("✅ Shown:", shownCount, "| Hidden:", hiddenCount);
 
         // Active nút tab
         document.querySelectorAll("#notificationDropdown .btn-link")
             .forEach(btn => btn.classList.remove("active"));
 
         const activeBtn = document.querySelector("#tab-" + tab);
-        if (activeBtn) activeBtn.classList.add("active");
+        if (activeBtn) {
+            activeBtn.classList.add("active");
+        }
     }
-</script>
 
-<script>
-    stompClient.subscribe('/topic/report-updates', function(message) {
-        var report = JSON.parse(message.body);
-        console.log("🔔 Báo cáo mới:", report);
+    // ============ DROPDOWN TOGGLE ============
+    document.addEventListener("DOMContentLoaded", function() {
+        const btnNotification = document.getElementById("btnNotification");
+        const dropdown = document.getElementById("notificationDropdown");
 
-        showRealtimeToast("📢 Báo cáo mới",
-            "Mã thùng: " + report.binId + " — Nội dung: " + report.description);
+        if (btnNotification && dropdown) {
+            btnNotification.addEventListener("click", function () {
+                dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+            });
+
+            // Ẩn dropdown khi click ra ngoài
+            document.addEventListener("click", function(e) {
+                if (!btnNotification.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = "none";
+                }
+            });
+        }
     });
-
-
-    function showRealtimeToast(title, message) {
-        const container = document.getElementById("realtime-toast-container");
-
-        const toast = document.createElement("div");
-        toast.style = `
-        background: #323232;
-        color: white;
-        padding: 12px 18px;
-        margin-top: 10px;
-        border-radius: 8px;
-        box-shadow: 0px 3px 8px rgba(0,0,0,0.3);
-        font-family: Arial;
-        min-width: 260px;
-        opacity: 0;
-        transition: opacity 0.4s ease;
-    `;
-
-        toast.innerHTML = `
-        <strong>${title}</strong><br>
-        <span style="font-size: 14px;">${message}</span>
-    `;
-
-        container.appendChild(toast);
-
-        // Hiệu ứng fade in
-        setTimeout(() => {
-            toast.style.opacity = "1";
-        }, 50);
-
-        // Tự biến mất sau 4 giây
-        setTimeout(() => {
-            toast.style.opacity = "0";
-            setTimeout(() => toast.remove(), 400);
-        }, 4000);
-    }
-
 </script>
 
 <div id="realtime-toast-container"

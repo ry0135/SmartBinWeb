@@ -290,6 +290,141 @@ public class TaskAppController {
     }
 
 
+    @PostMapping("/batch/report-issue")
+    public ResponseEntity<ApiMessage> reportBatchIssue(
+            @RequestParam int workerId,
+            @RequestParam String batchId,
+            @RequestParam String reason
+    ) {
+        try {
+            System.out.println("📢 Báo cáo sự cố batch — WorkerId=" + workerId + " | BatchId=" + batchId);
+
+            // 1. Lấy danh sách task trong batch
+            List<Task> tasks = taskRepository.findTaskByBatchId(batchId);
+
+            if (tasks == null || tasks.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiMessage("NOT_FOUND",
+                                "Không tìm thấy nhiệm vụ nào trong batch " + batchId));
+            }
+
+            // 2. Chỉ chọn task KHÔNG HOÀN THÀNH
+            List<Task> needUpdate = tasks.stream()
+                    .filter(t -> !"COMPLETED".equalsIgnoreCase(t.getStatus()))
+                    .toList();
+
+            // Nếu tất cả task đã completed → không báo cáo sự cố được
+            if (needUpdate.isEmpty()) {
+                return ResponseEntity.ok(
+                        new ApiMessage(
+                                "NO_ACTION",
+                                "Tất cả task trong batch " + batchId + " đã hoàn thành — không có mục nào để báo cáo."
+                        )
+                );
+            }
+
+            // 3. Update task chưa hoàn thành → ISSUE
+            for (Task task : needUpdate) {
+                task.setStatus("ISSUE");
+                task.setIssueReason("Sự cố: " + reason);
+                taskRepository.save(task);
+            }
+
+            // 4. Notifications cho managers
+            Task sample = needUpdate.get(0);
+            int binId = sample.getBin().getBinID();
+
+            List<Account> managers = accountRepository.findManagersSameProvinceByBin(binId);
+
+            String message = "Batch " + batchId + " gặp sự cố. "
+                    + needUpdate.size() + " nhiệm vụ bị ảnh hưởng. Lý do: " + reason;
+
+            for (Account m : managers) {
+                Notification noti = new Notification();
+                noti.setReceiverId(m.getAccountId());
+                noti.setSenderId(workerId);
+                noti.setTitle("❗Báo cáo sự cố ");
+                noti.setMessage(message);
+                noti.setType("ISSUE_TASK");
+                noti.setRead(false);
+                noti.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")).toLocalDateTime());
+
+                notificationRepository.save(noti);
+            }
+
+            // 5. WebSocket realtime update
+            Map<String, Object> wsData = new HashMap<>();
+            wsData.put("type", "BATCH_ISSUE");
+            wsData.put("batchId", batchId);
+            wsData.put("reason", reason);
+            wsData.put("affectedTaskCount", needUpdate.size());
+
+            simpMessagingTemplate.convertAndSend("/topic/task-updates", wsData);
+
+            return ResponseEntity.ok(
+                    new ApiMessage(
+                            "SUCCESS",
+                            "Đã báo cáo sự cố cho " + needUpdate.size() +
+                                    " nhiệm vụ chưa hoàn thành trong batch " + batchId
+                    )
+            );
+
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi khi báo cáo batch: " + e.getMessage());
+            e.printStackTrace();
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiMessage("ERROR",
+                            "Lỗi server khi xử lý báo cáo batch: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * API 2: Báo cáo sự cố cho 1 task cụ thể
+     * POST /api/tasks/{taskId}/report-issue
+     */
+    @PutMapping("/{taskId}/report-issue")
+    public ResponseEntity<?> reportTaskIssue(
+            @PathVariable int taskId,
+            @RequestParam String reason) {
+
+        Task task = taskRepository.findById(taskId).orElse(null);
+        if (task == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("❌ Task không tồn tại");
+        }
+
+        task.setStatus("ISSUE");
+        task.setIssueReason(reason);
+        taskRepository.save(task);
+
+        // Gửi thông báo
+        List<Account> managers = accountRepository.findManagersSameProvinceByBin(task.getBin().getBinID());
+
+        for (Account manager : managers) {
+            Notification noti = new Notification();
+            noti.setReceiverId(manager.getAccountId());
+            noti.setSenderId(task.getAssignedTo() != null ? task.getAssignedTo().getAccountId() : null);
+            noti.setTitle("❗ Sự cố nhiệm vụ");
+            noti.setMessage("Thùng " + task.getBin().getBinCode() + " gặp sự cố: " + reason);
+            noti.setType("ISSUE_TASK");
+            noti.setRead(false);
+            noti.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")).toLocalDateTime());
+            notificationRepository.save(noti);
+        }
+        Map<String, Object> update = new HashMap<>();
+        update.put("taskId", taskId);
+        update.put("binCode", task.getBin().getBinCode());
+        update.put("status", "ISSUE");
+        update.put("reason", reason);
+        update.put("type", "TASK_ISSUE");
+
+        simpMessagingTemplate.convertAndSend("/topic/task-updates", update);
+
+        System.out.println(">>> Realtime sent: TASK_ISSUE");
+        return ResponseEntity.ok("Đã đánh dấu sự cố cho task " + taskId);
+    }
+
 
 }
 

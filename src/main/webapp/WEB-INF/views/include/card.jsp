@@ -7,6 +7,8 @@
         cursor: pointer;
         border-radius: 10px;
         border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
     }
 
     .stats-card-clickable:hover {
@@ -17,12 +19,6 @@
     .stats-card-clickable.active {
         transform: scale(0.98);
         box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
-    }
-
-    /* Hiệu ứng ripple */
-    .stats-card-clickable {
-        position: relative;
-        overflow: hidden;
     }
 
     .stats-card-clickable::after {
@@ -43,70 +39,33 @@
         height: 300px;
     }
 
-    /* Border màu cho các card */
-    .border-left-warning {
-        border-left: 4px solid #f6c23e !important;
-    }
+    /* Card Border Colors */
+    .border-left-warning { border-left: 4px solid #f6c23e !important; }
+    .border-left-info { border-left: 4px solid #36b9cc !important; }
+    .border-left-success { border-left: 4px solid #1cc88a !important; }
+    .border-left-danger { border-left: 4px solid #e74a3b !important; }
+    .border-left-issue { border-left: 4px solid #6f42c1 !important; } /* Purple */
 
-    .border-left-info {
-        border-left: 4px solid #36b9cc !important;
-    }
+    /* Text Colors */
+    .text-purple { color: #6f42c1 !important; }
 
-    .border-left-success {
-        border-left: 4px solid #1cc88a !important;
-    }
-
-    .border-left-danger {
-        border-left: 4px solid #e74a3b !important;
-    }
-
-    /* Icon hover effect */
-    .stats-card-clickable:hover .fa-2x {
-        transform: scale(1.1);
-        transition: transform 0.3s ease;
-    }
-
-    /* Text styling */
-    .text-xs {
-        font-size: 0.75rem;
-        letter-spacing: 0.5px;
-    }
-
-    .font-weight-bold {
-        font-weight: 700;
-    }
-
-    .text-gray-800 {
-        color: #5a5c69 !important;
-    }
-
-    .text-gray-300 {
-        color: #dddfeb !important;
-    }
-
-    /* Card body padding */
-    .stats-card-clickable .card-body {
-        padding: 1.25rem;
-    }
-
-    /* Link styling */
-    .text-decoration-none:hover {
-        text-decoration: none !important;
-    }
+    .text-xs { font-size: 0.75rem; letter-spacing: 0.5px; }
+    .font-weight-bold { font-weight: 700; }
+    .text-gray-800 { color: #5a5c69 !important; }
+    .text-gray-300 { color: #dddfeb !important; }
 </style>
 
 <div class="row g-4 mb-4">
-    <!-- Task đang mở -->
-    <div class="col-xl-3 col-md-6">
+
+    <!-- Task mở -->
+    <div class="col-xl-2 col-md-6">
         <a href="${pageContext.request.contextPath}/tasks/open" class="text-decoration-none">
-            <div class="card border-left-warning shadow h-100 stats-card-clickable"
-                 id="openTasksCard"
-                 title="Click để xem task đang mở">
+            <div class="card border-left-warning shadow h-100 stats-card-clickable">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Nhiệm vụ đang mở
+                                Nhiệm vụ mở
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 ${openBatches != null ? openBatches : 0}
@@ -122,11 +81,9 @@
     </div>
 
     <!-- Đang thực hiện -->
-    <div class="col-xl-3 col-md-6">
+    <div class="col-xl-2 col-md-6">
         <a href="${pageContext.request.contextPath}/tasks/doing" class="text-decoration-none">
-            <div class="card border-left-info shadow h-100 stats-card-clickable"
-                 id="doingTasksCard"
-                 title="Click để xem task đang thực hiện">
+            <div class="card border-left-info shadow h-100 stats-card-clickable">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
@@ -146,17 +103,38 @@
         </a>
     </div>
 
+    <!-- Batch gặp sự cố (MỚI) -->
+    <div class="col-xl-2 col-md-6">
+        <a href="${pageContext.request.contextPath}/tasks/issue" class="text-decoration-none">
+            <div class="card border-left-issue shadow h-100 stats-card-clickable">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-purple text-uppercase mb-1">
+                                Gặp sự cố
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                ${issueBatches != null ? issueBatches : 0}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
     <!-- Đã hoàn thành -->
-    <div class="col-xl-3 col-md-6">
+    <div class="col-xl-2 col-md-6">
         <a href="${pageContext.request.contextPath}/tasks/completed" class="text-decoration-none">
-            <div class="card border-left-success shadow h-100 stats-card-clickable"
-                 id="completedTasksCard"
-                 title="Click để xem task đã hoàn thành">
+            <div class="card border-left-success shadow h-100 stats-card-clickable">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Đã hoàn thành
+                                Hoàn thành
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 ${completedBatches != null ? completedBatches : 0}
@@ -171,17 +149,15 @@
         </a>
     </div>
 
-    <!-- Task Cancel -->
-    <div class="col-xl-3 col-md-6">
+    <!-- Bị hủy -->
+    <div class="col-xl-2 col-md-6">
         <a href="${pageContext.request.contextPath}/tasks/cancel" class="text-decoration-none">
-            <div class="card border-left-danger shadow h-100 stats-card-clickable"
-                 id="cancelTasksCard"
-                 title="Click để xem task đã hủy">
+            <div class="card border-left-danger shadow h-100 stats-card-clickable">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                Nhiệm vụ đã hủy
+                                Bị hủy
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 ${cancelBatches != null ? cancelBatches : 0}
@@ -195,65 +171,33 @@
             </div>
         </a>
     </div>
-</div>
 
+</div>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Lấy tất cả các card
         const cards = document.querySelectorAll('.stats-card-clickable');
 
-        // Thêm sự kiện click cho mỗi card
         cards.forEach(card => {
-            card.addEventListener('click', function(e) {
-                // Xóa class active từ tất cả các card
+            card.addEventListener('click', function() {
                 cards.forEach(c => c.classList.remove('active'));
-
-                // Thêm class active cho card được click
                 this.classList.add('active');
-
-                // Tự động remove class active sau 300ms
-                setTimeout(() => {
-                    this.classList.remove('active');
-                }, 300);
-            });
-
-            // Thêm hiệu ứng hover cho icon
-            card.addEventListener('mouseenter', function() {
-                const icon = this.querySelector('.fa-2x');
-                if (icon) {
-                    icon.style.transform = 'scale(1.1) rotate(5deg)';
-                }
-            });
-
-            card.addEventListener('mouseleave', function() {
-                const icon = this.querySelector('.fa-2x');
-                if (icon) {
-                    icon.style.transform = 'scale(1) rotate(0deg)';
-                }
+                setTimeout(() => this.classList.remove('active'), 300);
             });
         });
 
-        // Thêm sự kiện cho phím tắt (1-4)
-        document.addEventListener('keydown', function(e) {
-            if (e.key >= '1' && e.key <= '4') {
-                const index = parseInt(e.key) - 1;
-                if (cards[index]) {
-                    const link = cards[index].closest('a');
-                    if (link) {
-                        link.click();
-                    }
-                }
-            }
-        });
-
-        // Highlight card active dựa trên URL hiện tại
+        // Highlight theo URL
         const currentPath = window.location.pathname;
+
         cards.forEach(card => {
             const link = card.closest('a');
             if (link && currentPath.includes(link.getAttribute('href'))) {
-                card.style.borderColor = card.classList.contains('border-left-warning') ? '#f6c23e' :
-                    card.classList.contains('border-left-info') ? '#36b9cc' :
-                        card.classList.contains('border-left-success') ? '#1cc88a' : '#e74a3b';
+
+                if (card.classList.contains('border-left-warning')) card.style.borderColor = '#f6c23e';
+                if (card.classList.contains('border-left-info')) card.style.borderColor = '#36b9cc';
+                if (card.classList.contains('border-left-success')) card.style.borderColor = '#1cc88a';
+                if (card.classList.contains('border-left-danger')) card.style.borderColor = '#e74a3b';
+                if (card.classList.contains('border-left-issue')) card.style.borderColor = '#6f42c1';
+
                 card.style.borderWidth = '3px';
             }
         });

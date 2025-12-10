@@ -2,7 +2,7 @@ name: Deploy SmartBin
 
 on:
   push:
-    branches: [ "main" ]   # Deploy khi push vào main
+    branches: [ "main" ]   # Push lên nhánh main sẽ tự động deploy
 
 jobs:
   deploy:
@@ -15,12 +15,12 @@ jobs:
       - name: 🔧 Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
           distribution: 'temurin'
+          java-version: '17'
 
       - name: 🏗️ Build WAR file
         run: |
-          cd smartbin
+          echo "Building WAR..."
           mvn -B clean package -DskipTests
 
       - name: 🔑 Setup SSH Key
@@ -29,20 +29,31 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: 📤 Upload ROOT.war to Server
+      - name: 🧪 Test SSH Connection
         run: |
-          scp -P ${{ secrets.SSH_PORT }} \
-          smartbin/target/ROOT.war \
-          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/home/ubuntu/smartbin/smartbin/smartbin-deploy/
-
-      - name: 🚀 Deploy on Server
-        run: |
+          echo "Testing SSH..."
           ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
-          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} \
-          "cd /home/ubuntu/smartbin/smartbin/smartbin-deploy && \
-           sudo docker compose down && \
-           sudo docker compose up -d --build && \
-           sudo docker system prune -f"
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH OK'"
+
+      - name: 📤 Upload WAR to Server
+        run: |
+          echo "Uploading WAR..."
+          scp -o StrictHostKeyChecking=no -P ${{ secrets.SSH_PORT }} \
+            target/*.war \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/home/ubuntu/smartbin/smartbin/smartbin-deploy/ROOT.war
+
+      - name: 🚀 Deploy on Remote Server
+        run: |
+          echo "Deploy on remote server..."
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
+              cd /home/ubuntu/smartbin/smartbin/smartbin-deploy && \
+              # Ghi FIREBASE_B64 vào file .env cho docker-compose dùng
+              echo 'FIREBASE_B64=${{ secrets.FIREBASE_B64 }}' > .env && \
+              chmod 600 .env && \
+              chmod +x deploy.sh && \
+              ./deploy.sh
+            "
 
       - name: 🎉 Done
         run: echo "Deploy SmartBin completed!"

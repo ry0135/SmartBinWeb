@@ -1,6 +1,6 @@
 console.log("Opening Web Socket from websocket.js...");
 
-var socket = new SockJS('https://smartbin-vn.duckdns.org/ws-bin-sockjs');
+var socket = new SockJS('https://smartbinx.duckdns.org/ws-bin-sockjs');
 let stompClient = Stomp.over(socket);
 
 // ================= CONNECT ==================

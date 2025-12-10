@@ -182,6 +182,8 @@ WHERE r.binId = :binId
             @Param("workerId") int workerId,
             @Param("taskId") int taskId
     );
+    @Query("SELECT COUNT(r) FROM Report r WHERE r.status = 'RECEIVED'")
+    long countNewReports();
 
 }
 

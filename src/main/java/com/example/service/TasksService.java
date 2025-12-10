@@ -381,46 +381,68 @@ public class TasksService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        // Tổng số batch
         batchStats.put("totalBatches", (long) allBatchIds.size());
 
-        // Đếm batch theo từng trạng thái
         long openBatches = 0;
         long doingBatches = 0;
         long completedBatches = 0;
         long cancelBatches = 0;
+        long issueBatches = 0;
 
         for (String batchId : allBatchIds) {
-            List<Task> batchTasks = taskRepository.findByBatchId(batchId);
-            if (!batchTasks.isEmpty()) {
-                // Đếm số lượng task theo từng trạng thái trong batch
-                long openCount = batchTasks.stream().filter(t -> "OPEN".equals(t.getStatus())).count();
-                long doingCount = batchTasks.stream().filter(t -> "DOING".equals(t.getStatus())).count();
-                long completedCount = batchTasks.stream().filter(t -> "COMPLETED".equals(t.getStatus())).count();
-                long cancelCount = batchTasks.stream().filter(t -> "CANCEL".equals(t.getStatus())).count();
-                long totalTasks = batchTasks.size();
 
-                // Logic xác định trạng thái batch
-                if (cancelCount > 0) {
-                    // Nếu có task bị cancel, batch là CANCEL
-                    cancelBatches++;
-                } else if (doingCount > 0) {
-                    // Nếu có ít nhất 1 task đang DOING, batch là DOING (ưu tiên cao nhất)
-                    doingBatches++;
-                } else if (completedCount == totalTasks) {
-                    // Chỉ khi TẤT CẢ task đều COMPLETED, batch mới là COMPLETED
-                    completedBatches++;
-                } else if (openCount > 0) {
-                    // Nếu có task OPEN và không có task nào DOING/CANCEL
-                    openBatches++;
-                }
+            List<Task> batchTasks = taskRepository.findByBatchId(batchId);
+            if (batchTasks.isEmpty()) continue;
+
+            long total = batchTasks.size();
+            long openCount = batchTasks.stream().filter(t -> "OPEN".equals(t.getStatus())).count();
+            long doingCount = batchTasks.stream().filter(t -> "DOING".equals(t.getStatus())).count();
+            long completedCount = batchTasks.stream().filter(t -> "COMPLETED".equals(t.getStatus())).count();
+            long cancelCount = batchTasks.stream().filter(t -> "CANCEL".equals(t.getStatus())).count();
+            long issueCount = batchTasks.stream().filter(t -> "ISSUE".equals(t.getStatus())).count();
+
+            // ================== ÁP DỤNG LOGIC MỚI ==================
+
+            // ⚠️ 1. Ưu tiên ISSUE
+            if (issueCount > 0) {
+                issueBatches++;
+                continue;
             }
+
+            // 🔄 2. Nếu có task đang làm → DOING
+            if (doingCount > 0) {
+                doingBatches++;
+                continue;
+            }
+
+            // 🟡 3. Nếu còn task OPEN → OPEN
+            if (openCount > 0) {
+                openBatches++;
+                continue;
+            }
+
+            // ⭐ 4. Nếu tất cả task là COMPLETED hoặc CANCEL → COMPLETED
+            if (completedCount + cancelCount == total && completedCount > 0) {
+                completedBatches++;
+                continue;
+            }
+
+            // ❌ 5. Nếu tất cả đều CANCEL → CANCEL
+            if (cancelCount == total) {
+                cancelBatches++;
+                continue;
+            }
+
+            // Nếu không thuộc loại nào (trường hợp hiếm)
+            // → có thể đưa vào CANCEL hoặc UNKNOWN tùy nghiệp vụ
+            cancelBatches++;
         }
 
         batchStats.put("openBatches", openBatches);
         batchStats.put("doingBatches", doingBatches);
         batchStats.put("completedBatches", completedBatches);
         batchStats.put("cancelBatches", cancelBatches);
+        batchStats.put("issueBatches", issueBatches);
 
         return batchStats;
     }
@@ -428,28 +450,136 @@ public class TasksService {
     // Thêm phương thức để lấy trạng thái của một batch cụ thể
     public String getBatchStatus(String batchId) {
         List<Task> batchTasks = taskRepository.findByBatchId(batchId);
+
         if (batchTasks.isEmpty()) {
             return "UNKNOWN";
         }
 
-        // Đếm số lượng task theo từng trạng thái
+        long totalTasks = batchTasks.size();
+
         long openCount = batchTasks.stream().filter(t -> "OPEN".equals(t.getStatus())).count();
         long doingCount = batchTasks.stream().filter(t -> "DOING".equals(t.getStatus())).count();
         long completedCount = batchTasks.stream().filter(t -> "COMPLETED".equals(t.getStatus())).count();
         long cancelCount = batchTasks.stream().filter(t -> "CANCEL".equals(t.getStatus())).count();
-        long totalTasks = batchTasks.size();
+        long issueCount = batchTasks.stream().filter(t -> "ISSUE".equals(t.getStatus())).count();
 
-        // Logic xác định trạng thái batch
-        if (cancelCount > 0) {
-            return "CANCEL";
-        } else if (doingCount > 0) {
-            return "DOING";
-        } else if (completedCount == totalTasks) {
-            return "COMPLETED";
-        } else if (openCount > 0) {
-            return "OPEN";
-        } else {
-            return "UNKNOWN";
+        // ⚠️ Ưu tiên ISSUE
+        if (issueCount > 0) {
+            return "ISSUE";
         }
+
+        // 🔄 Ưu tiên DOING
+        if (doingCount > 0) {
+            return "DOING";
+        }
+
+        // 🟡 Nếu có OPEN → OPEN
+        if (openCount > 0) {
+            return "OPEN";
+        }
+
+        // ⭐ Trường hợp bạn yêu cầu:
+        // Nếu tất cả task là COMPLETED hoặc CANCEL → vẫn xem batch là COMPLETED
+        if (completedCount + cancelCount == totalTasks && completedCount > 0) {
+            return "COMPLETED";
+        }
+
+        // Nếu tất cả đều CANCEL → CANCEL
+        if (cancelCount == totalTasks) {
+            return "CANCEL";
+        }
+
+        return "UNKNOWN";
     }
+
+    public List<Task> getIssueTasks() {
+        return taskRepository.findIssueTasks();
+    }
+
+    public List<Task> getIssueTasksByBatch(String batchId) {
+        return taskRepository.findIssueTasksByBatch(batchId);
+    }
+
+    public List<Task> getTasksByIds(List<Integer> ids) {
+        return taskRepository.findAllById(ids);
+    }
+
+    @Transactional
+    public void retryBatch(String batchId, int newWorkerId, String notes) throws Exception {
+
+        List<Task> oldTasks = taskRepository.findByBatchId(batchId);
+
+        if (oldTasks.isEmpty()) {
+            throw new RuntimeException("Batch không tồn tại");
+        }
+
+        // 🔴 CHỈ LẤY NHỮNG TASK CÓ TRẠNG THÁI "ISSUE" (bỏ qua COMPLETED)
+        List<Task> issueTasks = oldTasks.stream()
+                .filter(task -> "ISSUE".equals(task.getStatus()))
+                .collect(Collectors.toList());
+
+        if (issueTasks.isEmpty()) {
+            throw new RuntimeException("Không có task ISSUE nào trong batch này để giao lại");
+        }
+
+        // Kiểm tra xem có task COMPLETED không
+        boolean hasCompletedTasks = oldTasks.stream()
+                .anyMatch(task -> "COMPLETED".equals(task.getStatus()));
+
+        Account worker = accountRepository.findById(newWorkerId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên"));
+
+        // Tạo batch mới
+        String newBatchId = "RETRY_" + batchId + "_" + System.currentTimeMillis();
+
+        // 1. Đánh dấu task ISSUE cũ là CANCELLED
+        for (Task issueTask : issueTasks) {
+            issueTask.setStatus("CANCEL");
+            issueTask.setNotes("Đã giao lại task lỗi - " +
+                    (notes != null ? notes : "Giao lại tự động"));
+            taskRepository.save(issueTask);
+        }
+
+        // 2. Tạo task mới từ các task ISSUE
+        List<Task> newTasks = new ArrayList<>();
+        for (Task oldTask : issueTasks) {
+            Task newTask = new Task();
+            newTask.setBin(oldTask.getBin());
+            newTask.setAssignedTo(worker);
+            newTask.setTaskType(oldTask.getTaskType());
+            newTask.setPriority(oldTask.getPriority());
+            newTask.setNotes(notes == null ?
+                    "Giao lại từ task lỗi #" + oldTask.getTaskID() +
+                            (hasCompletedTasks ? " (Một số task khác đã hoàn thành)" : "")
+                    : notes);
+            newTask.setBatchId(newBatchId);
+            newTask.setStatus("OPEN");
+            newTask.setCreatedAt(new Date());
+
+            newTasks.add(taskRepository.save(newTask));
+        }
+
+        // 3. Gửi thông báo FCM
+        String token = accountService.getFcmTokenByWorkerId(newWorkerId);
+        if (token != null && !token.isEmpty()) {
+            fcmService.sendNotification(token,
+                    "Giao lại nhiệm vụ",
+                    "Bạn được giao " + newTasks.size() + " nhiệm vụ từ batch " + batchId +
+                            (hasCompletedTasks ? " (Một số task đã hoàn thành)" : ""),
+                    newBatchId);
+        }
+
+        // 4. Gửi thông báo trong hệ thống
+        Notification noti = new Notification();
+        noti.setReceiverId(newWorkerId);
+        noti.setSenderId(1); // ID của admin/hệ thống
+        noti.setTitle("Giao lại batch lỗi");
+        noti.setMessage("Bạn được giao lại " + newTasks.size() + " nhiệm vụ chưa hoàn thành từ batch " + batchId);
+        noti.setType("TASK_RETRY");
+        noti.setRead(false);
+        noti.setCreatedAt(LocalDateTime.now());
+
+        notificationRepository.save(noti);
+    }
+
 }

@@ -164,6 +164,10 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
 
         @Query("SELECT t FROM Task t WHERE t.batchId = :batchId")
         List<Task> findTaskByBatchId(@Param("batchId") String batchId);
+        @Query("SELECT t FROM Task t WHERE t.status = 'ISSUE' ORDER BY t.createdAt DESC")
+        List<Task> findIssueTasks();
+        @Query("SELECT t FROM Task t WHERE t.batchId = :batchId AND t.status = 'ISSUE'")
+        List<Task> findIssueTasksByBatch(@Param("batchId") String batchId);
 
 }
 

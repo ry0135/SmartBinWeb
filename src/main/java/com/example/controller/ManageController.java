@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.model.Bin;
 import com.example.model.Notification;
 import com.example.model.Ward;
+import com.example.repository.ReportRepository;
 import com.example.service.BinService;
 import com.example.service.NotificationService;
 import com.example.service.TasksService;
@@ -28,6 +29,9 @@ public class ManageController {
 
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private ReportRepository reportRepository;
+
     @GetMapping("/manage")
     public String manage(Model model, HttpSession session) {
         List<Bin> bins = binService.getAllBins();
@@ -71,6 +75,9 @@ public class ManageController {
         Integer currentAccountId = (Integer) session.getAttribute("currentAccountId");
 
         List<Notification> notifications = notificationService.getNotificationsByReceiverId(currentAccountId);
+        long newReports = reportRepository.countByStatus("RECEIVED");
+
+        model.addAttribute("newReports", newReports);
 
         model.addAttribute("notifications", notifications);
         model.addAttribute("count", notifications.size());

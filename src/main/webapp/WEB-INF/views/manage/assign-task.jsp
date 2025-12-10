@@ -372,8 +372,8 @@
 
 <script>
   // Pagination configuration
-  const BIN_ITEMS_PER_PAGE = 8;
-  const WORKER_ITEMS_PER_PAGE = 8;
+  const BIN_ITEMS_PER_PAGE = 3;
+  const WORKER_ITEMS_PER_PAGE = 3;
   let currentBinPage = 1;
   let currentWorkerPage = 1;
 

@@ -66,6 +66,8 @@ public class Task {
     @Column(name = "collectedvolume")
     private Double collectedVolume;
 
+    @Column(name = "IssueReason")
+    private String issueReason;
     // Constructors
     public Task() {
         this.createdAt = new Date();
@@ -78,6 +80,22 @@ public class Task {
 
     public Bin getBin() { return bin; }
     public void setBin(Bin bin) { this.bin = bin; }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getIssueReason() {
+        return issueReason;
+    }
+
+    public void setIssueReason(String issueReason) {
+        this.issueReason = issueReason;
+    }
 
     public Account getAssignedTo() { return assignedTo; }
     public void setAssignedTo(Account assignedTo) { this.assignedTo = assignedTo; }

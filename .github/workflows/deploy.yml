@@ -2,7 +2,7 @@ name: Deploy SmartBin
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ]   # Push lên nhánh main sẽ tự động deploy
 
 jobs:
   deploy:
@@ -33,7 +33,7 @@ jobs:
         run: |
           echo "Testing SSH..."
           ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
-          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH OK'"
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH OK'"
 
       - name: 📤 Upload WAR to Server
         run: |
@@ -44,12 +44,16 @@ jobs:
 
       - name: 🚀 Deploy on Remote Server
         run: |
+          echo "Deploy on remote server..."
           ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} \
-          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
-            cd /home/ubuntu/smartbin/smartbin/smartbin-deploy &&
-            chmod +x deploy.sh &&
-            ./deploy.sh
-          "
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
+              cd /home/ubuntu/smartbin/smartbin/smartbin-deploy && \
+              # Ghi FIREBASE_B64 vào file .env cho docker-compose dùng
+              echo 'FIREBASE_B64=${{ secrets.FIREBASE_B64 }}' > .env && \
+              chmod 600 .env && \
+              chmod +x deploy.sh && \
+              ./deploy.sh
+            "
 
       - name: 🎉 Done
         run: echo "Deploy SmartBin completed!"

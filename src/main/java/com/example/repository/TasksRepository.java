@@ -36,41 +36,34 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
         List<Task> findOpenTasksByWorker(@Param("workerId") int workerId);
 
         // 1. Lấy danh sách batch (gom nhóm)
-        @Query("SELECT new com.example.dto.TaskSummaryDTO(" +
+       @Query("SELECT new com.example.dto.TaskSummaryDTO(" +
            "t.batchId, " +
            "t.assignedTo.accountId, " +
            "MAX(t.notes), " +
            "MIN(t.priority), " +
-           // Logic xác định trạng thái ưu tiên mới: CANCELLED(4) > DOING(3) > COMPLETED(2) > ISSUE(1)
+           // Logic xác định trạng thái tổng hợp (Giữ nguyên)
            "CASE " +
-               // 1. Check CANCELLED (4) - Ưu tiên cao nhất
-               "WHEN MAX(CASE " +
-                    "WHEN t.status = 'CANCELLED' THEN 4 " +
-                    "WHEN t.status = 'DOING' THEN 3 " +
-                    "WHEN t.status = 'COMPLETED' THEN 2 " +
-                    "ELSE 1 END) = 4 THEN 'CANCELLED' " +
-               
-               // 2. Check DOING (3)
-               "WHEN MAX(CASE " +
-                    "WHEN t.status = 'CANCELLED' THEN 4 " +
-                    "WHEN t.status = 'DOING' THEN 3 " +
-                    "WHEN t.status = 'COMPLETED' THEN 2 " +
-                    "ELSE 1 END) = 3 THEN 'DOING' " +
-
-               // 3. Check COMPLETED (2)
-               "WHEN MAX(CASE " +
-                    "WHEN t.status = 'CANCELLED' THEN 4 " +
-                    "WHEN t.status = 'DOING' THEN 3 " +
-                    "WHEN t.status = 'COMPLETED' THEN 2 " +
-                    "ELSE 1 END) = 2 THEN 'COMPLETED' " +
-               
-               // 4. Mặc định là ISSUE (1)
-               "ELSE 'ISSUE' " +
+               "WHEN MAX(CASE WHEN t.status = 'CANCELLED' THEN 4 WHEN t.status = 'DOING' THEN 3 WHEN t.status = 'COMPLETED' THEN 2 WHEN t.status = 'ISSUE' THEN 1 ELSE 0 END) = 4 THEN 'CANCELLED' " +
+               "WHEN MAX(CASE WHEN t.status = 'CANCELLED' THEN 4 WHEN t.status = 'DOING' THEN 3 WHEN t.status = 'COMPLETED' THEN 2 WHEN t.status = 'ISSUE' THEN 1 ELSE 0 END) = 3 THEN 'DOING' " +
+               "WHEN MAX(CASE WHEN t.status = 'CANCELLED' THEN 4 WHEN t.status = 'DOING' THEN 3 WHEN t.status = 'COMPLETED' THEN 2 WHEN t.status = 'ISSUE' THEN 1 ELSE 0 END) = 2 THEN 'COMPLETED' " +
+               "WHEN MAX(CASE WHEN t.status = 'CANCELLED' THEN 4 WHEN t.status = 'DOING' THEN 3 WHEN t.status = 'COMPLETED' THEN 2 WHEN t.status = 'ISSUE' THEN 1 ELSE 0 END) = 1 THEN 'ISSUE' " +
+               "ELSE 'OPEN' " +
            "END, " +
            "MIN(t.createdAt)) " +
            "FROM Task t " +
            "WHERE t.assignedTo.accountId = :assignedTo " +
-           "GROUP BY t.batchId, t.assignedTo.accountId")
+           "GROUP BY t.batchId, t.assignedTo.accountId " +
+           // -----------------------------------------------------------
+           // THÊM MỆNH ĐỀ ORDER BY: Sắp xếp TĂNG DẦN theo giá trị số.
+           // Vì OPEN = 0 (thấp nhất), nó sẽ lên đầu tiên.
+           // -----------------------------------------------------------
+           "ORDER BY MAX(CASE " +
+               "WHEN t.status = 'CANCELLED' THEN 4 " +
+               "WHEN t.status = 'DOING' THEN 3 " +
+               "WHEN t.status = 'COMPLETED' THEN 2 " +
+               "WHEN t.status = 'ISSUE' THEN 1 " +
+               "ELSE 0 END) ASC" // Sắp xếp tăng dần (0 lên đầu)
+)
 List<TaskSummaryDTO> findTaskSummaryByAssignedTo(@Param("assignedTo") int assignedTo);
 
 

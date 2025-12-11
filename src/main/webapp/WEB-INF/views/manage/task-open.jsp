@@ -7,11 +7,82 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .action-btn {
-            transition: transform 0.2s;
+        body {
+            background-color: #f8f9fa;
         }
+
+        .action-btn {
+            transition: all 0.3s ease;
+        }
+
         .action-btn:hover {
-            transform: scale(1.05);
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+        }
+
+        .card-header {
+            border-radius: 12px 12px 0 0 !important;
+        }
+
+        .table-hover tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(40, 167, 69, 0.05);
+            transform: scale(1.01);
+        }
+
+        .badge {
+            padding: 0.5rem 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Pagination Styles */
+        .pagination {
+            gap: 0.25rem;
+        }
+
+        .page-item .page-link {
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            color: #28a745;
+            transition: all 0.3s ease;
+            margin: 0 2px;
+        }
+
+        .page-item .page-link:hover {
+            background-color: #28a745;
+            color: white;
+            border-color: #28a745;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .page-item.active .page-link {
+            background-color: #28a745;
+            border-color: #28a745;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+        }
+
+        .page-item.disabled .page-link {
+            opacity: 0.5;
+        }
+
+        /* Priority badges animation */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .badge.bg-danger {
+            animation: pulse 2s infinite;
         }
     </style>
 </head>
@@ -73,22 +144,23 @@
                                         </c:choose>
                                     </td>
                                     <td class="text-center">
-    <span class="badge ${task.taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${task.taskType}">
-        <c:choose>
-            <c:when test="${task.taskType == 'COLLECTION'}">Thu gom</c:when>
-            <c:when test="${task.taskType == 'MAINTENANCE'}">Bảo trì</c:when>
-            <c:otherwise>${task.taskType}</c:otherwise>
-        </c:choose>
-    </span>
+                                        <span class="badge ${task.taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${task.taskType}">
+                                            <c:choose>
+                                                <c:when test="${task.taskType == 'COLLECTION'}">Thu gom</c:when>
+                                                <c:when test="${task.taskType == 'MAINTENANCE'}">Bảo trì</c:when>
+                                                <c:otherwise>${task.taskType}</c:otherwise>
+                                            </c:choose>
+                                        </span>
                                     </td>
                                     <td class="text-center">
+                                        <!-- ĐÃ ĐẢO NGƯỢC: 5 = CAO NHẤT, 1 = THẤP NHẤT -->
                                         <c:choose>
-                                            <c:when test="${task.priority == 1}">
+                                            <c:when test="${task.priority == 5}">
                                                 <span class="badge bg-danger fs-6">
                                                     <i class="fas fa-exclamation-circle me-1"></i>Cực cao
                                                 </span>
                                             </c:when>
-                                            <c:when test="${task.priority == 2}">
+                                            <c:when test="${task.priority == 4}">
                                                 <span class="badge bg-warning text-dark fs-6">
                                                     <i class="fas fa-arrow-up me-1"></i>Cao
                                                 </span>
@@ -98,16 +170,21 @@
                                                     <i class="fas fa-minus me-1"></i>Trung bình
                                                 </span>
                                             </c:when>
-                                            <c:when test="${task.priority == 4}">
+                                            <c:when test="${task.priority == 2}">
                                                 <span class="badge bg-secondary fs-6">
                                                     <i class="fas fa-arrow-down me-1"></i>Thấp
                                                 </span>
                                             </c:when>
-                                            <c:when test="${task.priority == 5}">
+                                            <c:when test="${task.priority == 1}">
                                                 <span class="badge bg-dark fs-6">
                                                     <i class="fas fa-level-down-alt me-1"></i>Rất thấp
                                                 </span>
                                             </c:when>
+                                            <c:otherwise>
+                                                <span class="badge bg-light text-dark fs-6">
+                                                        ${task.priority}
+                                                </span>
+                                            </c:otherwise>
                                         </c:choose>
                                     </td>
                                     <td class="text-center">
@@ -134,7 +211,6 @@
                                         </small>
                                     </td>
                                     <td class="text-center">
-
                                         <button class="btn btn-sm btn-outline-danger action-btn"
                                                 onclick="deleteTask(${task.taskID})"
                                                 title="Xóa">
@@ -155,54 +231,70 @@
                         </table>
                     </div>
                 </div>
-                <c:if test="${totalPages > 1}">
-                    <div class="card-footer bg-white">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="text-muted">
-                                <c:choose>
-                                    <c:when test="${not empty batchTasks}">
-                                        Hiển thị <strong>${(currentPage - 1) * pageSize + 1}</strong>
-                                        đến <strong>${(currentPage - 1) * pageSize + batchTasks.size()}</strong>
-                                        trong tổng số <strong>${totalTasks}</strong> task
-                                    </c:when>
-                                    <c:otherwise>
-                                        Tổng số <strong>0</strong> task
-                                    </c:otherwise>
-                                </c:choose>
-                            </div>
+
+                <!-- PHÂN TRANG CẢI TIẾN -->
+                <div class="card-footer bg-white border-top">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <!-- Thông tin số lượng -->
+                        <div class="text-muted">
+                            <c:choose>
+                                <c:when test="${not empty batchTasks}">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Hiển thị <strong class="text-success">${(currentPage - 1) * pageSize + 1}</strong>
+                                    đến <strong class="text-success">${(currentPage - 1) * pageSize + batchTasks.size()}</strong>
+                                    trong tổng số <strong class="text-success">${totalTasks}</strong> task
+                                </c:when>
+                                <c:otherwise>
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Tổng số <strong>0</strong> task
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+
+                        <!-- Phân trang -->
+                        <c:if test="${totalPages > 1}">
                             <nav aria-label="Phân trang">
                                 <ul class="pagination mb-0">
+                                    <!-- First Page -->
+                                    <li class="page-item ${currentPage <= 1 ? 'disabled' : ''}">
+                                        <a class="page-link" href="?batchId=${batchId}&page=1" aria-label="First" title="Trang đầu">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+
                                     <!-- Previous -->
                                     <li class="page-item ${currentPage <= 1 ? 'disabled' : ''}">
-                                        <a class="page-link" href="?batchId=${batchId}&page=${currentPage - 1}" aria-label="Previous">
+                                        <a class="page-link" href="?batchId=${batchId}&page=${currentPage - 1}" aria-label="Previous" title="Trang trước">
                                             <i class="fas fa-chevron-left"></i>
                                         </a>
                                     </li>
 
-                                    <!-- First page -->
-                                    <c:if test="${currentPage > 3}">
+                                    <!-- Page Numbers -->
+                                    <c:set var="startPage" value="${currentPage - 2 < 1 ? 1 : currentPage - 2}" />
+                                    <c:set var="endPage" value="${currentPage + 2 > totalPages ? totalPages : currentPage + 2}" />
+
+                                    <!-- First page if not in range -->
+                                    <c:if test="${startPage > 1}">
                                         <li class="page-item">
                                             <a class="page-link" href="?batchId=${batchId}&page=1">1</a>
                                         </li>
-                                        <c:if test="${currentPage > 4}">
+                                        <c:if test="${startPage > 2}">
                                             <li class="page-item disabled">
                                                 <span class="page-link">...</span>
                                             </li>
                                         </c:if>
                                     </c:if>
 
-                                    <!-- Page numbers -->
-                                    <c:forEach begin="${currentPage - 2 < 1 ? 1 : currentPage - 2}"
-                                               end="${currentPage + 2 > totalPages ? totalPages : currentPage + 2}"
-                                               var="i">
+                                    <!-- Page range -->
+                                    <c:forEach begin="${startPage}" end="${endPage}" var="i">
                                         <li class="page-item ${currentPage == i ? 'active' : ''}">
                                             <a class="page-link" href="?batchId=${batchId}&page=${i}">${i}</a>
                                         </li>
                                     </c:forEach>
 
-                                    <!-- Last page -->
-                                    <c:if test="${currentPage < totalPages - 2}">
-                                        <c:if test="${currentPage < totalPages - 3}">
+                                    <!-- Last page if not in range -->
+                                    <c:if test="${endPage < totalPages}">
+                                        <c:if test="${endPage < totalPages - 1}">
                                             <li class="page-item disabled">
                                                 <span class="page-link">...</span>
                                             </li>
@@ -214,15 +306,35 @@
 
                                     <!-- Next -->
                                     <li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
-                                        <a class="page-link" href="?batchId=${batchId}&page=${currentPage + 1}" aria-label="Next">
+                                        <a class="page-link" href="?batchId=${batchId}&page=${currentPage + 1}" aria-label="Next" title="Trang sau">
                                             <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+
+                                    <!-- Last Page -->
+                                    <li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
+                                        <a class="page-link" href="?batchId=${batchId}&page=${totalPages}" aria-label="Last" title="Trang cuối">
+                                            <i class="fas fa-angle-double-right"></i>
                                         </a>
                                     </li>
                                 </ul>
                             </nav>
-                        </div>
+                        </c:if>
+
+                        <!-- Page Size Selector (Optional) -->
+                        <c:if test="${totalTasks > 10}">
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="text-muted mb-0 small">Hiển thị:</label>
+                                <select class="form-select form-select-sm" style="width: auto;" onchange="changePageSize(this.value)">
+                                    <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+                                    <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
+                                    <option value="50" ${pageSize == 50 ? 'selected' : ''}>50</option>
+                                    <option value="100" ${pageSize == 100 ? 'selected' : ''}>100</option>
+                                </select>
+                            </div>
+                        </c:if>
                     </div>
-                </c:if>
+                </div>
             </div>
         </main>
     </div>
@@ -231,7 +343,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     function updateTask(taskId) {
-        // Chuyển hướng đến trang cập nhật task
         window.location.href = '${pageContext.request.contextPath}/tasks/edit/' + taskId;
     }
 
@@ -245,15 +356,15 @@
             })
                 .then(response => {
                     if(response.ok) {
-                        alert('Xóa task thành công!');
-                        location.reload();
+                        showSuccessAlert('Xóa task thành công!');
+                        setTimeout(() => location.reload(), 1000);
                     } else {
-                        alert('Xóa task thất bại!');
+                        showErrorAlert('Xóa task thất bại!');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Có lỗi xảy ra!');
+                    showErrorAlert('Có lỗi xảy ra!');
                 });
         }
     }
@@ -268,17 +379,50 @@
             })
                 .then(response => {
                     if(response.ok) {
-                        alert('Xóa batch thành công!');
-                        window.location.href = '${pageContext.request.contextPath}/tasks/management';
+                        showSuccessAlert('Xóa batch thành công!');
+                        setTimeout(() => {
+                            window.location.href = '${pageContext.request.contextPath}/tasks/management';
+                        }, 1000);
                     } else {
-                        alert('Xóa batch thất bại!');
+                        showErrorAlert('Xóa batch thất bại!');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Có lỗi xảy ra!');
+                    showErrorAlert('Có lỗi xảy ra!');
                 });
         }
+    }
+
+    function changePageSize(size) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('pageSize', size);
+        urlParams.set('page', '1'); // Reset về trang 1
+        window.location.search = urlParams.toString();
+    }
+
+    function showSuccessAlert(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
+    }
+
+    function showErrorAlert(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            <i class="fas fa-exclamation-circle me-2"></i>${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
     }
 </script>
 </body>

@@ -364,8 +364,7 @@ public class TaskAppController {
             return ResponseEntity.ok(
                     new ApiMessage(
                             "SUCCESS",
-                            "Đã báo cáo sự cố cho " + needUpdate.size() +
-                                    " nhiệm vụ chưa hoàn thành trong batch " + batchId
+                            "Đã báo cáo sự cố thành công "
                     )
             );
 
@@ -422,7 +421,9 @@ public class TaskAppController {
         simpMessagingTemplate.convertAndSend("/topic/task-updates", update);
 
         System.out.println(">>> Realtime sent: TASK_ISSUE");
-        return ResponseEntity.ok("Đã đánh dấu sự cố cho task " + taskId);
+        return ResponseEntity.ok(
+                new ApiMessage("SUCCESS", "Đã báo cáo sự cố thành công")
+        );
     }
 
 

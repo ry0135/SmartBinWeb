@@ -129,10 +129,10 @@
         <div class="card-header d-flex justify-content-between align-items-center">
           <div>
             <i class="fas fa-layer-group me-1"></i>
-            Batch đang thực hiện
+            Batch đang mở
           </div>
           <div class="text-muted small" id="searchResultInfo">
-            Hiển thị <span id="showingFrom">1</span> - <span id="showingTo">0</span> / <span id="totalResults">0</span> tasks
+            Hiển thị <span id="showingFrom">1</span> - <span id="showingTo">0</span> / <span id="totalResults">0</span> Thùng
           </div>
         </div>
         <div class="card-body">
@@ -246,7 +246,7 @@
                           <i class="fas fa-edit"></i> Chỉnh sửa
                         </button>
                         <button class="btn btn-sm btn-outline-danger" onclick="deleteBatch('${batch.key}')">
-                          <i class="fas fa-trash"></i> Xóa Batch
+                          <i class="fas fa-trash"></i> Huỷ nhiệm vụ
                         </button>
                         <c:if test="${not empty batch.value[0].assignedTo}">
                           <button class="btn btn-sm btn-outline-info" onclick="contactWorker(${batch.value[0].assignedTo.accountId})">

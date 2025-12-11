@@ -184,11 +184,11 @@
                                     <td>
                                         <div class="note-box">
                                             <c:choose>
-                                                <c:when test="${empty task.notes}">
+                                                <c:when test="${empty task.issueReason}">
                                                     <i class="text-muted">Không có ghi chú</i>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    ${task.notes}
+                                                    ${task.issueReason}
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>

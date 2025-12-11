@@ -290,7 +290,7 @@ public class TaskAppController {
     }
 
 
-    @PostMapping("/batch/report-issue")
+      @PostMapping("/batch/report-issue")
     public ResponseEntity<ApiMessage> reportBatchIssue(
             @RequestParam int workerId,
             @RequestParam String batchId,
@@ -425,7 +425,6 @@ public class TaskAppController {
                 new ApiMessage("SUCCESS", "Đã báo cáo sự cố thành công")
         );
     }
-
 
 }
 

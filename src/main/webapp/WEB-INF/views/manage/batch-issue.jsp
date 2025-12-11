@@ -3,24 +3,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Nhiệm vụ đã hủy</title>
+    <title>Nhiệm vụ đang thực hiện</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .search-highlight {
-            background-color: yellow;
+            background-color: #DDA0DD;
             font-weight: bold;
         }
         .batch-card {
             transition: all 0.3s ease;
-            border-left: 4px solid #dc3545;
+            border-left: 4px solid #17a2b8;
         }
         .batch-card:hover {
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             transform: translateY(-2px);
         }
         .task-card {
-            border-left: 3px solid #dc3545;
+            border-left: 3px solid #20c997;
             margin-bottom: 10px;
         }
         .batch-stats {
@@ -29,8 +29,8 @@
         .status-badge {
             font-size: 0.8rem;
         }
-        .cancelled-badge {
-            background-color: #dc3545;
+        .doing-badge {
+            background-color: #DA70D6;
             color: #fff;
         }
         .stats-card {
@@ -47,19 +47,19 @@
         }
 
         .page-link {
-            color: #dc3545;
+            color: #17a2b8;
             border: 1px solid #dee2e6;
         }
 
         .page-link:hover {
             color: #fff;
-            background-color: #dc3545;
-            border-color: #dc3545;
+            background-color: #DA70D6;
+            border-color: #17a2b8;
         }
 
         .page-item.active .page-link {
-            background-color: #dc3545;
-            border-color: #dc3545;
+            background-color: #DA70D6;
+            border-color: #17a2b8;
             color: #fff;
         }
     </style>
@@ -74,11 +74,11 @@
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">
-                    <i class="fas fa-times-circle text-danger me-2"></i>
-                    Nhiệm vụ đã hủy
+                    <i class="fas fa-spinner text-info me-2"></i>
+                    Nhiệm vụ gặp sự cố
                 </h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
-                    <button class="btn btn-sm btn-outline-danger" onclick="exportCancelledTasks()">
+                    <button class="btn btn-sm btn-outline-info" onclick="exportDoingTasks()">
                         <i class="fas fa-download"></i> Export
                     </button>
                 </div>
@@ -129,28 +129,28 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
                         <i class="fas fa-layer-group me-1"></i>
-                        Batch đã hủy
+                        Batch đang gặp sự cố
                     </div>
                     <div class="text-muted small" id="searchResultInfo">
                         Hiển thị <span id="showingFrom">1</span> - <span id="showingTo">0</span> / <span id="totalResults">0</span> tasks
                     </div>
                 </div>
                 <div class="card-body">
-                    <!-- Hiển thị Batch đã hủy -->
+                    <!-- Hiển thị Batch đang issue -->
                     <div id="batchTasksSection">
-                        <c:forEach var="batch" items="${canceltasksByBatch}">
+                        <c:forEach var="batch" items="${issueTasksByBatch}">
                             <div class="card mb-3 batch-card" data-batch-card>
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-8">
                                             <div class="d-flex justify-content-between align-items-start mb-2">
                                                 <h5 class="card-title mb-0">
-                                                    <i class="fas fa-layer-group text-danger me-2"></i>
+                                                    <i class="fas fa-layer-group text-info me-2"></i>
                                                     Batch: ${batch.key}
                                                 </h5>
                                                 <div>
                                                     <span class="badge bg-secondary me-2">${batch.value.size()} tasks</span>
-                                                    <span class="badge cancelled-badge">ĐÃ HỦY</span>
+                                                    <span class="badge doing-badge">Đang Bị Sự Cố</span>
                                                 </div>
                                             </div>
 
@@ -171,12 +171,12 @@
                                                         <div class="mb-1">
                                                             <strong>Loại:</strong>
                                                             <span class="badge ${batch.value[0].taskType == 'COLLECT' || batch.value[0].taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${batch.value[0].taskType}">
-                                                                <c:choose>
-                                                                    <c:when test="${batch.value[0].taskType == 'COLLECT' || batch.value[0].taskType == 'COLLECTION'}">Thu gom</c:when>
-                                                                    <c:when test="${batch.value[0].taskType == 'MAINTENANCE'}">Bảo trì</c:when>
-                                                                    <c:otherwise>${batch.value[0].taskType}</c:otherwise>
-                                                                </c:choose>
-                                                            </span>
+                                <c:choose>
+                                    <c:when test="${batch.value[0].taskType == 'COLLECT' || batch.value[0].taskType == 'COLLECTION'}">Thu gom</c:when>
+                                    <c:when test="${batch.value[0].taskType == 'MAINTENANCE'}">Bảo trì</c:when>
+                                    <c:otherwise>${batch.value[0].taskType}</c:otherwise>
+                                </c:choose>
+                              </span>
                                                         </div>
                                                     </div>
                                                     <div class="col-sm-6">
@@ -227,11 +227,11 @@
                                                         </div>
 
                                                         <div class="mb-1">
-                                                            <strong>Trạng thái:</strong>
+                                                            <strong>Tiến độ:</strong>
                                                             <div class="progress" style="height: 8px;">
-                                                                <div class="progress-bar bg-danger" style="width: 100%"></div>
+                                                                <div class="progress-bar bg-info" style="width: 50%"></div>
                                                             </div>
-                                                            <small class="text-danger">Đã hủy</small>
+                                                            <small class="text-muted">Đang thực hiện</small>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -239,7 +239,7 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="d-grid gap-2">
-                                                <button class="btn btn-sm btn-outline-primary" onclick="viewBatchDetail('${batch.key}')">
+                                                <button class="btn btn-sm btn-outline-primary" onclick="viewBatchDetailDoing('${batch.key}')">
                                                     <i class="fas fa-eye"></i> Xem chi tiết
                                                 </button>
                                                 <c:if test="${not empty batch.value[0].assignedTo}">
@@ -255,14 +255,14 @@
                         </c:forEach>
                     </div>
 
-                    <!-- Hiển thị Task đơn lẻ đã hủy -->
-                    <c:if test="${not empty singleTasks}">
+                    <!-- Hiển thị Task đơn lẻ đang DOING -->
+                    <c:if test="${not empty singleIssueTasks}">
                         <div class="mt-4">
                             <h5 class="mb-3">
                                 <i class="fas fa-list me-2"></i>
-                                Task đơn lẻ đã hủy
+                                Task đơn lẻ đang thực hiện
                             </h5>
-                            <c:forEach var="task" items="${singleTasks}">
+                            <c:forEach var="task" items="${singleIssueTasks}">
                                 <div class="card mb-2 task-card" data-task-card>
                                     <div class="card-body py-2">
                                         <div class="row align-items-center">
@@ -273,26 +273,26 @@
                                                 <span class="badge bg-dark">Thùng ${task.bin.binID}</span>
                                             </div>
                                             <div class="col-md-2">
-                                                <span class="badge ${task.taskType == 'COLLECT' || task.taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${task.taskType}">
-                                                    <c:choose>
-                                                        <c:when test="${task.taskType == 'COLLECT' || task.taskType == 'COLLECTION'}">Thu gom</c:when>
-                                                        <c:when test="${task.taskType == 'MAINTENANCE'}">Bảo trì</c:when>
-                                                        <c:otherwise>${task.taskType}</c:otherwise>
-                                                    </c:choose>
-                                                </span>
+                        <span class="badge ${task.taskType == 'COLLECT' || task.taskType == 'COLLECTION' ? 'bg-primary' : 'bg-warning'}" data-task-type="${task.taskType}">
+                          <c:choose>
+                              <c:when test="${task.taskType == 'COLLECT' || task.taskType == 'COLLECTION'}">Thu gom</c:when>
+                              <c:when test="${task.taskType == 'MAINTENANCE'}">Bảo trì</c:when>
+                              <c:otherwise>${task.taskType}</c:otherwise>
+                          </c:choose>
+                        </span>
                                             </div>
                                             <div class="col-md-2">
-                                                <span class="badge ${task.priority == 5 ? 'bg-danger' : task.priority == 4 ? 'bg-danger' : task.priority == 3 ? 'bg-warning' : task.priority == 2 ? 'bg-info' : 'bg-success'}"
-                                                      style="${task.priority == 4 ? 'opacity: 0.8;' : ''}" data-priority="${task.priority}">
-                                                    <c:choose>
-                                                        <c:when test="${task.priority == 5}">Rất cao</c:when>
-                                                        <c:when test="${task.priority == 4}">Cao</c:when>
-                                                        <c:when test="${task.priority == 3}">Trung bình</c:when>
-                                                        <c:when test="${task.priority == 2}">Thấp</c:when>
-                                                        <c:when test="${task.priority == 1}">Rất thấp</c:when>
-                                                        <c:otherwise>Ưu tiên ${task.priority}</c:otherwise>
-                                                    </c:choose>
-                                                </span>
+                        <span class="badge ${task.priority == 5 ? 'bg-danger' : task.priority == 4 ? 'bg-danger' : task.priority == 3 ? 'bg-warning' : task.priority == 2 ? 'bg-info' : 'bg-success'}"
+                              style="${task.priority == 4 ? 'opacity: 0.8;' : ''}" data-priority="${task.priority}">
+                          <c:choose>
+                              <c:when test="${task.priority == 5}">Rất cao</c:when>
+                              <c:when test="${task.priority == 4}">Cao</c:when>
+                              <c:when test="${task.priority == 3}">Trung bình</c:when>
+                              <c:when test="${task.priority == 2}">Thấp</c:when>
+                              <c:when test="${task.priority == 1}">Rất thấp</c:when>
+                              <c:otherwise>Ưu tiên ${task.priority}</c:otherwise>
+                          </c:choose>
+                        </span>
                                             </div>
                                             <div class="col-md-2">
                                                 <c:if test="${not empty task.assignedTo}">
@@ -312,11 +312,11 @@
                     </c:if>
 
                     <!-- Hiển thị khi không có task nào -->
-                    <c:if test="${empty canceltasksByBatch and empty singleTasks}">
+                    <c:if test="${empty issueBatches and empty singleIssueTasks}">
                         <div class="text-center py-5" id="emptyState">
-                            <i class="fas fa-times-circle fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Không có task nào đã hủy</h5>
-                            <p class="text-muted">Chưa có nhiệm vụ nào bị hủy</p>
+                            <i class="fas fa-spinner fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Không có task nào bị sự cố</h5>
+                            <p class="text-muted">Tất cả các task hiện đã hoàn thành hoặc chưa được bắt đầu</p>
                         </div>
                     </c:if>
 
@@ -624,8 +624,8 @@
     }
 
     // ==================== CÁC HÀM TIỆN ÍCH ====================
-    function viewBatchDetail(batchId) {
-        window.location.href = '${pageContext.request.contextPath}/tasks/batchCancel/' + batchId;
+    function viewBatchDetailDoing(batchId) {
+        window.location.href = '${pageContext.request.contextPath}/tasks/batchIssue/' + batchId;
     }
 
     function viewTaskDetail(taskId) {
@@ -636,8 +636,8 @@
         alert('Liên hệ với nhân viên ID: ' + workerId + '\nChức năng đang được phát triển');
     }
 
-    function exportCancelledTasks() {
-        alert('Xuất danh sách task đã hủy\nChức năng đang được phát triển');
+    function exportDoingTasks() {
+        alert('Xuất danh sách task đang thực hiện\nChức năng đang được phát triển');
     }
 </script>
 </body>

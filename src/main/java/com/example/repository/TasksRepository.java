@@ -41,13 +41,17 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
                 "t.assignedTo.accountId, " +
                 "MAX(t.notes), " +
                 "MIN(t.priority), " +
-                "MAX(t.status), " +
+                // Logic mới: DOING (3) > COMPLETED (2) > ISSUE (1)
+                "CASE " +
+                "WHEN MAX(CASE WHEN t.status = 'DOING' THEN 3 WHEN t.status = 'COMPLETED' THEN 2 ELSE 1 END) = 3 THEN 'DOING' " +
+                "WHEN MAX(CASE WHEN t.status = 'COMPLETED' THEN 2 WHEN t.status = 'DOING' THEN 3 ELSE 1 END) = 2 THEN 'COMPLETED' " +
+                "ELSE 'ISSUE' " +
+                "END, " +
                 "MIN(t.createdAt)) " +
                 "FROM Task t " +
                 "WHERE t.assignedTo.accountId = :assignedTo " +
                 "GROUP BY t.batchId, t.assignedTo.accountId")
         List<TaskSummaryDTO> findTaskSummaryByAssignedTo(@Param("assignedTo") int assignedTo);
-
 
 
 
@@ -164,6 +168,10 @@ public interface TasksRepository extends JpaRepository<Task, Integer> {
 
         @Query("SELECT t FROM Task t WHERE t.batchId = :batchId")
         List<Task> findTaskByBatchId(@Param("batchId") String batchId);
+        @Query("SELECT t FROM Task t WHERE t.status = 'ISSUE' ORDER BY t.createdAt DESC")
+        List<Task> findIssueTasks();
+        @Query("SELECT t FROM Task t WHERE t.batchId = :batchId AND t.status = 'ISSUE'")
+        List<Task> findIssueTasksByBatch(@Param("batchId") String batchId);
 
 }
 

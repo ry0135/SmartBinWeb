@@ -105,7 +105,6 @@
               <label for="searchType" class="form-label">Loại nhiệm vụ</label>
               <select class="form-select" id="searchType" onchange="performSearch()">
                 <option value="">Tất cả</option>
-                <option value="COLLECT">Thu gom</option>
                 <option value="COLLECTION">Thu gom</option>
                 <option value="MAINTENANCE">Bảo trì</option>
               </select>

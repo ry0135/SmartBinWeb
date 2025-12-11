@@ -309,6 +309,9 @@ public class ReportService {
         reportRepository.deleteAll();
     }
 
+    public long countNewReports() {
+        return reportRepository.countByStatus("RECEIVED");
+    }
 
     public Report getLatestReportByBinId(int binId) {
         return reportRepository.findLatestFullOrOverload(binId);

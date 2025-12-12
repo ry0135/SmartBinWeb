@@ -31,7 +31,7 @@ public class AIPredictService {
             result.put("bin_id", jsonNode.path("bin_id").asInt());
             result.put("current_fill", jsonNode.path("current_fill").asDouble());
             result.put("hours_left", jsonNode.path("hours_left").asDouble());
-            result.put("predicted_full_time", jsonNode.path("predicted_full_time").asText());
+            result.put("predicted_full_time", jsonNode.path("predicted_full_time_vn").asText());
             result.put("status", jsonNode.path("status").asText());
             result.put("message", jsonNode.path("message").asText());
             System.out.println("🔗 Gọi AI URL: " + url);

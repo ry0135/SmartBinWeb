@@ -27,17 +27,17 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
     List<Feedback> findByReportIdOrderByCreatedAtDesc(Integer reportId);
 
     // Tính điểm trung bình theo WardID
-    @Query("SELECT AVG(f.rating) FROM Feedback f WHERE f.wardId = :wardId")
-    Double getAverageRatingByWardId(@Param("wardId") Integer wardId);
+//    @Query("SELECT AVG(f.rating) FROM Feedback f WHERE f.wardId = :wardId")
+//    Double getAverageRatingByWardId(@Param("wardId") Integer wardId);
 
     // Đếm feedback theo WardID
-    long countByWardId(Integer wardId);
+//    long countByWardId(Integer wardId);
 
     // Đếm feedback theo rating
     long countByRating(Integer rating);
 
-    // Đếm feedback theo WardID và Rating
-    long countByWardIdAndRating(Integer wardId, Integer rating);
+//    // Đếm feedback theo WardID và Rating
+//    long countByWardIdAndRating(Integer wardId, Integer rating);
 
     // Tìm feedback theo khoảng rating
     @Query("SELECT f FROM Feedback f WHERE f.rating BETWEEN :minRating AND :maxRating ORDER BY f.createdAt DESC")

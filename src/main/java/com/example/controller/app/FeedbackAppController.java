@@ -2,13 +2,15 @@ package com.example.controller.app;
 
 import com.example.model.Feedback;
 import com.example.model.ApiResponse;
+import com.example.model.Report;
+import com.example.repository.ReportRepository;
 import com.example.service.FeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
-
 @RestController
 @RequestMapping("api/feedbacks")
 @CrossOrigin(origins = "*")

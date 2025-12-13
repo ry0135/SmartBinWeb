@@ -35,10 +35,6 @@ public class Feedback {
     private Account account;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "WardID", insertable = false, updatable = false)
-    private Ward ward;
-
-    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ReportID", insertable = false, updatable = false)
     private Report report;
 
@@ -80,9 +76,6 @@ public class Feedback {
 
     public Account getAccount() { return account; }
     public void setAccount(Account account) { this.account = account; }
-
-    public Ward getWard() { return ward; }
-    public void setWard(Ward ward) { this.ward = ward; }
 
     public Report getReport() { return report; }
     public void setReport(Report report) { this.report = report; }

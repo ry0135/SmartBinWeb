@@ -16,9 +16,8 @@ public class BinLog {
     @Column(name = "CurrentFill")
     private double currentFill;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "RecordedAt", insertable = false, updatable = false)
-    private Date recordedAt;
+    @Column(name = "RecordedAt")
+    private LocalDateTime recordedAt;
 
     public int getLogId() {
         return logId;
@@ -44,11 +43,11 @@ public class BinLog {
         this.currentFill = currentFill;
     }
 
-    public Date getRecordedAt() {
+    public LocalDateTime getRecordedAt() {
         return recordedAt;
     }
 
-    public void setRecordedAt(Date recordedAt) {
+    public void setRecordedAt(LocalDateTime recordedAt) {
         this.recordedAt = recordedAt;
     }
 

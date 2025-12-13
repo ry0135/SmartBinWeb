@@ -205,7 +205,6 @@
                         <tr>
                             <th>ID</th>
                             <th>Account ID</th>
-                            <th>Ward ID</th>
                             <th>Rating</th>
                             <th>Comment</th>
                             <th>Report ID</th>
@@ -218,7 +217,6 @@
                             <tr class="<c:if test='${f.rating <= 3}'>low-rating</c:if>">
                                 <td>${f.feedbackId}</td>
                                 <td>${f.accountId}</td>
-                                <td>${f.ward.wardName}</td> <!-- ✅ Hiển thị tên phường -->
                                 <td>
                                         ${f.rating} ⭐
                                     <c:if test="${f.rating <= 2}">
@@ -232,7 +230,6 @@
                                     <button type="button" class="btn btn-sm btn-info action-btn view-btn"
                                             data-id="${f.feedbackId}"
                                             data-account="${f.accountId}"
-                                            data-ward="${f.ward.wardName}"
                                             data-rating="${f.rating}"
                                             data-comment="${f.comment}"
                                             data-report="${f.reportId}"
@@ -264,7 +261,6 @@
                 <table class="table table-bordered">
                     <tr><th>ID</th><td id="detail-id"></td></tr>
                     <tr><th>Account ID</th><td id="detail-account"></td></tr>
-                    <tr><th>Ward ID</th><td id="detail-ward"></td></tr>
                     <tr><th>Rating</th><td id="detail-rating"></td></tr>
                     <tr><th>Comment</th><td id="detail-comment"></td></tr>
                     <tr><th>Report ID</th><td id="detail-report"></td></tr>
@@ -337,7 +333,6 @@
     $(document).on("click", ".view-btn", function () {
         $("#detail-id").text($(this).data("id"));
         $("#detail-account").text($(this).data("account"));
-        $("#detail-ward").text($(this).data("ward"));
         $("#detail-rating").html($(this).data("rating") + " ⭐");
         $("#detail-comment").text($(this).data("comment"));
         $("#detail-report").text($(this).data("report"));

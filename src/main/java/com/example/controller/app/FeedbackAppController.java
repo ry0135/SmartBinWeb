@@ -71,16 +71,16 @@ public class FeedbackAppController {
 //    }
 
     // Lấy đánh giá theo phường
-    @GetMapping("/ward/{wardId}")
-    public ResponseEntity<ApiResponse<List<Feedback>>> getFeedbacksByWard(@PathVariable Integer wardId) {
-        try {
-            List<Feedback> feedbacks = feedbackService.getFeedbacksByWardId(wardId);
-            return ResponseEntity.ok(ApiResponse.success("Lấy danh sách đánh giá theo phường thành công", feedbacks));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                .body(ApiResponse.error("Có lỗi xảy ra: " + e.getMessage()));
-        }
-    }
+//    @GetMapping("/ward/{wardId}")
+//    public ResponseEntity<ApiResponse<List<Feedback>>> getFeedbacksByWard(@PathVariable Integer wardId) {
+//        try {
+//            List<Feedback> feedbacks = feedbackService.getFeedbacksByWardId(wardId);
+//            return ResponseEntity.ok(ApiResponse.success("Lấy danh sách đánh giá theo phường thành công", feedbacks));
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest()
+//                .body(ApiResponse.error("Có lỗi xảy ra: " + e.getMessage()));
+//        }
+//    }
 
     // Lấy đánh giá theo báo cáo
     @GetMapping("/report/{reportId}")

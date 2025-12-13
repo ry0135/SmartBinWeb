@@ -9,12 +9,14 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
 public class AiChatService {
 
-    @Value("${openai.api.key}")    private String openAiApiKey;
+    @Value("${openai.api.key}")
+    private String openAiApiKey;
 
     @Value("${openai.model:gpt-4o-mini}")
     private String openAiModel;
@@ -66,7 +68,7 @@ public class AiChatService {
 
         if (result == null) return "GENERAL";
 
-        result = result.trim().toUpperCase();
+        result = result.trim().toUpperCase(Locale.ROOT);
 
         if (result.contains("SQL")) return "SQL";
         if (result.contains("DOC")) return "DOC";
@@ -181,17 +183,80 @@ public class AiChatService {
         }
     }
 
+    /**
+     * Gợi ý schema THẬT của SmartBinDB để GPT sinh SQL đúng.
+     * (ĐÃ SỬA cho khớp với dump bạn gửi)
+     */
     private String getSchemaHint() {
-        // Gợi ý schema cơ bản cho GPT biết để sinh SQL đúng hơn
-        return "Database SmartBinDB có một số bảng chính (SQL Server):\n" +
-                "- Bins(BinID int, BinCode nvarchar, Capacity int, CurrentFill int, Status int, WardID int, LastUpdated datetime, Street nvarchar)\n" +
-                "- Wards(WardID int, WardName nvarchar, ProvinceID int)\n" +
-                "- Provinces(ProvinceID int, ProvinceName nvarchar)\n" +
-                "- Accounts(AccountID int, FullName nvarchar, Email nvarchar, Role int, Status int)\n" +
-                "- Tasks(TaskID int, BinID int, WorkerID int, Status int, CreatedAt datetime, CompletedAt datetime)\n" +
-                "…\n" +
-                "Status của Bins: 1 = hoạt động, 0 = bảo trì.\n" +
-                "CurrentFill là phần trăm (0-100) mức đầy của thùng.\n";
+        return "Database SmartBinDB (SQL Server) có một số bảng chính:\n" +
+                "\n" +
+                "1. Bins:\n" +
+                "   - Bins(BinID int PRIMARY KEY IDENTITY,\n" +
+                "         BinCode nvarchar(50),\n" +
+                "         Latitude float,\n" +
+                "         Longitude float,\n" +
+                "         Street nvarchar(50),\n" +
+                "         WardID int,\n" +
+                "         Capacity float,\n" +
+                "         CurrentFill float,\n" +
+                "         Status int, -- 1 = đang hoạt động, 2 = bảo trì/ngưng hoạt động\n" +
+                "         LastUpdated datetime)\n" +
+                "\n" +
+                "2. Wards:\n" +
+                "   - Wards(WardID int PRIMARY KEY,\n" +
+                "           WardName nvarchar(100),\n" +
+                "           ProvinceID int)\n" +
+                "\n" +
+                "3. Provinces:\n" +
+                "   - Provinces(ProvinceID int PRIMARY KEY,\n" +
+                "              ProvinceName nvarchar(100))\n" +
+                "\n" +
+                "4. Accounts:\n" +
+                "   - Accounts(AccountID int PRIMARY KEY IDENTITY,\n" +
+                "              FullName nvarchar(100),\n" +
+                "              Email nvarchar(255),\n" +
+                "              Password nvarchar(255),\n" +
+                "              Phone nvarchar(20),\n" +
+                "              Role int,   -- ví dụ: 1=Admin, 2=Manager, 3=Citizen, 4=Worker, 5=Bao Tri (tuỳ hệ thống quy ước)\n" +
+                "              Status int,\n" +
+                "              Code nvarchar(20),\n" +
+                "              CreatedAt datetime,\n" +
+                "              IsVerified nvarchar(5) NULL,\n" +
+                "              AddressDetail nvarchar(255) NULL,\n" +
+                "              WardID int NULL,\n" +
+                "              fcm_token nvarchar(max) NULL,\n" +
+                "              AvatarUrl nvarchar(max) NULL)\n" +
+                "\n" +
+                "5. Tasks:\n" +
+                "   - Tasks(TaskID int PRIMARY KEY IDENTITY,\n" +
+                "           BinID int,          -- khoá ngoại tới Bins.BinID\n" +
+                "           AssignedTo int,     -- AccountID của nhân viên/worker được giao nhiệm vụ\n" +
+                "           TaskType nvarchar(50),  -- ví dụ: 'COLLECTION', 'MAINTENANCE'\n" +
+                "           Priority int,\n" +
+                "           Status nvarchar(20),    -- GIÁ TRỊ CHUỖI, ví dụ: 'OPEN', 'DOING', 'COMPLETED', 'CANCEL'\n" +
+                "           Notes nvarchar(max) NULL,\n" +
+                "           BatchID nvarchar(100) NULL,\n" +
+                "           CreatedAt datetime,\n" +
+                "           UpdatedAt datetime NULL,\n" +
+                "           CompletedAt datetime NULL,\n" +
+                "           afterImage nvarchar(max) NULL,\n" +
+                "           CompletedLat float NULL,\n" +
+                "           CompletedLng float NULL,\n" +
+                "           dueAt datetime NULL,\n" +
+                "           collectedVolume float NULL)\n" +
+                "\n" +
+                "-- Lưu ý QUAN TRỌNG:\n" +
+                "-- * Trong bảng Tasks KHÔNG có cột WorkerID, chỉ có cột AssignedTo.\n" +
+                "-- * Trong bảng Tasks, Status là NVARCHAR, KHÔNG phải số. Không được viết Status = 1.\n" +
+                "--   Hãy dùng cụ thể: Status = 'OPEN', 'DOING', 'COMPLETED' hoặc 'CANCEL'.\n" +
+                "-- * 'đang thực hiện', 'đang làm', 'đang nhận task' thường tương ứng Status IN ('OPEN', 'DOING').\n" +
+                "-- * 'đã hoàn thành' tương ứng Status = 'COMPLETED'.\n" +
+                "-- * 'bị huỷ' tương ứng Status = 'CANCEL'.\n" +
+                "\n" +
+                "-- Một số liên kết thường dùng:\n" +
+                "-- - Bins.WardID -> Wards.WardID -> Wards.ProvinceID -> Provinces.ProvinceID\n" +
+                "-- - Tasks.BinID -> Bins.BinID\n" +
+                "-- - Tasks.AssignedTo -> Accounts.AccountID\n";
     }
 
     private String generateSqlFromQuestion(String question, String schemaHint) {
@@ -202,8 +267,16 @@ public class AiChatService {
                 "3. Sinh ra MỘT câu lệnh SQL SELECT DUY NHẤT, không giải thích gì thêm.\n" +
                 "4. KHÔNG dùng JOIN với bảng không có trong schema.\n" +
                 "5. KHÔNG dùng cột không tồn tại.\n" +
+                "   - ĐẶC BIỆT: Trong bảng Tasks, KHÔNG dùng cột WorkerID vì cột này KHÔNG TỒN TẠI.\n" +
+                "     Hãy dùng cột AssignedTo để chỉ nhân viên/worker được giao nhiệm vụ.\n" +
                 "6. KHÔNG viết nhiều lệnh, KHÔNG dùng GO.\n" +
-                "7. Không bao giờ dùng DDL/DML (CREATE/UPDATE/DELETE/INSERT). Chỉ SELECT.";
+                "7. Không bao giờ dùng DDL/DML (CREATE/UPDATE/DELETE/INSERT/ALTER/DROP/TRUNCATE/MERGE). Chỉ SELECT.\n" +
+                "8. Trong bảng Tasks, cột Status là NVARCHAR với các giá trị: 'OPEN', 'DOING', 'COMPLETED', 'CANCEL'.\n" +
+                "   - KHÔNG được so sánh Status với số (không được viết Status = 1).\n" +
+                "   - Nếu người dùng hỏi 'đang thực hiện', 'đang nhận task', hãy coi là Status IN ('OPEN', 'DOING').\n" +
+                "   - Nếu hỏi 'đã hoàn thành', dùng Status = 'COMPLETED'.\n" +
+                "\n" +
+                "Hãy chỉ trả về duy nhất câu lệnh SELECT hợp lệ.";
 
         String userMsg = "Schema database:\n" + schemaHint +
                 "\n\nCâu hỏi của người dùng: " + question +
@@ -218,10 +291,37 @@ public class AiChatService {
                 .replace("```", "")
                 .trim();
 
-        // Lấy đến dấu chấm phẩy đầu tiên nếu có nhiều câu
+        // Chỉ lấy tới dấu chấm phẩy đầu tiên nếu có nhiều câu
         int idx = sql.indexOf(";");
         if (idx > 0) {
             sql = sql.substring(0, idx + 1);
+        }
+
+        // ================== LỚP BẢO VỆ AN TOÀN ==================
+        String upper = sql.toUpperCase(Locale.ROOT);
+
+        // Chỉ cho phép SELECT
+        if (!upper.startsWith("SELECT")) {
+            System.err.println("[BLOCK] SQL không bắt đầu bằng SELECT: " + sql);
+            return null;
+        }
+
+        // Chặn các từ khoá nguy hiểm (phòng GPT phá luật)
+        String[] forbidden = new String[]{
+                " UPDATE ", " DELETE ", " INSERT ",
+                " ALTER ", " DROP ", " TRUNCATE ", " MERGE ", " EXEC ", " EXECUTE "
+        };
+        for (String bad : forbidden) {
+            if (upper.contains(bad)) {
+                System.err.println("[BLOCK] Phát hiện từ khoá cấm '" + bad.trim() + "' trong SQL: " + sql);
+                return null;
+            }
+        }
+
+        // Chặn nếu vẫn lỡ dùng WorkerID
+        if (upper.contains("WORKERID")) {
+            System.err.println("[BLOCK] SQL sử dụng cột WorkerID (không tồn tại): " + sql);
+            return null;
         }
 
         return sql;

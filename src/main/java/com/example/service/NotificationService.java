@@ -37,4 +37,9 @@ public class NotificationService {
     public int getUnreadCount(Integer receiverId) {
         return notificationRepository.countUnreadByUserId(receiverId);
     }
+    public boolean hasTaskReminderSent(Integer receiverId) {
+        return notificationRepository
+                .existsByReceiverIdAndType(receiverId, "TASK_REMINDER");
+    }
+
 }

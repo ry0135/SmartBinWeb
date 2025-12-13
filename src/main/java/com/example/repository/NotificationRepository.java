@@ -12,4 +12,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     List<Notification> findByReceiverIdOrderByCreatedAtDesc(Integer receiverId);
     @Query("SELECT COUNT(n) FROM Notification n WHERE n.receiverId = :receiverId AND n.isRead = false")
     int countUnreadByUserId(@Param("receiverId") Integer receiverId);
+
+
+
+        boolean existsByReceiverIdAndType(Integer receiverId, String type);
+
+
 }

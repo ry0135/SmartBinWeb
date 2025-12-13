@@ -1,11 +1,15 @@
 package com.example.service;
 
+import com.example.controller.app.FeedbackAppController;
 import com.example.model.Feedback;
+import com.example.model.Report;
 import com.example.repository.FeedbackRepository;
+import com.example.repository.ReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -17,12 +21,38 @@ public class FeedbackService {
 
     @Autowired
     private FeedbackRepository feedbackRepository;
-
+    @Autowired
+    private ReportRepository reportRepository;
     // Tạo feedback mới
     public Feedback createFeedback(Feedback feedback) {
         feedback.setCreatedAt(LocalDateTime.now());
         return feedbackRepository.save(feedback);
     }
+    @Transactional // Đảm bảo toàn bộ logic là một giao dịch
+    public Feedback createFeedbackAndUpdateReport(FeedbackAppController.FeedbackRequest request) {
+        Report report = reportRepository.findByReportId(request.getReportId());
+
+        if (report == null) {
+            throw new EntityNotFoundException("Report không tồn tại"); // Hoặc exception phù hợp
+        }
+
+        // 1. Tạo feedback
+        Feedback feedback = new Feedback();
+        feedback.setAccountId(request.getAccountId());
+        feedback.setRating(request.getRating());
+        feedback.setComment(request.getComment());
+        feedback.setReportId(request.getReportId());
+        feedback.setCreatedAt(LocalDateTime.now());
+        // Lấy WardID từ Bin của Report (Đảm bảo mối quan hệ Report -> Bin là EAGER hoặc đã được fetch)
+        Feedback createdFeedback = feedbackRepository.save(feedback); // Lưu feedback
+
+        // 2. Cập nhật trạng thái report
+        report.setStatus("DONE");
+        reportRepository.save(report); // Cập nhật report (Cả 2 đều commit khi phương thức này kết thúc thành công)
+
+        return createdFeedback;
+    }
+
 
     // Lấy feedback theo ID
     public Optional<Feedback> getFeedbackById(Integer feedbackId) {

@@ -17,9 +17,6 @@ public class Feedback {
     @Column(name = "AccountID", nullable = false)
     private Integer accountId;
 
-    @Column(name = "WardID", nullable = false)
-    private Integer wardId;
-
     @Column(name = "Rating", nullable = false)
     private Integer rating;
 
@@ -56,7 +53,6 @@ public class Feedback {
 
     public Feedback(Integer accountId, Integer wardId, Integer rating, String comment, Integer reportId) {
         this.accountId = accountId;
-        this.wardId = wardId;
         this.rating = rating;
         this.comment = comment;
         this.reportId = reportId;
@@ -69,9 +65,6 @@ public class Feedback {
 
     public Integer getAccountId() { return accountId; }
     public void setAccountId(Integer accountId) { this.accountId = accountId; }
-
-    public Integer getWardId() { return wardId; }
-    public void setWardId(Integer wardId) { this.wardId = wardId; }
 
     public Integer getRating() { return rating; }
     public void setRating(Integer rating) { this.rating = rating; }

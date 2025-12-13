@@ -19,22 +19,38 @@ public class FeedbackAppController {
 
     // Tạo đánh giá mới từ app
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<Feedback>> createFeedback(@RequestBody FeedbackRequest request) {
+    public ResponseEntity<ApiResponse<Feedback>> createFeedback(
+            @RequestBody FeedbackRequest request) {
+
         try {
+            // 1. Tạo feedback
             Feedback feedback = new Feedback();
             feedback.setAccountId(request.getAccountId());
             feedback.setWardId(request.getWardId());
             feedback.setRating(request.getRating());
             feedback.setComment(request.getComment());
             feedback.setReportId(request.getReportId());
-            feedback.setCreatedAt(java.time.LocalDateTime.now());
+            feedback.setCreatedAt(LocalDateTime.now());
 
             Feedback createdFeedback = feedbackService.createFeedback(feedback);
 
-            return ResponseEntity.ok(ApiResponse.success("Đánh giá đã được tạo thành công", createdFeedback));
+            // 2. Cập nhật trạng thái report
+            Report report = reportRepository.findByReportId(request.getReportId());
+            if (report == null) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("Report không tồn tại"));
+            }
+
+            report.setStatus("DONE");
+            reportRepository.save(report);
+
+            return ResponseEntity.ok(
+                    ApiResponse.success("Đánh giá đã được tạo thành công", createdFeedback)
+            );
+
         } catch (Exception e) {
             return ResponseEntity.badRequest()
-                .body(ApiResponse.error("Có lỗi xảy ra: " + e.getMessage()));
+                    .body(ApiResponse.error("Có lỗi xảy ra: " + e.getMessage()));
         }
     }
 

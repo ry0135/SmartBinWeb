@@ -185,6 +185,10 @@ List<TaskSummaryDTO> findTaskSummaryByAssignedTo(@Param("assignedTo") int assign
         List<Task> findIssueTasks();
         @Query("SELECT t FROM Task t WHERE t.batchId = :batchId AND t.status = 'ISSUE'")
         List<Task> findIssueTasksByBatch(@Param("batchId") String batchId);
+        @Query("SELECT t FROM Task t WHERE t.status = 'DOING' AND t.completedAt IS NULL")
+        List<Task> findDoingTasksNotCompleted();
+        @Query("SELECT t FROM Task t WHERE t.status = 'OPEN' AND t.assignedTo IS NOT NULL")
+        List<Task> findOpenAssignedTasks();
 
 }
 

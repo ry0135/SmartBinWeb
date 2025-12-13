@@ -62,7 +62,7 @@ public class SchedulerConfig {
                     BinLog newLog = new BinLog();
                     newLog.setBinId(bin.getBinID());
                     newLog.setCurrentFill(currentFill);
-                    newLog.setRecordedAt(new Date());
+                    newLog.setRecordedAt(LocalDateTime.now());
                     binLogRepository.save(newLog);
 
                     System.out.println("🧾 Đã lưu log BinID " + bin.getBinID() +

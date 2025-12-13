@@ -146,7 +146,6 @@ public class FeedbackAppController {
     // Inner class cho request
     public static class FeedbackRequest {
         private Integer accountId;
-        private Integer wardId;
         private Integer rating;
         private String comment;
         private Integer reportId;
@@ -155,8 +154,6 @@ public class FeedbackAppController {
         public Integer getAccountId() { return accountId; }
         public void setAccountId(Integer accountId) { this.accountId = accountId; }
 
-        public Integer getWardId() { return wardId; }
-        public void setWardId(Integer wardId) { this.wardId = wardId; }
 
         public Integer getRating() { return rating; }
         public void setRating(Integer rating) { this.rating = rating; }

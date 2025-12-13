@@ -6,9 +6,11 @@ import com.example.model.Report;
 import com.example.repository.ReportRepository;
 import com.example.service.FeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
 @RestController
@@ -22,42 +24,27 @@ public class FeedbackAppController {
     @Autowired
     private ReportRepository reportRepository;
     // Tạo đánh giá mới từ app
- @PostMapping("/create")
+    @PostMapping("/create")
     public ResponseEntity<ApiResponse<Feedback>> createFeedback(
             @RequestBody FeedbackRequest request) {
-
         try {
-            // 2. Cập nhật trạng thái report
-            Report report = reportRepository.findByReportId(request.getReportId());
-            // 1. Tạo feedback
-            Feedback feedback = new Feedback();
-            feedback.setAccountId(request.getAccountId());
-            feedback.setRating(request.getRating());
-            feedback.setComment(request.getComment());
-            feedback.setReportId(request.getReportId());
-            feedback.setCreatedAt(LocalDateTime.now());
-
-            feedback.setWardId(report.getBin().getWardID());
-            Feedback createdFeedback = feedbackService.createFeedback(feedback);
-            if (report == null) {
-                return ResponseEntity.badRequest()
-                        .body(ApiResponse.error("Report không tồn tại"));
-            }
-
-            report.setStatus("DONE");
-            reportRepository.save(report);
+            // Gọi Service để xử lý cả 2 thao tác trong 1 Transaction
+            Feedback createdFeedback = feedbackService.createFeedbackAndUpdateReport(request);
 
             return ResponseEntity.ok(
                     ApiResponse.success("Đánh giá đã được tạo thành công", createdFeedback)
             );
 
-        } catch (Exception e) {
+        } catch (EntityNotFoundException e) { // Bắt lỗi Report không tồn tại
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Có lỗi xảy ra: " + e.getMessage()));
+                    .body(ApiResponse.error(e.getMessage()));
+        } catch (Exception e) {
+            // Đây là nơi bắt các lỗi giao dịch/Rollback
+            // Log e.printStackTrace() để xem lỗi gốc là gì
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR) // Dùng 500 cho lỗi server/rollback
+                    .body(ApiResponse.error("Lỗi server khi tạo đánh giá: " + e.getMessage()));
         }
     }
-
-    
 
     // Lấy đánh giá theo người dùng
     @GetMapping("/user/{accountId}")

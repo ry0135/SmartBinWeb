@@ -21,7 +21,7 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
     List<Feedback> findByAccountIdOrderByCreatedAtDesc(Integer accountId);
 
     // Tìm feedback theo WardID
-    List<Feedback> findByWardIdOrderByCreatedAtDesc(Integer wardId);
+//    List<Feedback> findByWardIdOrderByCreatedAtDesc(Integer wardId);
 
     // Tìm feedback theo ReportID
     List<Feedback> findByReportIdOrderByCreatedAtDesc(Integer reportId);

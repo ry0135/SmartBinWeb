@@ -66,9 +66,9 @@ public class FeedbackService {
     }
 
     // Lấy feedback theo WardID
-    public List<Feedback> getFeedbacksByWardId(Integer wardId) {
-        return feedbackRepository.findByWardIdOrderByCreatedAtDesc(wardId);
-    }
+//    public List<Feedback> getFeedbacksByWardId(Integer wardId) {
+//        return feedbackRepository.findByWardIdOrderByCreatedAtDesc(wardId);
+//    }
 
     // Lấy feedback theo ReportID
     public List<Feedback> getFeedbacksByReportId(Integer reportId) {

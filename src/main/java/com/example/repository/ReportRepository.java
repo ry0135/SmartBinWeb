@@ -22,6 +22,9 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
 
     Report findByReportId(Integer reportId);
 
+    @Query("SELECT r FROM Report r JOIN FETCH r.bin WHERE r.reportId = :reportId")
+    Report findByReportIdWithBin(@Param("reportId") Integer reportId);
+
     // Tìm báo cáo theo AccountID
     List<Report> findByAccountIdOrderByCreatedAtDesc(Integer accountId);
 

@@ -44,7 +44,6 @@ public class FeedbackService {
         feedback.setReportId(request.getReportId());
         feedback.setCreatedAt(LocalDateTime.now());
         // Lấy WardID từ Bin của Report (Đảm bảo mối quan hệ Report -> Bin là EAGER hoặc đã được fetch)
-        feedback.setWardId(report.getBin().getWardID());
 
         Feedback createdFeedback = feedbackRepository.save(feedback); // Lưu feedback
 

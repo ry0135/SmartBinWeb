@@ -18,7 +18,9 @@ public class FeedbackAppController {
 
     @Autowired
     private FeedbackService feedbackService;
-
+    
+    @Autowired
+    private ReportRepository reportRepository;
     // Tạo đánh giá mới từ app
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<Feedback>> createFeedback(

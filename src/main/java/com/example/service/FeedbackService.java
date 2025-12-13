@@ -80,14 +80,14 @@ public class FeedbackService {
     }
 
     // Tính điểm trung bình theo WardID
-    public Double getAverageRatingByWardId(Integer wardId) {
-        return feedbackRepository.getAverageRatingByWardId(wardId);
-    }
+//    public Double getAverageRatingByWardId(Integer wardId) {
+//        return feedbackRepository.getAverageRatingByWardId(wardId);
+//    }
 
     // Đếm feedback theo WardID
-    public long countFeedbacksByWardId(Integer wardId) {
-        return feedbackRepository.countByWardId(wardId);
-    }
+//    public long countFeedbacksByWardId(Integer wardId) {
+//        return feedbackRepository.countByWardId(wardId);
+//    }
 
     // Đếm feedback theo rating
     public long countFeedbacksByRating(Integer rating) {
@@ -95,33 +95,33 @@ public class FeedbackService {
     }
 
     // Đếm feedback theo WardID và Rating
-    public long countFeedbacksByWardIdAndRating(Integer wardId, Integer rating) {
-        return feedbackRepository.countByWardIdAndRating(wardId, rating);
-    }
+//    public long countFeedbacksByWardIdAndRating(Integer wardId, Integer rating) {
+//        return feedbackRepository.countByWardIdAndRating(wardId, rating);
+//    }
 
     // Lấy feedback theo khoảng rating
     public List<Feedback> getFeedbacksByRatingRange(Integer minRating, Integer maxRating) {
         return feedbackRepository.findByRatingBetweenOrderByCreatedAtDesc(minRating, maxRating);
     }
 
-    // Lấy thống kê feedback theo WardID
-    public FeedbackStats getFeedbackStatsByWardId(Integer wardId) {
-        Double averageRating = getAverageRatingByWardId(wardId);
-        long totalFeedbacks = countFeedbacksByWardId(wardId);
-
-        FeedbackStats stats = new FeedbackStats();
-        stats.setWardId(wardId);
-        stats.setAverageRating(averageRating != null ? averageRating : 0.0);
-        stats.setTotalFeedbacks(totalFeedbacks);
-
-        // Đếm theo từng rating
-        for (int i = 1; i <= 5; i++) {
-            long count = countFeedbacksByWardIdAndRating(wardId, i);
-            stats.setRatingCount(i, count);
-        }
-
-        return stats;
-    }
+//    // Lấy thống kê feedback theo WardID
+//    public FeedbackStats getFeedbackStatsByWardId(Integer wardId) {
+//        Double averageRating = getAverageRatingByWardId(wardId);
+//        long totalFeedbacks = countFeedbacksByWardId(wardId);
+//
+//        FeedbackStats stats = new FeedbackStats();
+//        stats.setWardId(wardId);
+//        stats.setAverageRating(averageRating != null ? averageRating : 0.0);
+//        stats.setTotalFeedbacks(totalFeedbacks);
+//
+//        // Đếm theo từng rating
+//        for (int i = 1; i <= 5; i++) {
+//            long count = countFeedbacksByWardIdAndRating(wardId, i);
+//            stats.setRatingCount(i, count);
+//        }
+//
+//        return stats;
+//    }
 
     // Lấy thống kê tổng quan
     public OverallFeedbackStats getOverallFeedbackStats() {

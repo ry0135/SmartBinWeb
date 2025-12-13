@@ -22,24 +22,23 @@ public class FeedbackAppController {
     @Autowired
     private ReportRepository reportRepository;
     // Tạo đánh giá mới từ app
-    @PostMapping("/create")
+   @PostMapping("/create")
     public ResponseEntity<ApiResponse<Feedback>> createFeedback(
             @RequestBody FeedbackRequest request) {
 
         try {
+            // 2. Cập nhật trạng thái report
+            Report report = reportRepository.findByReportId(request.getReportId());
             // 1. Tạo feedback
             Feedback feedback = new Feedback();
             feedback.setAccountId(request.getAccountId());
-            feedback.setWardId(request.getWardId());
             feedback.setRating(request.getRating());
             feedback.setComment(request.getComment());
             feedback.setReportId(request.getReportId());
             feedback.setCreatedAt(LocalDateTime.now());
 
+            feedback.setWardId(report.getBin().getWardID());
             Feedback createdFeedback = feedbackService.createFeedback(feedback);
-
-            // 2. Cập nhật trạng thái report
-            Report report = reportRepository.findByReportId(request.getReportId());
             if (report == null) {
                 return ResponseEntity.badRequest()
                         .body(ApiResponse.error("Report không tồn tại"));
